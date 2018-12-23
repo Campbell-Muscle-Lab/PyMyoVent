@@ -12,18 +12,47 @@ except:
 class single_circulation():
     """Class for a single ventricle circulation"""
 
-    def __init__(self):
-        self.blood_volume = 0.5         # blood volume in liters
-        self.no_of_compartments = 4     # aorta, arteries, veins, ventricle
-        self.resistance = np.array([3, 50, 75, 6])
-        self.compliance = np.array([0.001, 0.005, 0.3, 0.001])
+    def __init__(self,sim_object):
+
+        # Initialize circulation object using data from the sim_object
+        circ_params = sim_object.single_circulation_model.circulation
+
+        self.no_of_compartments = int(circ_params.no_of_compartments.cdata)
+        self.blood_volume = float(circ_params.blood.volume.cdata)
+
+        self.aorta_resistance = float(circ_params.aorta.resistance.cdata)
+        self.aorta_compliance = float(circ_params.aorta.compliance.cdata)
+
+        self.arteries_resistance = float(circ_params.arteries.resistance.cdata)
+        self.arteries_compliance = float(circ_params.arteries.compliance.cdata)
+
+        self.veins_resistance = float(circ_params.veins.resistance.cdata)
+        self.veins_compliance = float(circ_params.veins.compliance.cdata)
+
+        self.ventricle_resistance = float(circ_params.ventricle.resistance.cdata)
+
+        print('%d' % self.blood_volume)
+        print("aorta resistance: %f" % self.aorta_resistance)
+
+        # Initialise the resistance and compliance arrays for calcuations
+        self.resistance = np.array([self.aorta_resistance,
+                                    self.arteries_resistance,
+                                    self.veins_resistance,
+                                    self.ventricle_resistance])
+        self.compliance = np.array([self.aorta_compliance,
+                                    self.arteries_compliance,
+                                    self.veins_compliance,
+                                    0])
         self.p = np.zeros(self.no_of_compartments)
         self.v = np.array([0, 0, self.blood_volume, 0])
+
         self.ventricular_pressure = 0
         self.ventricular_slack_volume = 100
         self.ventricular_stiffness = 1
 
-        self.hs = hs.half_sarcomere()
+        # Pull of the half_sarcomere parameters
+        hs_params = sim_object.single_circulation_model.half_sarcomere
+        self.hs = hs.half_sarcomere(hs_params)
 
     def derivs(self, t, v):
         # returns dv, derivative of volume

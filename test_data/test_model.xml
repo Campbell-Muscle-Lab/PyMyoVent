@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<single_circulation_model>
+
+<circulation>
+	<no_of_compartments>4</no_of_compartments>
+	<blood>
+		<volume units="l">5000</volume>
+	</blood>
+	<aorta>
+		<resistance units="g">3.0</resistance>
+		<compliance units="g2">0.001</compliance>
+	</aorta>
+	<arteries>
+		<resistance units="g">50.0</resistance>
+		<compliance units="g2">0.005</compliance>
+	</arteries>
+	<veins>
+		<resistance units="g">75.0</resistance>
+		<compliance units="g2">0.3</compliance>
+	</veins>
+	<ventricle>
+		<resistance units="g">6.0</resistance>
+		<compliance units="g2">0.001</compliance>
+	</ventricle>
+</circulation>
+
+<half_sarcomere>
+	<max_rate>5000</max_rate>
+	<temperature>288</temperature>
+	
+	<cb_number_density>6.9e16</cb_number_density>
+
+	<myofilaments>
+		<kinetic_scheme>3state_with_SRX</kinetic_scheme>
+		<k_1>100</k_1>
+		<k_force>0.001</k_force>
+		<k_2>100</k_2>
+		<k_3>100</k_3>
+		<k_4_0>100</k_4_0>
+		<k_4_1>0.5</k_4_1>
+		<k_cb>0.001</k_cb>
+		<x_ps>3</x_ps>
+		<k_on>3e7</k_on>
+		<k_off>200</k_off>
+		<k_coop>10</k_coop>
+		<bin_min>-5</bin_min>
+		<bin_max>5</bin_max>
+		<bin_width>1</bin_width>
+		<filament_compliance_factor>0.5</filament_compliance_factor>
+		<thick_filament_length>815</thick_filament_length>
+		<thin_filament_length>1120</thin_filament_length>
+		<bare_zone_length>80</bare_zone_length>
+		<k_falloff>0.0024</k_falloff>
+		
+		
+		
+	</myofilaments>
+</half_sarcomere>
+
+</single_circulation_model>
