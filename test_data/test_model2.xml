@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<single_circulation_model>
+
+<circulation>
+	<no_of_compartments>4</no_of_compartments>
+</circulation>
+
+</single_circulation_model>

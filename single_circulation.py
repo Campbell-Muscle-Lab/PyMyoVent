@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.integrate import solve_ivp
 
 try:
@@ -12,10 +13,19 @@ except:
 class single_circulation():
     """Class for a single ventricle circulation"""
 
-    def __init__(self,sim_object):
+    from .display import display_simulation
+
+    def __init__(self,single_circulation_model):
+
+#        # Initialize output data
+        print(single_circulation_model)
+        self.output_file_string = \
+            single_circulation_model.output_data.file_string.cdata
+        self.output_buffer_size = \
+            int(single_circulation_model.output_data.buffer_size.cdata)
 
         # Initialize circulation object using data from the sim_object
-        circ_params = sim_object.single_circulation_model.circulation
+        circ_params = single_circulation_model.circulation
 
         self.no_of_compartments = int(circ_params.no_of_compartments.cdata)
         self.blood_volume = float(circ_params.blood.volume.cdata)
@@ -29,7 +39,8 @@ class single_circulation():
         self.veins_resistance = float(circ_params.veins.resistance.cdata)
         self.veins_compliance = float(circ_params.veins.compliance.cdata)
 
-        self.ventricle_resistance = float(circ_params.ventricle.resistance.cdata)
+        self.ventricle_resistance = \
+            float(circ_params.ventricle.resistance.cdata)
 
         print('%d' % self.blood_volume)
         print("aorta resistance: %f" % self.aorta_resistance)
@@ -51,8 +62,29 @@ class single_circulation():
         self.ventricular_stiffness = 1
 
         # Pull of the half_sarcomere parameters
-        hs_params = sim_object.single_circulation_model.half_sarcomere
-        self.hs = hs.half_sarcomere(hs_params)
+        hs_params = single_circulation_model.half_sarcomere
+        self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
+
+        # Create a pandas data structure to store data
+        self.sim_time = 0.0
+        self.data_buffer_index = int(0)
+        self.data = pd.DataFrame({'time': np.zeros(self.output_buffer_size),
+                                  'pressure_aorta':
+                                      np.zeros(self.output_buffer_size),
+                                  'pressure_arteries':
+                                      np.zeros(self.output_buffer_size),
+                                  'pressure_veins':
+                                      np.zeros(self.output_buffer_size),
+                                  'pressure_ventricle':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_aorta':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_arteries':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_veins':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_ventricle':
+                                      np.zeros(self.output_buffer_size)})
 
     def derivs(self, t, v):
         # returns dv, derivative of volume
@@ -105,6 +137,29 @@ class single_circulation():
                 (p[-1]-p[0]) / self.resistance[0]
 
         return dv
+
+    def implement_time_step(self, time_step, activation):
+        """ Steps circulatory system forward in time """
+
+        # Update the half-sarcomere
+        self.hs.implement_time_step(time_step, 0.0, activation)
+
+        # steps solution forward in time
+        sol = solve_ivp(self.derivs, [0, time_step], self.v)
+        self.v = sol.y[:, -1]
+
+        # Update data structures
+        self.sim_time = self.sim_time + time_step
+        self.data_buffer_index = self.data_buffer_index + int(1)
+        self.data.at[self.data_buffer_index, 'time'] = self.sim_time
+        self.data.at[self.data_buffer_index, 'pressure_aorta'] = self.p[0]
+        self.data.at[self.data_buffer_index, 'pressure_arteries'] = self.p[1]
+        self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[2]
+        self.data.at[self.data_buffer_index, 'pressure_ventricle'] = self.p[3]
+        self.data.at[self.data_buffer_index, 'volume_aorta'] = self.v[0]
+        self.data.at[self.data_buffer_index, 'volume_arteries'] = self.v[1]
+        self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[2]
+        self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[3]
 
     def step_solution(self, dt):
         # steps solution forward in time

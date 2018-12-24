@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="windows-1252"?>
 <single_circulation_model>
 
+<output_data>
+	<file_string>ken</file_string>
+	<buffer_size>1000</buffer_size>
+</output_data>
+
 <circulation>
 	<no_of_compartments>4</no_of_compartments>
 	<blood>
@@ -51,10 +56,15 @@
 		<thin_filament_length>1120</thin_filament_length>
 		<bare_zone_length>80</bare_zone_length>
 		<k_falloff>0.0024</k_falloff>
-		
-		
-		
 	</myofilaments>
+	
+	<membranes>
+		<kinetic_scheme>simple_2_compartment</kinetic_scheme>
+		<Ca_content>1e-3</Ca_content>
+		<k_leak>1e-3</k_leak>
+		<k_act>1.0e-2</k_act>
+		<k_serca>1.0</k_serca>
+	</membranes>
 </half_sarcomere>
 
 </single_circulation_model>
