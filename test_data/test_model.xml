@@ -3,29 +3,30 @@
 
 <output_data>
 	<file_string>ken</file_string>
-	<buffer_size>1000</buffer_size>
+	<buffer_size>200</buffer_size>
 </output_data>
 
 <circulation>
 	<no_of_compartments>4</no_of_compartments>
 	<blood>
-		<volume units="l">5000</volume>
+		<volume units="ml">5000</volume>
 	</blood>
 	<aorta>
-		<resistance units="g">3.0</resistance>
-		<compliance units="g2">0.001</compliance>
+		<resistance units="g">0.3</resistance>
+		<compliance units="g2">0.03</compliance>
 	</aorta>
 	<arteries>
-		<resistance units="g">50.0</resistance>
-		<compliance units="g2">0.005</compliance>
+		<resistance units="g">5.0</resistance>
+		<compliance units="g2">0.05</compliance>
 	</arteries>
 	<veins>
-		<resistance units="g">75.0</resistance>
+		<resistance units="g">7.5</resistance>
 		<compliance units="g2">0.3</compliance>
 	</veins>
 	<ventricle>
-		<resistance units="g">6.0</resistance>
-		<compliance units="g2">0.001</compliance>
+		<resistance units="g">0.6</resistance>
+		<wall_volume units="g">100</wall_volume>
+		<slack_volume units = "ml">100</slack_volume>
 	</ventricle>
 </circulation>
 
@@ -34,20 +35,21 @@
 	<temperature>288</temperature>
 	
 	<cb_number_density>6.9e16</cb_number_density>
+	<initial_hs_length>900</initial_hs_length>
 
 	<myofilaments>
 		<kinetic_scheme>3state_with_SRX</kinetic_scheme>
 		<k_1>100</k_1>
-		<k_force>0.001</k_force>
+		<k_force>0</k_force>
 		<k_2>100</k_2>
-		<k_3>100</k_3>
+		<k_3>10</k_3>
 		<k_4_0>100</k_4_0>
 		<k_4_1>0.5</k_4_1>
 		<k_cb>0.001</k_cb>
 		<x_ps>3</x_ps>
 		<k_on>3e7</k_on>
-		<k_off>200</k_off>
-		<k_coop>10</k_coop>
+		<k_off>500</k_off>
+		<k_coop>5</k_coop>
 		<bin_min>-5</bin_min>
 		<bin_max>5</bin_max>
 		<bin_width>1</bin_width>
@@ -56,14 +58,17 @@
 		<thin_filament_length>1120</thin_filament_length>
 		<bare_zone_length>80</bare_zone_length>
 		<k_falloff>0.0024</k_falloff>
+		<passive_mode>linear</passive_mode>
+		<passive_linear_k_p>150</passive_linear_k_p>
+		<passive_linear_l_slack>900</passive_linear_l_slack>
 	</myofilaments>
 	
 	<membranes>
 		<kinetic_scheme>simple_2_compartment</kinetic_scheme>
 		<Ca_content>1e-3</Ca_content>
-		<k_leak>1e-3</k_leak>
-		<k_act>1.0e-2</k_act>
-		<k_serca>1.0</k_serca>
+		<k_leak>2e-2</k_leak>
+		<k_act>5.0e-1</k_act>
+		<k_serca>20.0</k_serca>
 	</membranes>
 </half_sarcomere>
 
