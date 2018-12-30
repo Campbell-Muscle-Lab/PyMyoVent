@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.integrate import solve_ivp
+from scipy.constants import mmHg as mmHg_in_pascals
 
 try:
     import Python_MyoSim.half_sarcomere.half_sarcomere as hs
@@ -13,14 +14,11 @@ except:
 class single_circulation():
     """Class for a single ventricle circulation"""
 
-    from .display import display_simulation
+    from .display import display_simulation, display_flows, display_pv_loop
 
     def __init__(self, single_circulation_model):
-        # Initialize output data
-        self.output_file_string = \
-            single_circulation_model.output_data.file_string.cdata
         self.output_buffer_size = \
-            int(single_circulation_model.output_data.buffer_size.cdata)
+            int(single_circulation_model.sim_data.no_of_time_points.cdata)
 
         # Initialize circulation object using data from the sim_object
         circ_params = single_circulation_model.circulation
@@ -65,11 +63,17 @@ class single_circulation():
         # Deduce the slack circumference of the ventricle and set that
         self.lv_circumference = \
             self.return_lv_circumference(self.ventricle_slack_volume)
+        
+        print("hsl: %f" % self.hs.hs_length)
+        print("slack hsl: %f" % slack_hsl)
+        print("slack_lv_circumference %f" % self.lv_circumference)
 
-        # Set the initial volumes
+
+        # Set the initial volumes with most of the blood in the veins
+        initial_ventricular_volume = 1.5 * self.ventricle_slack_volume
         self.v = np.array([0, 0,
-                           self.blood_volume - self.ventricle_slack_volume,
-                           self.ventricle_slack_volume])
+                           self.blood_volume - initial_ventricular_volume,
+                           initial_ventricular_volume])
 
         # Deduce the pressures
         self.p = np.zeros(self.no_of_compartments)
@@ -96,8 +100,15 @@ class single_circulation():
                                   'volume_veins':
                                       np.zeros(self.output_buffer_size),
                                   'volume_ventricle':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_ventricle_to_aorta':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_aorta_to_arteries':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_arteries_to_veins':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_veins_to_ventricle':
                                       np.zeros(self.output_buffer_size)})
-
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
         self.data.at[0, 'pressure_arteries'] = self.p[1]
@@ -109,46 +120,55 @@ class single_circulation():
         self.data.at[0, 'volume_veins'] = self.v[2]
         self.data.at[0, 'volume_ventricle'] = self.v[3]
 
-    def derivs(self, t, v):
-        # returns dv, derivative of volume
-        p = np.zeros(self.no_of_compartments)
+    def return_flows(self, v):
+        # returns fluxes between different compartments
 
         # Calculate pressure in each compartment
+        p = np.zeros(self.no_of_compartments)
         vi = range(self.no_of_compartments-1)
         for x in vi:
             p[x] = v[x] / self.compliance[x]
         p[-1] = self.return_lv_pressure(v[-1])
 
-        # Calculate volume changes
+        flows = dict()
+
+        flows['ventricle_to_aorta'] = 0.0
+        if (p[-1] > p[0]):
+            flows['ventricle_to_aorta'] = \
+                (p[-1] - p[0]) / self.resistance[0]
+
+        flows['aorta_to_arteries'] = \
+            (p[0] - p[1]) / self.resistance[1]
+        
+        flows['arteries_to_veins'] = \
+            (p[1] - p[2])/ self.resistance[2]
+        
+        flows['veins_to_ventricle'] = 0.0
+        if (p[2] > p[-1]):
+            flows['veins_to_ventricle'] = \
+                (p[2] - p[-1]) / self.resistance[-1]
+
+        return flows
+
+    def derivs(self, t, v):
+        # returns dv, derivative of volume
         dv = np.zeros(self.no_of_compartments)
 
-        # Aorta
-        # Allow for valve
-        if (p[-1] > p[0]):
-            dv[0] = dv[0] + (p[-1]-p[0])/self.resistance[0]
-        dv[0] = dv[0] - (p[0]-p[1]) / self.resistance[1]
+        # First deduce flows
+        flows = self.return_flows(v)
 
-        # Arteries are easier
-        dv[1] = dv[1] + \
-            ((p[0]-p[1]) / self.resistance[1]) - \
-            ((p[1]-p[2]) / self.resistance[2])
+        # Different compartments
+        dv[0] = flows['ventricle_to_aorta'] - \
+                flows['aorta_to_arteries']
 
-        # Veins
-        dv[2] = dv[2] + \
-            ((p[1]-p[2]) / self.resistance[2])
-        # Allow for valve
-        if (p[2] > p[-1]):
-            dv[2] = dv[2] - \
-                (p[2]-p[-1]) / self.resistance[-1]
+        dv[1] = flows['aorta_to_arteries'] - \
+                flows['arteries_to_veins']
 
-        # Ventricle
-        # Allow for valve
-        if (p[2] > p[-1]):
-            dv[-1] = dv[-1] + \
-                (p[2] - p[-1]) / self.resistance[-1]
-        if (p[-1] > p[0]):
-            dv[-1] = dv[-1] - \
-                (p[-1]-p[0]) / self.resistance[0]
+        dv[2] = flows['arteries_to_veins'] - \
+                flows['veins_to_ventricle']
+
+        dv[3] = flows['veins_to_ventricle'] - \
+                flows['ventricle_to_aorta']
 
         return dv
 
@@ -161,9 +181,6 @@ class single_circulation():
         # steps solution forward in time
         sol = solve_ivp(self.derivs, [0, time_step], self.v)
         self.v = sol.y[:, -1]
-        print(self.v)
-
-        print("sum of volumes: %f" % np.sum(self.v))
 
         # Implements the length change on the half-sarcomere
         new_lv_circumference = self.return_lv_circumference(self.v[-1])
@@ -171,10 +188,6 @@ class single_circulation():
             ((new_lv_circumference / self.lv_circumference) - 1.0)
         self.hs.update_simulation(0.0, delta_hsl, 0.0, 1)
         self.lv_circumference = new_lv_circumference
-        print("lv_circumference %f" % self.lv_circumference)
-        
-        print("delta_hsl %f" % delta_hsl)
-        
 
         # Update the pressures
         vi = range(self.no_of_compartments-1)
@@ -182,25 +195,41 @@ class single_circulation():
             self.p[x] = self.v[x] / self.compliance[x]
         self.p[-1] = self.return_lv_pressure(self.v[-1])
 
-        # Update data structures
-        if (time_step > 0.0):
-            self.sim_time = self.sim_time + time_step
-            self.data_buffer_index = self.data_buffer_index + 1
-            self.data.at[self.data_buffer_index, 'time'] = self.sim_time
-            self.data.at[self.data_buffer_index, 'pressure_aorta'] = self.p[0]
-            self.data.at[self.data_buffer_index, 'pressure_arteries'] = self.p[1]
-            self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[2]
-            self.data.at[self.data_buffer_index, 'pressure_ventricle'] = self.p[-1]
-            self.data.at[self.data_buffer_index, 'volume_aorta'] = self.v[0]
-            self.data.at[self.data_buffer_index, 'volume_arteries'] = self.v[1]
-            self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[2]
-            self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[-1]
+    def update_data_holders(self, time_step, activation):
+
+        # Update data structure for circulation
+        self.sim_time = self.sim_time + time_step
+        self.data_buffer_index = self.data_buffer_index + 1
+        self.data.at[self.data_buffer_index, 'time'] = self.sim_time
+        self.data.at[self.data_buffer_index, 'pressure_aorta'] = self.p[0]
+        self.data.at[self.data_buffer_index, 'pressure_arteries'] = self.p[1]
+        self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[2]
+        self.data.at[self.data_buffer_index, 'pressure_ventricle'] = self.p[-1]
+        self.data.at[self.data_buffer_index, 'volume_aorta'] = self.v[0]
+        self.data.at[self.data_buffer_index, 'volume_arteries'] = self.v[1]
+        self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[2]
+        self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[-1]
+
+        flows = self.return_flows(self.v)
+        self.data.at[self.data_buffer_index, 'flow_ventricle_to_aorta'] = \
+            flows['ventricle_to_aorta']
+        self.data.at[self.data_buffer_index, 'flow_aorta_to_arteries'] = \
+            flows['aorta_to_arteries']
+        self.data.at[self.data_buffer_index, 'flow_arteries_to_veins'] = \
+            flows['arteries_to_veins']
+        self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
+            flows['veins_to_ventricle']
+
+        # Now update data structure for half_sarcomere
+        self.hs.update_data_holder(time_step, activation)
 
     def return_lv_circumference(self, lv_volume):
-        lv_circum = np.power((6*np.power(np.pi,2.0) * 
-                              (lv_volume + 
-                                   (self.ventricle_wall_volume / 2.0))),
-                                    (1.0 / 3.0))
+        # 0.001 below is to do with liters to meters conversion
+        lv_circum = (2.0 * np.pi * 
+            np.power((3 * 0.001 * 
+                     (lv_volume + (self.ventricle_wall_volume / 2.0)) /
+                     (2 * np.pi)) , (1.0 / 3.0)))
+#        print("lv %f vwv %f" % (lv_volume,self.ventricle_wall_volume))
         return lv_circum
 
     def return_lv_pressure(self, lv_volume):
@@ -214,8 +243,22 @@ class single_circulation():
         # Estimate the force produced at the new length
         f = self.hs.myof.check_myofilament_forces(delta_hsl)
         total_force = f['total_force']
-
-        return total_force * (-1 +
+#        print("hsl: %f" % self.hs.hs_length)
+#        print("delta_hsl %f cb_f: %f pf: %f total_force: %f" %
+#              (delta_hsl, f['cb_force'], f['pas_force'], total_force))
+#        
+#        # Laplaces law says that for a sphere,
+#        # P = 2 * S * w / r, where S is wall stress,
+#        # w is thickness, and r is internal radius
+#        r = np.power((3.0 * 0.001 * lv_volume / (2.0 * np.pi)),(1.0 / 3.0))
+#        w = 0.01
+#        P_in_pascals = 2 * total_force * w / r
+#        P_in_mmHg = P_in_pascals / mmHg_in_pascals
+#        
+#        return P_in_mmHg
+        
+        # This equation comes from Slinker and Campbell
+        return (total_force / mmHg_in_pascals) * (-1 +
             np.power((1.0 + (self.ventricle_wall_volume / lv_volume)),(2/3)))
 
     def step_solution(self, dt):
