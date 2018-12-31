@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="windows-1252"?>
 <single_circulation_model>
 
-<sim_data>
+<simulation_data>
 	<no_of_time_points>1250</no_of_time_points>
 	<time_step>0.001</time_step>
 	<activation_frequency>1</activation_frequency>
-</sim_data>
+</simulation_data>
+
+<output_data>
+	<data_file>../output/data/summary_data.xlsx</data_file>
+	<summary_figure>..output/figures/summary_figure.png</summary_figure>
+</output_data>
 
 <circulation>
 	<no_of_compartments>4</no_of_compartments>

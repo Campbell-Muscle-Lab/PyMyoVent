@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy import signal
 from scipy.integrate import solve_ivp
 from scipy.constants import mmHg as mmHg_in_pascals
 
@@ -15,13 +16,34 @@ class single_circulation():
     """Class for a single ventricle circulation"""
 
     from .display import display_simulation, display_flows, display_pv_loop
+#    from .driver import return_sim_struct_from_xml_file, \
+#        run_simulation_from_xml_file
 
-    def __init__(self, single_circulation_model):
+    def __init__(self, single_circulation_simulation):
+        # Pull off stuff
+        self.simulation_parameters = \
+            single_circulation_simulation.simulation_parameters
+
+        self.output_parameters = \
+            single_circulation_simulation.output_parameters
+
         self.output_buffer_size = \
-            int(single_circulation_model.sim_data.no_of_time_points.cdata)
+            int(single_circulation_simulation.simulation_parameters.
+                no_of_time_points.cdata)
+
+        # Look for perturbations
+        self.volume_perturbation = np.zeros(self.output_buffer_size+1)
+        if (hasattr(single_circulation_simulation, 'perturbations')):
+            if hasattr(single_circulation_simulation.perturbations, 'volume'):
+                temp = single_circulation_simulation.perturbations.volume
+                start_index = int(temp.start_index.cdata)
+                stop_index = int(temp.stop_index.cdata)
+                increment = float(temp.increment.cdata)
+                self.volume_perturbation[(start_index+1):(stop_index+1)] =\
+                    increment
 
         # Initialize circulation object using data from the sim_object
-        circ_params = single_circulation_model.circulation
+        circ_params = single_circulation_simulation.circulation
 
         self.no_of_compartments = int(circ_params.no_of_compartments.cdata)
         self.blood_volume = float(circ_params.blood.volume.cdata)
@@ -53,7 +75,7 @@ class single_circulation():
                                     0])
 
         # Pull off the half_sarcomere parameters
-        hs_params = single_circulation_model.half_sarcomere
+        hs_params = single_circulation_simulation.half_sarcomere
         self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
 
         # Deduce the hsl where force is zero and set the hsl to that length
@@ -108,6 +130,8 @@ class single_circulation():
                                   'flow_arteries_to_veins':
                                       np.zeros(self.output_buffer_size),
                                   'flow_veins_to_ventricle':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_perturbation':
                                       np.zeros(self.output_buffer_size)})
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
@@ -220,6 +244,9 @@ class single_circulation():
         self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
             flows['veins_to_ventricle']
 
+        self.data.at[self.data_buffer_index, 'volume_perturbation'] =\
+            self.volume_perturbation[self.data_buffer_index]
+
         # Now update data structure for half_sarcomere
         self.hs.update_data_holder(time_step, activation)
 
@@ -243,10 +270,7 @@ class single_circulation():
         # Estimate the force produced at the new length
         f = self.hs.myof.check_myofilament_forces(delta_hsl)
         total_force = f['total_force']
-#        print("hsl: %f" % self.hs.hs_length)
-#        print("delta_hsl %f cb_f: %f pf: %f total_force: %f" %
-#              (delta_hsl, f['cb_force'], f['pas_force'], total_force))
-#        
+
 #        # Laplaces law says that for a sphere,
 #        # P = 2 * S * w / r, where S is wall stress,
 #        # w is thickness, and r is internal radius
@@ -254,39 +278,51 @@ class single_circulation():
 #        w = 0.01
 #        P_in_pascals = 2 * total_force * w / r
 #        P_in_mmHg = P_in_pascals / mmHg_in_pascals
-#        
-#        return P_in_mmHg
         
         # This equation comes from Slinker and Campbell
         return (total_force / mmHg_in_pascals) * (-1 +
             np.power((1.0 + (self.ventricle_wall_volume / lv_volume)),(2/3)))
 
-    def step_solution(self, dt):
-        # steps solution forward in time
-        sol = solve_ivp(self.derivs, [0, dt], self.v)
-        self.v = sol.y[:, -1]
+    def run_simulation(self):
+        # Run the simulation
+        from .display import display_simulation, display_flows, display_pv_loop
 
-    def run_simulation(self, dt, no_of_time_points, max_ventricular_pressure):
-        t = np.zeros(1)
-        v = self.v
+        # Create an activation profile
+        no_of_time_points = \
+            int(self.simulation_parameters.no_of_time_points.cdata)
+        dt = float(self.simulation_parameters.time_step.cdata)
+        activation_frequency = \
+            float(self.simulation_parameters.activation_frequency.cdata)
+        activation_duty_ratio = \
+            float(self.simulation_parameters.duty_ratio.cdata)
 
-        j = 0
+        # Create an activation pattern
+        t = dt*np.arange(1, no_of_time_points+1)
+        act = 0.5*(1+signal.square(np.pi+2*np.pi*activation_frequency*t,
+                            duty=activation_duty_ratio))
 
-        x = range(no_of_time_points)
-        for i in x:
-            if ((i % 250) == 0):
-                j = 50
+        # Run the simulation
+        for i in np.arange(np.size(t)):
+            # Apply volume perturbation to veins
+            self.v[-2] = self.v[-2] + self.volume_perturbation[i]
+            # Update display
+            if (np.mod(i, 200)==0):
+                print("Blood volume: %.3f, %.0f %% complete" %
+                      (np.sum(self.v), (100*i/np.size(t))))
+            # Update simulation
+            self.implement_time_step(dt, act[i])
+            self.update_data_holders(dt, act[i])
 
-            if (j > 0):
-                j = j - 1
-                self.ventricular_pressure = max_ventricular_pressure
-            else:
-                self.ventricular_pressure = 0
+        # Concatenate data structures
+        self.data = pd.concat([self.data, self.hs.hs_data], axis=1)
 
-            print("i: %d" % i)
-            self.step_solution(dt)
-            t = np.vstack((t, t[-1]+dt))
-            v = np.vstack((v, self.v))
+        # Make plots
+        display_simulation(self.data,
+                           self.output_parameters.summary_figure.cdata)
+        display_flows(self.data,
+                      self.output_parameters.flows_figure.cdata)
+        display_pv_loop(self.data,
+                        self.output_parameters.pv_figure.cdata)
 
-        sim_output = {'t': t, 'v': v}
-        return sim_output
+        # Write data to disk
+        self.data.to_excel(self.output_parameters.data_file.cdata)
