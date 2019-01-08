@@ -13,7 +13,7 @@ def run_simulation_from_xml_file(xml_file_string):
     sim_struct = return_sim_struct_from_xml_file(xml_file_string)
     
     # Now create a single circulation object
-    sim_object = sc.single_circulation(sim_struct)
+    sim_object = sc.single_circulation(sim_struct, xml_file_string)
 
     # Now run the simulation
     sim_object.run_simulation()

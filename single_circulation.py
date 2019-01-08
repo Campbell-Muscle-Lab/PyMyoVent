@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from openpyxl import Workbook
+from lxml import etree
 from scipy import signal
 from scipy.integrate import solve_ivp
 from scipy.constants import mmHg as mmHg_in_pascals
@@ -19,8 +21,10 @@ class single_circulation():
 #    from .driver import return_sim_struct_from_xml_file, \
 #        run_simulation_from_xml_file
 
-    def __init__(self, single_circulation_simulation):
+    def __init__(self, single_circulation_simulation, xml_file_string = None):
         # Pull off stuff
+        self.input_xml_file_string = xml_file_string
+        
         self.simulation_parameters = \
             single_circulation_simulation.simulation_parameters
 
@@ -54,6 +58,12 @@ class single_circulation():
         self.arteries_resistance = float(circ_params.arteries.resistance.cdata)
         self.arteries_compliance = float(circ_params.arteries.compliance.cdata)
 
+        self.arterioles_resistance = float(circ_params.arterioles.resistance.cdata)
+        self.arterioles_compliance = float(circ_params.arterioles.compliance.cdata)
+
+        self.capillaries_resistance = float(circ_params.capillaries.resistance.cdata)
+        self.capillaries_compliance = float(circ_params.capillaries.compliance.cdata)
+
         self.veins_resistance = float(circ_params.veins.resistance.cdata)
         self.veins_compliance = float(circ_params.veins.compliance.cdata)
 
@@ -67,10 +77,14 @@ class single_circulation():
         # Initialise the resistance and compliance arrays for calcuations
         self.resistance = np.array([self.aorta_resistance,
                                     self.arteries_resistance,
+                                    self.arterioles_resistance,
+                                    self.capillaries_resistance,
                                     self.veins_resistance,
                                     self.ventricle_resistance])
         self.compliance = np.array([self.aorta_compliance,
                                     self.arteries_compliance,
+                                    self.arterioles_compliance,
+                                    self.capillaries_compliance,
                                     self.veins_compliance,
                                     0])
 
@@ -93,9 +107,9 @@ class single_circulation():
 
         # Set the initial volumes with most of the blood in the veins
         initial_ventricular_volume = 1.5 * self.ventricle_slack_volume
-        self.v = np.array([0, 0,
-                           self.blood_volume - initial_ventricular_volume,
-                           initial_ventricular_volume])
+        self.v = np.zeros(self.no_of_compartments)
+        self.v[-2] = self.blood_volume - initial_ventricular_volume
+        self.v[-1] = initial_ventricular_volume
 
         # Deduce the pressures
         self.p = np.zeros(self.no_of_compartments)
@@ -111,6 +125,10 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'pressure_arteries':
                                       np.zeros(self.output_buffer_size),
+                                  'pressure_arterioles':
+                                      np.zeros(self.output_buffer_size),
+                                  'pressure_capillaries':
+                                      np.zeros(self.output_buffer_size),
                                   'pressure_veins':
                                       np.zeros(self.output_buffer_size),
                                   'pressure_ventricle':
@@ -118,6 +136,10 @@ class single_circulation():
                                   'volume_aorta':
                                       np.zeros(self.output_buffer_size),
                                   'volume_arteries':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_arterioles':
+                                      np.zeros(self.output_buffer_size),
+                                  'volume_capillaries':
                                       np.zeros(self.output_buffer_size),
                                   'volume_veins':
                                       np.zeros(self.output_buffer_size),
@@ -127,7 +149,11 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'flow_aorta_to_arteries':
                                       np.zeros(self.output_buffer_size),
-                                  'flow_arteries_to_veins':
+                                  'flow_arteries_to_arterioles':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_arterioles_to_capillaries':
+                                      np.zeros(self.output_buffer_size),
+                                  'flow_capillaries_to_veins':
                                       np.zeros(self.output_buffer_size),
                                   'flow_veins_to_ventricle':
                                       np.zeros(self.output_buffer_size),
@@ -136,13 +162,17 @@ class single_circulation():
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
         self.data.at[0, 'pressure_arteries'] = self.p[1]
-        self.data.at[0, 'pressure_veins'] = self.p[2]
-        self.data.at[0, 'pressure_ventricle'] = self.p[3]
+        self.data.at[0, 'pressure_arterioles'] = self.p[2]
+        self.data.at[0, 'pressure_capillaries'] = self.p[3]
+        self.data.at[0, 'pressure_veins'] = self.p[4]
+        self.data.at[0, 'pressure_ventricle'] = self.p[5]
 
         self.data.at[0, 'volume_aorta'] = self.v[0]
         self.data.at[0, 'volume_arteries'] = self.v[1]
-        self.data.at[0, 'volume_veins'] = self.v[2]
-        self.data.at[0, 'volume_ventricle'] = self.v[3]
+        self.data.at[0, 'volume_arterioles'] = self.v[2]
+        self.data.at[0, 'volume_capillaries'] = self.v[3]
+        self.data.at[0, 'volume_veins'] = self.v[4]
+        self.data.at[0, 'volume_ventricle'] = self.v[5]
 
     def return_flows(self, v):
         # returns fluxes between different compartments
@@ -163,14 +193,20 @@ class single_circulation():
 
         flows['aorta_to_arteries'] = \
             (p[0] - p[1]) / self.resistance[1]
-        
-        flows['arteries_to_veins'] = \
-            (p[1] - p[2])/ self.resistance[2]
-        
+
+        flows['arteries_to_arterioles'] = \
+            (p[1] - p[2]) / self.resistance[2]
+
+        flows['arterioles_to_capillaries'] = \
+            (p[2] - p[3]) / self.resistance[3]
+
+        flows['capillaries_to_veins'] = \
+            (p[3] - p[4]) / self.resistance[4]
+
         flows['veins_to_ventricle'] = 0.0
-        if (p[2] > p[-1]):
+        if (p[4] > p[-1]):
             flows['veins_to_ventricle'] = \
-                (p[2] - p[-1]) / self.resistance[-1]
+                (p[4] - p[-1]) / self.resistance[-1]
 
         return flows
 
@@ -186,12 +222,18 @@ class single_circulation():
                 flows['aorta_to_arteries']
 
         dv[1] = flows['aorta_to_arteries'] - \
-                flows['arteries_to_veins']
+                flows['arteries_to_arterioles']
 
-        dv[2] = flows['arteries_to_veins'] - \
+        dv[2] = flows['arteries_to_arterioles'] - \
+                flows['arterioles_to_capillaries']
+
+        dv[3] = flows['arterioles_to_capillaries'] - \
+                flows['capillaries_to_veins']
+
+        dv[4] = flows['capillaries_to_veins'] - \
                 flows['veins_to_ventricle']
 
-        dv[3] = flows['veins_to_ventricle'] - \
+        dv[-1] = flows['veins_to_ventricle'] - \
                 flows['ventricle_to_aorta']
 
         return dv
@@ -218,6 +260,7 @@ class single_circulation():
         for x in vi:
             self.p[x] = self.v[x] / self.compliance[x]
         self.p[-1] = self.return_lv_pressure(self.v[-1])
+#        print(self.p)
 
     def update_data_holders(self, time_step, activation):
 
@@ -227,11 +270,15 @@ class single_circulation():
         self.data.at[self.data_buffer_index, 'time'] = self.sim_time
         self.data.at[self.data_buffer_index, 'pressure_aorta'] = self.p[0]
         self.data.at[self.data_buffer_index, 'pressure_arteries'] = self.p[1]
-        self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[2]
+        self.data.at[self.data_buffer_index, 'pressure_arterioles'] = self.p[2]
+        self.data.at[self.data_buffer_index, 'pressure_capillaries'] = self.p[3]
+        self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[4]
         self.data.at[self.data_buffer_index, 'pressure_ventricle'] = self.p[-1]
         self.data.at[self.data_buffer_index, 'volume_aorta'] = self.v[0]
         self.data.at[self.data_buffer_index, 'volume_arteries'] = self.v[1]
-        self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[2]
+        self.data.at[self.data_buffer_index, 'volume_arterioles'] = self.v[2]
+        self.data.at[self.data_buffer_index, 'volume_capillaries'] = self.v[3]
+        self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[4]
         self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[-1]
 
         flows = self.return_flows(self.v)
@@ -239,8 +286,12 @@ class single_circulation():
             flows['ventricle_to_aorta']
         self.data.at[self.data_buffer_index, 'flow_aorta_to_arteries'] = \
             flows['aorta_to_arteries']
-        self.data.at[self.data_buffer_index, 'flow_arteries_to_veins'] = \
-            flows['arteries_to_veins']
+        self.data.at[self.data_buffer_index, 'flow_arteries_to_arterioles'] = \
+            flows['arteries_to_arterioles']
+        self.data.at[self.data_buffer_index,'flow_arterioles_to_capilllaries'] = \
+            flows['arterioles_to_capillaries']
+        self.data.at[self.data_buffer_index, 'flow_capillaries_to_veins'] = \
+            flows['capillaries_to_veins']
         self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
             flows['veins_to_ventricle']
 
@@ -317,6 +368,7 @@ class single_circulation():
         self.data = pd.concat([self.data, self.hs.hs_data], axis=1)
 
         # Make plots
+        # Circulation
         display_simulation(self.data,
                            self.output_parameters.summary_figure.cdata)
         display_flows(self.data,
@@ -324,5 +376,127 @@ class single_circulation():
         display_pv_loop(self.data,
                         self.output_parameters.pv_figure.cdata)
 
+        # Half-sarcomere
+        hs.half_sarcomere.display_fluxes(self.data,
+                               self.output_parameters.hs_fluxes_figure.cdata)
+
         # Write data to disk
-        self.data.to_excel(self.output_parameters.data_file.cdata)
+        # Read xml input as a string
+        wb = Workbook()
+        ws_parameters = wb.active
+        ws_parameters.title = 'Simulation parameters'
+
+        tree = etree.parse(self.input_xml_file_string)
+        root = tree.getroot()
+
+        def build_xml_string(input_object, current_string, indent):
+            
+            def indent_string(indent):
+                ind_string = ""
+                for i in np.arange(0,indent):
+                    ind_string = ("%s    " % ind_string)
+                return ind_string
+            
+            for child in input_object:
+                current_string = ("%s\n%s<%s>" %
+                                  (current_string, indent_string(indent), child.tag))
+                if (len(list(child))>0):
+                    current_string = build_xml_string(child, current_string, indent+1)
+                else:
+                    current_string = ("%s%s%s" %
+                                     (current_string, indent_string(0), child.text))
+                if (len(list(child))==0):
+                    current_string = ("%s%s</%s>" %
+                                      (current_string, indent_string(0), child.tag))
+                else:
+                    current_string = ("%s\n%s</%s>" %
+                                      (current_string, indent_string(indent), child.tag))
+            return current_string
+
+        xml_string = build_xml_string(root,"",0)
+
+        
+        if (self.input_xml_file_string):
+            f = open(self.input_xml_file_string, mode='r')
+            input_xml = f.read()
+            f.close
+            ws_parameters['A1'] = input_xml
+        wb.save(self.output_parameters.data_file.cdata)
+
+        # Append data as a new sheet
+        append_df_to_excel(self.output_parameters.data_file.cdata,self.data,
+                           sheet_name='Data')
+
+def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
+                       truncate_sheet=False, 
+                       **to_excel_kwargs):
+    """
+    Append a DataFrame [df] to existing Excel file [filename]
+    into [sheet_name] Sheet.
+    If [filename] doesn't exist, then this function will create it.
+
+    Parameters:
+      filename : File path or existing ExcelWriter
+                 (Example: '/path/to/file.xlsx')
+      df : dataframe to save to workbook
+      sheet_name : Name of sheet which will contain DataFrame.
+                   (default: 'Sheet1')
+      startrow : upper left cell row to dump data frame.
+                 Per default (startrow=None) calculate the last row
+                 in the existing DF and write to the next row...
+      truncate_sheet : truncate (remove and recreate) [sheet_name]
+                       before writing DataFrame to Excel file
+      to_excel_kwargs : arguments which will be passed to `DataFrame.to_excel()`
+                        [can be dictionary]
+
+    Returns: None
+    """
+    from openpyxl import load_workbook
+
+    import pandas as pd
+
+    # ignore [engine] parameter if it was passed
+    if 'engine' in to_excel_kwargs:
+        to_excel_kwargs.pop('engine')
+
+    writer = pd.ExcelWriter(filename, engine='openpyxl')
+
+    # Python 2.x: define [FileNotFoundError] exception if it doesn't exist 
+    try:
+        FileNotFoundError
+    except NameError:
+        FileNotFoundError = IOError
+
+
+    try:
+        # try to open an existing workbook
+        writer.book = load_workbook(filename)
+
+        # get the last row in the existing Excel sheet
+        # if it was not specified explicitly
+        if startrow is None and sheet_name in writer.book.sheetnames:
+            startrow = writer.book[sheet_name].max_row
+
+        # truncate sheet
+        if truncate_sheet and sheet_name in writer.book.sheetnames:
+            # index of [sheet_name] sheet
+            idx = writer.book.sheetnames.index(sheet_name)
+            # remove [sheet_name]
+            writer.book.remove(writer.book.worksheets[idx])
+            # create an empty sheet [sheet_name] using old index
+            writer.book.create_sheet(sheet_name, idx)
+
+        # copy existing sheets
+        writer.sheets = {ws.title:ws for ws in writer.book.worksheets}
+    except FileNotFoundError:
+        # file does not exist yet, we will create it
+        pass
+
+    if startrow is None:
+        startrow = 0
+
+    # write out the new sheet
+    df.to_excel(writer, sheet_name, startrow=startrow, **to_excel_kwargs)
+
+    # save the workbook
+    writer.save()

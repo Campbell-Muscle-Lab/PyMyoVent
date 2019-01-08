@@ -26,6 +26,7 @@ def display_pv_loop(data_structure, output_file_string="", t_limits=[]):
 
     if (output_file_string):
         f.savefig(output_file_string)
+        plt.close('all')
 
 def display_flows(data_structure, output_file_string=""):
 
@@ -41,14 +42,19 @@ def display_flows(data_structure, output_file_string=""):
              label='Ventricle to Aorta')
     ax1.plot('time', 'flow_aorta_to_arteries', data=data_structure,
              label='Aorta to Arteries')
-    ax1.plot('time', 'flow_arteries_to_veins', data=data_structure,
-             label='Arteries to Veins')
+    ax1.plot('time', 'flow_arteries_to_arterioles', data=data_structure,
+             label='Arteries to arterioles')
+    ax1.plot('time', 'flow_arterioles_to_capillaries', data=data_structure,
+             label='Arterioles to capillaries')
+    ax1.plot('time', 'flow_capillaries_to_veins', data=data_structure,
+             label='Capillaries to Veins')
     ax1.plot('time', 'flow_veins_to_ventricle', data=data_structure,
              label='Veins to Ventricle')
     ax1.legend(bbox_to_anchor=(1.05, 1))
 
-    if not (output_file_string):
+    if (output_file_string):
         f.savefig(output_file_string)
+        plt.close('all')
 
 
 def display_simulation(data_structure, output_file_string="", t_limits=[]):
@@ -63,6 +69,8 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     ax1 = f.add_subplot(spec2[0, 0])
     ax1.plot('time', 'pressure_aorta', data=data_structure, label='Aorta')
     ax1.plot('time', 'pressure_arteries', data=data_structure, label='Arteries')
+    ax1.plot('time', 'pressure_arterioles', data=data_structure, label='Arterioles')
+    ax1.plot('time', 'pressure_capillaries', data=data_structure, label='Capillaries')
     ax1.plot('time', 'pressure_veins',  data=data_structure, label='Veins')
     ax1.plot('time', 'pressure_ventricle',  data=data_structure, label='Ventricle')
     ax1.set_ylabel('Pressure')
@@ -73,6 +81,8 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     ax2 = f.add_subplot(spec2[1, 0])
     ax2.semilogy('time', 'volume_aorta', data=data_structure, label='Aorta')
     ax2.semilogy('time', 'volume_arteries', data=data_structure, label='Arteries')
+    ax2.semilogy('time', 'volume_arterioles', data=data_structure, label='Arterioles')
+    ax2.semilogy('time', 'volume_capillaries', data=data_structure, label='Capillaries')
     ax2.semilogy('time', 'volume_veins',  data=data_structure, label='Veins')
     ax2.semilogy('time', 'volume_ventricle', data=data_structure, label='Ventricle')
     ax2.set_ylabel('log_{10} Volume')
@@ -143,3 +153,4 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
 
     if (output_file_string):
         f.savefig(output_file_string)
+        plt.close('all')
