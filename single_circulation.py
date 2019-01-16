@@ -13,7 +13,6 @@ except:
     sys.path.append('c:\\ken\\github\\campbellmusclelab\\python\\modules')
     import Python_MyoSim.half_sarcomere.half_sarcomere as hs
 
-
 class single_circulation():
     """Class for a single ventricle circulation"""
 
@@ -303,10 +302,16 @@ class single_circulation():
 
     def return_lv_circumference(self, lv_volume):
         # 0.001 below is to do with liters to meters conversion
-        lv_circum = (2.0 * np.pi * 
-            np.power((3 * 0.001 * 
-                     (lv_volume + (self.ventricle_wall_volume / 2.0)) /
-                     (2 * np.pi)) , (1.0 / 3.0)))
+        if (lv_volume > 0.0):
+            lv_circum = (2.0 * np.pi * 
+                np.power((3 * 0.001 * 
+                         (lv_volume + (self.ventricle_wall_volume / 2.0)) /
+                         (2 * np.pi)) , (1.0 / 3.0)))
+        else:
+            lv_circum = (2.0 * np.pi * 
+                np.power((3 * 0.001 * 
+                         ((self.ventricle_wall_volume / 2.0)) /
+                         (2 * np.pi)) , (1.0 / 3.0)))
 #        print("lv %f vwv %f" % (lv_volume,self.ventricle_wall_volume))
         return lv_circum
 
@@ -329,10 +334,25 @@ class single_circulation():
 #        w = 0.01
 #        P_in_pascals = 2 * total_force * w / r
 #        P_in_mmHg = P_in_pascals / mmHg_in_pascals
+        # Deduce internal radius
+        internal_r = np.power((3.0 * 0.001 * lv_volume) /
+                              (2.0 * np.pi), (1.0 / 3.0))
+        internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
+        wall_thickness = 0.001 * self.ventricle_wall_volume / internal_area
         
-        # This equation comes from Slinker and Campbell
-        return (total_force / mmHg_in_pascals) * (-1 +
-            np.power((1.0 + (self.ventricle_wall_volume / lv_volume)),(2/3)))
+        P_in_pascals = 2.0 * total_force * wall_thickness / internal_r
+        P_in_mmHg = P_in_pascals / mmHg_in_pascals
+        
+        return P_in_mmHg
+        
+        
+#        # This equation comes from Slinker and Campbell
+#        if (lv_volume>0):
+#            return (total_force / mmHg_in_pascals) * (-1 +
+#                   np.power((1.0 + (self.ventricle_wall_volume / lv_volume)),(2/3)))
+#        else:
+#            return 0.0
+
 
     def run_simulation(self):
         # Run the simulation

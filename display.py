@@ -63,7 +63,7 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
-    f.set_size_inches([7, 12])
+    f.set_size_inches([8, 14])
     spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
                               figure=f)
     ax1 = f.add_subplot(spec2[0, 0])
@@ -152,5 +152,6 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     ax9.legend(bbox_to_anchor=(1.05, 1))
 
     if (output_file_string):
+        print("summary_output_file: %s" % output_file_string)
         f.savefig(output_file_string)
-        plt.close('all')
+#        plt.close()
