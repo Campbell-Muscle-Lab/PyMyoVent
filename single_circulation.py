@@ -157,6 +157,8 @@ class single_circulation():
                                   'flow_veins_to_ventricle':
                                       np.zeros(self.output_buffer_size),
                                   'volume_perturbation':
+                                      np.zeros(self.output_buffer_size),
+                                  'ventricle_wall_volume':
                                       np.zeros(self.output_buffer_size)})
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
@@ -172,6 +174,8 @@ class single_circulation():
         self.data.at[0, 'volume_capillaries'] = self.v[3]
         self.data.at[0, 'volume_veins'] = self.v[4]
         self.data.at[0, 'volume_ventricle'] = self.v[5]
+
+        self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
 
     def return_flows(self, v):
         # returns fluxes between different compartments
@@ -294,8 +298,11 @@ class single_circulation():
         self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
             flows['veins_to_ventricle']
 
-        self.data.at[self.data_buffer_index, 'volume_perturbation'] =\
+        self.data.at[self.data_buffer_index, 'volume_perturbation'] = \
             self.volume_perturbation[self.data_buffer_index]
+
+        self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] = \
+            self.ventricle_wall_volume
 
         # Now update data structure for half_sarcomere
         self.hs.update_data_holder(time_step, activation)
@@ -378,7 +385,7 @@ class single_circulation():
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
             # Update display
             if (np.mod(i, 200)==0):
-                print("Blood volume: %.3f, %.0f %% complete" %
+                print("Blood volume: %.3g, %.0f %% complete" %
                       (np.sum(self.v), (100*i/np.size(t))))
             # Update simulation
             self.implement_time_step(dt, act[i])

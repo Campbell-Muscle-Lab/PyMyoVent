@@ -57,13 +57,14 @@ def display_flows(data_structure, output_file_string=""):
         plt.close('all')
 
 
-def display_simulation(data_structure, output_file_string="", t_limits=[]):
+def display_simulation(data_structure, output_file_string="", t_limits=[],
+                       dpi=None):
 
-    no_of_rows = 9
+    no_of_rows = 10
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
-    f.set_size_inches([8, 14])
+    f.set_size_inches([14, 14])
     spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
                               figure=f)
     ax1 = f.add_subplot(spec2[0, 0])
@@ -88,8 +89,8 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     ax2.set_ylabel('log_{10} Volume')
     if t_limits:
         ax2.set_xlim(t_limits)
-    ax2.set_ylim([1e-3, 10])
-    ax2.set_yticks(np.array([1e-3, 1e-2, 1e-1, 1, 10]))
+    ax2.set_ylim([1e-5, 10])
+    ax2.set_yticks(np.array([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]))
     ax2.legend(bbox_to_anchor=(1.05, 1))
 
     ax3 = f.add_subplot(spec2[2, 0])
@@ -99,59 +100,66 @@ def display_simulation(data_structure, output_file_string="", t_limits=[]):
     ax3.set_ylabel('Activation')
     ax3.legend(bbox_to_anchor=(1.05, 1))
 
-    ax4 = f.add_subplot(spec2[3, 0])
-    ax4.plot('time', 'Ca_conc', data=data_structure, label='Ca concentration')
-    if t_limits:
-        ax4.set_xlim(t_limits)
-    ax4.set_ylabel('Concentration\n[M]')
-    ax4.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    ax4.legend(bbox_to_anchor=(1.05, 1))
+#    ax4 = f.add_subplot(spec2[3, 0])
+#    ax4.plot('time', 'membrane_voltage', data=data_structure, label='Voltage')
+#    if t_limits:
+#        ax4.set_xlim(t_limits)
+#    ax4.set_ylabel('Membrane\nvoltage\n(V)')
+#    ax4.legend(bbox_to_anchor=(1.05, 1))
 
     ax5 = f.add_subplot(spec2[4, 0])
-    ax5.plot('time', 'hs_length', data=data_structure, label='hs_length')
+    ax5.plot('time', 'Ca_conc', data=data_structure, label='Ca concentration')
     if t_limits:
         ax5.set_xlim(t_limits)
-    ax5.set_ylabel('Length')
+    ax5.set_ylabel('Concentration\n[M]')
+    ax5.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax5.legend(bbox_to_anchor=(1.05, 1))
 
     ax6 = f.add_subplot(spec2[5, 0])
-    ax6.plot('time', 'hs_force', data=data_structure, label='Total force')
-    ax6.plot('time', 'cb_force', data=data_structure, label='Crossbridge force')
-    ax6.plot('time', 'pas_force', data=data_structure, label='Passive force')
+    ax6.plot('time', 'hs_length', data=data_structure, label='hs_length')
     if t_limits:
         ax6.set_xlim(t_limits)
-    ax6.set_ylabel('Force')
-    ax6.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax6.set_ylabel('Length')
     ax6.legend(bbox_to_anchor=(1.05, 1))
 
     ax7 = f.add_subplot(spec2[6, 0])
-    ax7.plot('time', 'n_on', data=data_structure, label='N_on')
-    ax7.plot('time', 'n_off', data=data_structure, label='N_off')
-    ax7.plot('time', 'n_bound', data=data_structure, label='N_bound')
+    ax7.plot('time', 'hs_force', data=data_structure, label='Total force')
+    ax7.plot('time', 'cb_force', data=data_structure, label='Crossbridge force')
+    ax7.plot('time', 'pas_force', data=data_structure, label='Passive force')
     if t_limits:
         ax7.set_xlim(t_limits)
-    ax7.set_ylim([0, 1.0])
-    ax7.set_ylabel('Thin filament')
+    ax7.set_ylabel('Force')
+    ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax7.legend(bbox_to_anchor=(1.05, 1))
 
     ax8 = f.add_subplot(spec2[7, 0])
-    ax8.plot('time', 'M_OFF', data=data_structure, label='M_OFF')
-    ax8.plot('time', 'M_ON', data=data_structure, label='M_ON')
-    ax8.plot('time', 'M_bound', data=data_structure, label='M_bound')
+    ax8.plot('time', 'n_on', data=data_structure, label='N_on')
+    ax8.plot('time', 'n_off', data=data_structure, label='N_off')
+    ax8.plot('time', 'n_bound', data=data_structure, label='N_bound')
     if t_limits:
         ax8.set_xlim(t_limits)
     ax8.set_ylim([0, 1.0])
-    ax8.set_ylabel('Thick filament')
+    ax8.set_ylabel('Thin filament')
     ax8.legend(bbox_to_anchor=(1.05, 1))
 
     ax9 = f.add_subplot(spec2[8, 0])
-    ax9.plot('time', 'volume_ventricle', data=data_structure, label='Ventricle')
+    ax9.plot('time', 'M_OFF', data=data_structure, label='M_OFF')
+    ax9.plot('time', 'M_ON', data=data_structure, label='M_ON')
+    ax9.plot('time', 'M_bound', data=data_structure, label='M_bound')
     if t_limits:
         ax9.set_xlim(t_limits)
-    ax9.set_ylabel('Volume')
+    ax9.set_ylim([0, 1.0])
+    ax9.set_ylabel('Thick filament')
     ax9.legend(bbox_to_anchor=(1.05, 1))
+
+    ax10 = f.add_subplot(spec2[9, 0])
+    ax10.plot('time', 'volume_ventricle', data=data_structure, label='Ventricle')
+    if t_limits:
+        ax10.set_xlim(t_limits)
+    ax10.set_ylabel('Volume')
+    ax10.legend(bbox_to_anchor=(1.05, 1))
 
     if (output_file_string):
         print("summary_output_file: %s" % output_file_string)
-        f.savefig(output_file_string)
+        f.savefig(output_file_string, dpi=dpi)
 #        plt.close()
