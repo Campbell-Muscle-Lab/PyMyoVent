@@ -45,6 +45,28 @@ class single_circulation():
                 self.volume_perturbation[(start_index+1):(stop_index+1)] =\
                     increment
 
+        # Look for baroreceptor module
+        if (hasattr(single_circulation_simulation, 'baroreceptor')):
+            self.baroreceptor_active = 1
+            baroreceptor_max_memory = \
+                int(single_circulation_simulation.baroreceptor.
+                    max_memory.cdata)
+            self.baroreceptor_pressure_array = \
+                np.zeros(baroreceptor_max_memory)
+            self.baroreceptor_target_aorta_pressure = \
+                float(single_circulation_simulation.baroreceptor.
+                      target_aorta_pressure.cdata)
+            self.baroreceptor_hr_gain = \
+                float(single_circulation_simulation.baroreceptor.
+                      hr_gain.cdata)
+        else:
+             self.baroreceptor_active= 0
+
+        # Look for growth module
+        if (hasattr(single_circulation_simulation, 'growth_module')):
+            # do this
+            temp = 1
+
         # Initialize circulation object using data from the sim_object
         circ_params = single_circulation_simulation.circulation
 
@@ -365,7 +387,7 @@ class single_circulation():
         # Run the simulation
         from .display import display_simulation, display_flows, display_pv_loop
 
-        # Create an activation profile
+        # Set up some values for the simulation
         no_of_time_points = \
             int(self.simulation_parameters.no_of_time_points.cdata)
         dt = float(self.simulation_parameters.time_step.cdata)
@@ -373,23 +395,88 @@ class single_circulation():
             float(self.simulation_parameters.activation_frequency.cdata)
         activation_duty_ratio = \
             float(self.simulation_parameters.duty_ratio.cdata)
-
-        # Create an activation pattern
         t = dt*np.arange(1, no_of_time_points+1)
-        act = 0.5*(1+signal.square(np.pi+2*np.pi*activation_frequency*t,
-                            duty=activation_duty_ratio))
+
+        # Branch depending on whether we are in baroreceptor mode
+        if (self.baroreceptor_active):
+            # Baroreceptor
+            baroreceptor_inter_act_counter = \
+                (1.0 - activation_duty_ratio)*(1.0 / (activation_frequency * dt))
+            baroreceptor_act_counter = (activation_duty_ratio * (1.0 / dt))
+            baroreceptor_counter = baroreceptor_inter_act_counter
+            activation_level = 0
+        else:
+            # No baroreceptor so create an activation profile that
+            # predefines the stimulus
+            predefined_activation_level = \
+                0.5*(1+signal.square(np.pi+2*np.pi*activation_frequency*t,
+                                     duty=activation_duty_ratio))
 
         # Run the simulation
         for i in np.arange(np.size(t)):
+            
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
-            # Update display
-            if (np.mod(i, 200)==0):
+
+            if (self.baroreceptor_active == 1):
+                # Baroreceptor mode
+                # Slide the pressure array across
+                self.baroreceptor_pressure_array = \
+                    np.roll(self.baroreceptor_pressure_array,1)
+                # Add in current aortic pressure
+                self.baroreceptor_pressure_array[0] = self.p[0]
+
+                # Decrement the counter
+                baroreceptor_counter = baroreceptor_counter - 1
+
+                # Initiate activation if appropriate
+                if (baroreceptor_counter <= 0):
+                    activation_level = 1.0
+                
+                # End activation if appropriate, and adjust for next beat
+                if (baroreceptor_counter <= -baroreceptor_act_counter):
+                    
+                    # End activation
+                    activation_level = 0.0
+
+                    # Deduce pressure error
+                    temp_p = self.baroreceptor_pressure_array[
+                            0:int(baroreceptor_inter_act_counter+
+                                  baroreceptor_act_counter-1)]
+                    pressure_error = \
+                        (temp_p.mean() - self.baroreceptor_target_aorta_pressure)
+                        
+                    # if error is negative, hr should speed up, so interact down
+                    baroreceptor_inter_act_counter = \
+                        (baroreceptor_inter_act_counter + 
+                        (self.baroreceptor_hr_gain * pressure_error))
+                    
+                    if (baroreceptor_inter_act_counter < (0.25 / dt)):
+                        baroreceptor_inter_act_counter = (0.25 / dt)
+                    
+                    baroreceptor_counter = baroreceptor_inter_act_counter
+
+                    # Update display
+                    print("Mean aortic pressure: %.0f Error: %.0f Heart-rate: %.2f" %
+                          (temp_p.mean(), pressure_error, 
+                          (1.0 / (dt*(baroreceptor_inter_act_counter + baroreceptor_act_counter)))))
+            else:
+                # Predefined
+                activation_level = predefined_activation_level[i]
+
+            # Display
+            if ( (i % 200) == 0):
                 print("Blood volume: %.3g, %.0f %% complete" %
                       (np.sum(self.v), (100*i/np.size(t))))
-            # Update simulation
-            self.implement_time_step(dt, act[i])
-            self.update_data_holders(dt, act[i])
+
+            self.implement_time_step(dt, activation_level)
+            self.update_data_holders(dt, activation_level)
+            
+            if (i==50000):
+                self.baroreceptor_target_aorta_pressure = 80
+            
+            if (i==70000):
+                self.baroreceptor_target_aorta_pressure = 120
 
         # Concatenate data structures
         self.data = pd.concat([self.data, self.hs.hs_data], axis=1)

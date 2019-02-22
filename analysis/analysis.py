@@ -161,9 +161,27 @@ def create_sensitivity_plot(analysis_data, fig_name):
 
     par_strings = df['test_parameter']
     unique_par_strings = par_strings.unique()
-    
+
+    # Get the number of numeric columns
     no_of_results = df.select_dtypes(include=[np.number]).shape[1]-1
     
+    # Find min and max of each metric
+    min_metric_value = np.zeros(no_of_results+1)
+    max_metric_value = np.zeros(no_of_results+1)
+    
+    # Get each numeric column
+    df_results = df.select_dtypes(include=[np.number])
+    df_results = df_results.drop(columns=['parameter_value'])
+    for (i,column) in enumerate(df_results):
+        print(i)
+        min_metric_value[i] = df_results[column].min()
+        max_metric_value[i] = df_results[column].max()
+    
+    print("min values")
+    print(min_metric_value)
+    print("max_values")
+    print(max_metric_value)
+   
     no_of_fig_cols = int(np.ceil(np.sqrt(no_of_results)))
     no_of_fig_rows = no_of_fig_cols
 
@@ -176,15 +194,21 @@ def create_sensitivity_plot(analysis_data, fig_name):
                                  figure=f)
         df_parset = df[df['test_parameter']==unique_par_strings[i]]
         par_values = df_parset['parameter_value']
+        # Get the indices that sort par_values in ascending order
+        si = np.argsort(par_values)
+        par_values = par_values.values
+        par_values = par_values[si]
+        print(si)
         # Get the numeric columns
         df_results = df_parset.select_dtypes(include=[np.number])
         print(df_results)
         df_results = df_results.drop(columns=['parameter_value'])
         counter = 0
-        for column in df_results:
+        for (j,column) in enumerate(df_results):
             # Pull off the values
-            y = df_results[column]
-
+            y = df_results[column].values
+            # Sort them in order of the par_values
+            y = y[si]
             # Get the right axes
             r = int(counter/no_of_fig_cols)
             c = counter-(r*no_of_fig_cols)
@@ -195,6 +219,8 @@ def create_sensitivity_plot(analysis_data, fig_name):
             ax.plot(par_values, y, 'bo-')
             ax.set_xlabel(unique_par_strings[i].rsplit('/', 1)[1])
             ax.set_ylabel(column)
+            ax.set_ylim(min_metric_value[j], max_metric_value[j])
+            
 
         # Generate a filename
         output_file_string = output_fig_folder + '/' + \

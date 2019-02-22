@@ -89,8 +89,8 @@ def display_simulation(data_structure, output_file_string="", t_limits=[],
     ax2.set_ylabel('log_{10} Volume')
     if t_limits:
         ax2.set_xlim(t_limits)
-    ax2.set_ylim([1e-5, 10])
-    ax2.set_yticks(np.array([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 10]))
+    ax2.set_ylim([1e-3, 10])
+    ax2.set_yticks(np.array([1e-3, 1e-2, 1e-1, 1, 10]))
     ax2.legend(bbox_to_anchor=(1.05, 1))
 
     ax3 = f.add_subplot(spec2[2, 0])
@@ -100,12 +100,14 @@ def display_simulation(data_structure, output_file_string="", t_limits=[],
     ax3.set_ylabel('Activation')
     ax3.legend(bbox_to_anchor=(1.05, 1))
 
-#    ax4 = f.add_subplot(spec2[3, 0])
-#    ax4.plot('time', 'membrane_voltage', data=data_structure, label='Voltage')
-#    if t_limits:
-#        ax4.set_xlim(t_limits)
-#    ax4.set_ylabel('Membrane\nvoltage\n(V)')
-#    ax4.legend(bbox_to_anchor=(1.05, 1))
+    # Look for membrane voltage
+    if ('membrane_voltage' in data_structure.columns):
+        ax4 = f.add_subplot(spec2[3, 0])
+        ax4.plot('time', 'membrane_voltage', data=data_structure, label='Voltage')
+        if t_limits:
+            ax4.set_xlim(t_limits)
+        ax4.set_ylabel('Membrane\nvoltage\n(V)')
+        ax4.legend(bbox_to_anchor=(1.05, 1))
 
     ax5 = f.add_subplot(spec2[4, 0])
     ax5.plot('time', 'Ca_conc', data=data_structure, label='Ca concentration')
