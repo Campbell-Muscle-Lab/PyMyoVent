@@ -1,0 +1,13 @@
+build/**
+dist/**
+deb_dist/**
+debian/**
+**/*.pyc
+*.pyc
+*.DS_Store
+MANIFEST
+untangle.egg-info
+.tox/
+tox.init
+untangle-*.tar.gz
+.cache/*
