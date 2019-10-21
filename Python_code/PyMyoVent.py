@@ -24,3 +24,8 @@ if __name__ == "__main__":
         if (sys.argv[1] == 'run_default_model'):
             print('Running default model')
             run_simulation_from_xml_file('..\demo_files\demo_1\demo_1_model.xml')
+
+    if (no_of_arguments == 3):
+        if (sys.argv[1] == 'run_defined_model'):
+            print('Running model %s' % sys.argv[2])
+            run_simulation_from_xml_file(sys.argv[2])
