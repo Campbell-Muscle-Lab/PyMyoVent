@@ -4,7 +4,8 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 def display_fluxes(data_structure, output_file_string="", t_limits=[], \
-                   kinetic_scheme='3state_with_SRX'):
+                   kinetic_scheme='3state_with_SRX',
+                   dpi=None):
     no_of_rows = 3
     no_of_cols = 1
 
@@ -21,7 +22,6 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
 
     if (kinetic_scheme=='3state_with_SRX'):
         
-        ax1 = f.add_subplot()
         ax1 = f.add_subplot(spec2[0, 0])
         ax1.plot('time', 'J1', data=data_structure, label='J1')
         ax1.plot('time', 'J2', data=data_structure, label='J2')
@@ -29,7 +29,6 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
         ax1.set_ylabel('Flux')
         ax1.legend(bbox_to_anchor=(1.05, 1))
 
-        ax2 = f.add_subplot()
         ax2 = f.add_subplot(spec2[1, 0])
         ax2.plot('time', 'J3', data=data_structure, label='J3')
         ax2.plot('time', 'J4', data=data_structure, label='J4')
@@ -37,7 +36,6 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
         ax2.set_ylabel('Flux')
         ax2.legend(bbox_to_anchor=(1.05, 1))
 
-        ax3 = f.add_subplot()
         ax3 = f.add_subplot(spec2[2, 0])
         ax3.plot('time', 'Jon', data=data_structure, label='Jon')
         ax3.plot('time', 'Joff', data=data_structure, label='Joff')
@@ -46,5 +44,20 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
         ax3.legend(bbox_to_anchor=(1.05, 1))
 
     if (output_file_string):
-        f.savefig(output_file_string)
-        plt.close('all')
+        save_figure_to_file(f, output_file_string, dpi);
+
+def save_figure_to_file(f, im_file_string, dpi=None, verbose=1):
+    # Writes an image to file
+
+    import os
+    from skimage.io import imsave
+    
+    # Check directory exists and save image file
+    dir_path = os.path.dirname(im_file_string)
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
+
+    if (verbose):
+        print('Saving figure to to %s' % im_file_string)
+
+    f.savefig(im_file_string, dpi=dpi)

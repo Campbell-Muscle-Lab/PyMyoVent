@@ -21,6 +21,6 @@ if __name__ == "__main__":
         print('PyMyoVent called with no inputs')
     
     if (no_of_arguments == 2):
-        if (sys.argv[1] == 'run_model'):
+        if (sys.argv[1] == 'run_default_model'):
             print('Running default model')
-            run_simulation_from_xml_file('test_model.xml')
+            run_simulation_from_xml_file('..\demo_files\demo_1\demo_1_model.xml')
