@@ -10,6 +10,10 @@ PyMyoVent simulates a single ventricle pumping blood around a closed circulation
   + Modules
     + Single_circulation
     + MyoSim
+      + [Background](pages/modules/MyoSim/background.html)
+      + half_sarcomere
+        + myofilaments
+        + membranes
 
 + Model files
   + [Structure](pages/model_files/model_files.html)
