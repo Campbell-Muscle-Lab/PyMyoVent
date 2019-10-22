@@ -2,7 +2,7 @@
 
 MyoSim is software that [Ken Campbell](http://www.campbellmusclelab.org) originally wrote to simulate the mechanical properties of half-sarcomeres. It extends [Huxley-based cross-bridge distribution techniques](https://www.ncbi.nlm.nih.gov/pubmed/4449057) with Ca<sup>2+</sup> activation and cooperative effects.
 
-This repository contains an implementation of MyoSim written in MATLAB. Other versions of MyoSim have been written in [C++](http://www.myosim.org) and [Python](https://github.com/Campbell-Muscle-Lab/Python_MyoSim). None of the versions are completely interchangeable. All have strengths and weaknesses.
+This repository contains an implementation of MyoSim written in Python. Other versions of MyoSim have been written in [C++](http://www.myosim.org) and [MATLAB](https://Campbell-Muscle-Lab.github.io/MATLAB_MyoSim). None of the versions are completely interchangeable. All have strengths and weaknesses. The C++ code is the fastest, but also (by far) the most complicated.
 
 ### Theory
 
