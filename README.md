@@ -7,4 +7,4 @@ The name reflects the:
 + the use of MyoSim as the contraction model
 + the single ventricle form of the model
 
-Documentation can be found in the docs folder and [online](Campbell-Muscle-Lab.github.io/PyMyoVent/index.html)
+Documentation can be found in the docs folder and [online](https://Campbell-Muscle-Lab.github.io/PyMyoVent/index.html)
