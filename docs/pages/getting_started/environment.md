@@ -2,7 +2,7 @@
 
 1. PyMyoVent uses Anaconda for environment management.
 
-1. If you don't know what this means, read our [Anaconda tutorial](anaconda.pdf)
+1. If you don't know what this means, read our [Anaconda tutorial](Anaconda.pdf)
   + Thanks to Dylan Coli for writing this!
   
 1. The *.yml environment file is in:
