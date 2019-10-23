@@ -1,9 +1,7 @@
 ### Run a defined model
 
-1. Open a command prompt
-  + If you don't know how
-    + type cmd in the Search field of your start menu
-    + or Google it to find instructions that work for you
+1. Activate a command prompt using the [PyMyoVent environment](..\environment.html) 
+  + follow the instructions in out [environment tutorial[(..\anaconda.pdf) if you need help
 
 1. Change the directory to the Python_code folder of your repository
    + If you installed PyMyoVent in `c:\users\your_username_here\GitHub\PyMyoVent`  
