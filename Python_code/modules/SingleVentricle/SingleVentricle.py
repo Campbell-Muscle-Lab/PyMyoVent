@@ -7,26 +7,39 @@ from scipy.integrate import solve_ivp
 from scipy.constants import mmHg as mmHg_in_pascals
 
 from modules.MyoSim.half_sarcomere import half_sarcomere as hs
+from modules.SystemControl import system_control as syscon
 
 class single_circulation():
     """Class for a single ventricle circulation"""
 
-    from .display import display_simulation, display_flows, display_pv_loop
-    
+
+
+
 
     def __init__(self, single_circulation_simulation, xml_file_string=None):
+
+        from .implement import return_lv_circumference,return_lv_pressure
         # Pull off stuff
         self.input_xml_file_string = xml_file_string
 
         self.simulation_parameters = \
             single_circulation_simulation.simulation_parameters
 
+        self.baroreflex = \
+            single_circulation_simulation.baroreflex
+
         self.output_parameters = \
             single_circulation_simulation.output_parameters
 
         self.output_buffer_size = \
-            int(single_circulation_simulation.simulation_parameters.
-                no_of_time_points.cdata)
+            int(self.baroreflex.simulation.no_of_time_points.cdata)
+        self.T=\
+            float(self.baroreflex.simulation.basal_heart_period.cdata)
+
+        self.activation_level=0.0
+        #self.output_buffer_size = \
+        #    int(single_circulation_simulation.baroreflex.
+        #        no_of_time_points.cdata)
 
         # Look for perturbations
         self.volume_perturbation = np.zeros(self.output_buffer_size+1)
@@ -40,7 +53,7 @@ class single_circulation():
                     increment
 
         # Look for baroreceptor module
-        if (hasattr(single_circulation_simulation, 'baroreceptor')):
+        """if (hasattr(single_circulation_simulation, 'baroreceptor')):
             self.baroreceptor_active = 1
             baroreceptor_max_memory = \
                 int(single_circulation_simulation.baroreceptor.
@@ -54,7 +67,7 @@ class single_circulation():
                 float(single_circulation_simulation.baroreceptor.
                       hr_gain.cdata)
         else:
-             self.baroreceptor_active= 0
+             self.baroreceptor_active= 0"""
 
         # Look for growth module
         if (hasattr(single_circulation_simulation, 'growth_module')):
@@ -102,7 +115,13 @@ class single_circulation():
                                     self.capillaries_compliance,
                                     self.veins_compliance,
                                     0])
-
+        # Baro
+        self.baro_params = single_circulation_simulation.baroreflex
+        self.baro_scheme = self.baro_params.baro_scheme.cdata
+        self.syscon=syscon.system_control(self.baro_params, self.output_buffer_size)
+        #self.P_tilda=[100.0]
+        #self.delta_Ts=1.0
+        #self.delta_Tv=1.0
         # Pull off the half_sarcomere parameters
         hs_params = single_circulation_simulation.half_sarcomere
         self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
@@ -112,9 +131,10 @@ class single_circulation():
         self.hs.update_simulation(0.0,(slack_hsl - self.hs.hs_length), 0.0)
 
         # Deduce the slack circumference of the ventricle and set that
-        self.lv_circumference = \
-            self.return_lv_circumference(self.ventricle_slack_volume)
-        
+
+        self.lv_circumference =\
+         return_lv_circumference(self,self.ventricle_slack_volume)
+
         print("hsl: %f" % self.hs.hs_length)
         print("slack hsl: %f" % slack_hsl)
         print("slack_lv_circumference %f" % self.lv_circumference)
@@ -130,7 +150,7 @@ class single_circulation():
         self.p = np.zeros(self.no_of_compartments)
         for i in np.arange(0, self.no_of_compartments-1):
             self.p[i] = self.v[i] / self.compliance[i]
-        self.p[-1] = self.return_lv_pressure(self.v[-1])
+        self.p[-1] = return_lv_pressure(self,self.v[-1])
 
         # Create a pandas data structure to store data
         self.sim_time = 0.0
@@ -176,6 +196,7 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'ventricle_wall_volume':
                                       np.zeros(self.output_buffer_size)})
+
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
         self.data.at[0, 'pressure_arteries'] = self.p[1]
@@ -193,287 +214,54 @@ class single_circulation():
 
         self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
 
-    def return_flows(self, v):
-        # returns fluxes between different compartments
-
-        # Calculate pressure in each compartment
-        p = np.zeros(self.no_of_compartments)
-        vi = range(self.no_of_compartments-1)
-        for x in vi:
-            p[x] = v[x] / self.compliance[x]
-        p[-1] = self.return_lv_pressure(v[-1])
-
-        flows = dict()
-
-        flows['ventricle_to_aorta'] = 0.0
-        if (p[-1] > p[0]):
-            flows['ventricle_to_aorta'] = \
-                (p[-1] - p[0]) / self.resistance[0]
-
-        flows['aorta_to_arteries'] = \
-            (p[0] - p[1]) / self.resistance[1]
-
-        flows['arteries_to_arterioles'] = \
-            (p[1] - p[2]) / self.resistance[2]
-
-        flows['arterioles_to_capillaries'] = \
-            (p[2] - p[3]) / self.resistance[3]
-
-        flows['capillaries_to_veins'] = \
-            (p[3] - p[4]) / self.resistance[4]
-
-        flows['veins_to_ventricle'] = 0.0
-        if (p[4] > p[-1]):
-            flows['veins_to_ventricle'] = \
-                (p[4] - p[-1]) / self.resistance[-1]
-
-        return flows
-
-    def derivs(self, t, v):
-        # returns dv, derivative of volume
-        dv = np.zeros(self.no_of_compartments)
-
-        # First deduce flows
-        flows = self.return_flows(v)
-
-        # Different compartments
-        dv[0] = flows['ventricle_to_aorta'] - \
-                flows['aorta_to_arteries']
-
-        dv[1] = flows['aorta_to_arteries'] - \
-                flows['arteries_to_arterioles']
-
-        dv[2] = flows['arteries_to_arterioles'] - \
-                flows['arterioles_to_capillaries']
-
-        dv[3] = flows['arterioles_to_capillaries'] - \
-                flows['capillaries_to_veins']
-
-        dv[4] = flows['capillaries_to_veins'] - \
-                flows['veins_to_ventricle']
-
-        dv[-1] = flows['veins_to_ventricle'] - \
-                flows['ventricle_to_aorta']
-
-        return dv
-
-    def implement_time_step(self, time_step, activation):
-        """ Steps circulatory system forward in time """
-
-        # Update the half-sarcomere
-        self.hs.update_simulation(time_step, 0.0, activation, 1)
-
-        # steps solution forward in time
-        sol = solve_ivp(self.derivs, [0, time_step], self.v)
-        self.v = sol.y[:, -1]
-
-        # Implements the length change on the half-sarcomere
-        new_lv_circumference = self.return_lv_circumference(self.v[-1])
-        delta_hsl = self.hs.hs_length *\
-            ((new_lv_circumference / self.lv_circumference) - 1.0)
-        self.hs.update_simulation(0.0, delta_hsl, 0.0, 1)
-        self.lv_circumference = new_lv_circumference
-
-        # Update the pressures
-        vi = range(self.no_of_compartments-1)
-        for x in vi:
-            self.p[x] = self.v[x] / self.compliance[x]
-        self.p[-1] = self.return_lv_pressure(self.v[-1])
-#        print(self.p)
-
-    def update_data_holders(self, time_step, activation):
-
-        # Update data structure for circulation
-        self.sim_time = self.sim_time + time_step
-        self.data_buffer_index = self.data_buffer_index + 1
-        self.data.at[self.data_buffer_index, 'time'] = self.sim_time
-        self.data.at[self.data_buffer_index, 'pressure_aorta'] = self.p[0]
-        self.data.at[self.data_buffer_index, 'pressure_arteries'] = self.p[1]
-        self.data.at[self.data_buffer_index, 'pressure_arterioles'] = self.p[2]
-        self.data.at[self.data_buffer_index, 'pressure_capillaries'] = self.p[3]
-        self.data.at[self.data_buffer_index, 'pressure_veins'] = self.p[4]
-        self.data.at[self.data_buffer_index, 'pressure_ventricle'] = self.p[-1]
-        self.data.at[self.data_buffer_index, 'volume_aorta'] = self.v[0]
-        self.data.at[self.data_buffer_index, 'volume_arteries'] = self.v[1]
-        self.data.at[self.data_buffer_index, 'volume_arterioles'] = self.v[2]
-        self.data.at[self.data_buffer_index, 'volume_capillaries'] = self.v[3]
-        self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[4]
-        self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[-1]
-
-        flows = self.return_flows(self.v)
-        self.data.at[self.data_buffer_index, 'flow_ventricle_to_aorta'] = \
-            flows['ventricle_to_aorta']
-        self.data.at[self.data_buffer_index, 'flow_aorta_to_arteries'] = \
-            flows['aorta_to_arteries']
-        self.data.at[self.data_buffer_index, 'flow_arteries_to_arterioles'] = \
-            flows['arteries_to_arterioles']
-        self.data.at[self.data_buffer_index,'flow_arterioles_to_capilllaries'] = \
-            flows['arterioles_to_capillaries']
-        self.data.at[self.data_buffer_index, 'flow_capillaries_to_veins'] = \
-            flows['capillaries_to_veins']
-        self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
-            flows['veins_to_ventricle']
-
-        self.data.at[self.data_buffer_index, 'volume_perturbation'] = \
-            self.volume_perturbation[self.data_buffer_index]
-
-        self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] = \
-            self.ventricle_wall_volume
-
-        # Now update data structure for half_sarcomere
-        self.hs.update_data_holder(time_step, activation)
-
-    def return_lv_circumference(self, lv_volume):
-        # 0.001 below is to do with liters to meters conversion
-        if (lv_volume > 0.0):
-            lv_circum = (2.0 * np.pi * 
-                np.power((3 * 0.001 * 
-                         (lv_volume + (self.ventricle_wall_volume / 2.0)) /
-                         (2 * np.pi)) , (1.0 / 3.0)))
-        else:
-            lv_circum = (2.0 * np.pi * 
-                np.power((3 * 0.001 * 
-                         ((self.ventricle_wall_volume / 2.0)) /
-                         (2 * np.pi)) , (1.0 / 3.0)))
-#        print("lv %f vwv %f" % (lv_volume,self.ventricle_wall_volume))
-        return lv_circum
-
-    def return_lv_pressure(self, lv_volume):
-        # Deduce new lv circumference
-        new_lv_circumference = self.return_lv_circumference(lv_volume)
-
-        # Deduce relative change in hsl
-        delta_hsl = self.hs.hs_length * \
-            ((new_lv_circumference / self.lv_circumference) - 1.0)
-
-        # Estimate the force produced at the new length
-        f = self.hs.myof.check_myofilament_forces(delta_hsl)
-        total_force = f['total_force']
-
-#        # Laplaces law says that for a sphere,
-#        # P = 2 * S * w / r, where S is wall stress,
-#        # w is thickness, and r is internal radius
-#        r = np.power((3.0 * 0.001 * lv_volume / (2.0 * np.pi)),(1.0 / 3.0))
-#        w = 0.01
-#        P_in_pascals = 2 * total_force * w / r
-#        P_in_mmHg = P_in_pascals / mmHg_in_pascals
-        # Deduce internal radius
-        internal_r = np.power((3.0 * 0.001 * lv_volume) /
-                              (2.0 * np.pi), (1.0 / 3.0))
-        internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
-        wall_thickness = 0.001 * self.ventricle_wall_volume / internal_area
-        
-        P_in_pascals = 2.0 * total_force * wall_thickness / internal_r
-        P_in_mmHg = P_in_pascals / mmHg_in_pascals
-        
-        return P_in_mmHg
-        
-        
-#        # This equation comes from Slinker and Campbell
-#        if (lv_volume>0):
-#            return (total_force / mmHg_in_pascals) * (-1 +
-#                   np.power((1.0 + (self.ventricle_wall_volume / lv_volume)),(2/3)))
-#        else:
-#            return 0.0
-
 
     def run_simulation(self):
         # Run the simulation
-        from .display import display_simulation, display_flows, display_pv_loop
-
+        from .implement import implement_time_step, update_data_holders
+        from .display import display_simulation, display_flows, display_pv_loop,display_baro_results
+        #baro_params = single_circulation_simulation.baroreflex
         # Set up some values for the simulation
         no_of_time_points = \
-            int(self.simulation_parameters.no_of_time_points.cdata)
-        dt = float(self.simulation_parameters.time_step.cdata)
-        activation_frequency = \
-            float(self.simulation_parameters.activation_frequency.cdata)
-        activation_duty_ratio = \
-            float(self.simulation_parameters.duty_ratio.cdata)
-        t = dt*np.arange(1, no_of_time_points+1)
+            int(self.baro_params.simulation.no_of_time_points.cdata)
 
-        # Branch depending on whether we are in baroreceptor mode
-        if (self.baroreceptor_active):
-            # Baroreceptor
-            baroreceptor_inter_act_counter = \
-                (1.0 - activation_duty_ratio)*(1.0 / (activation_frequency * dt))
-            baroreceptor_act_counter = (activation_duty_ratio * (1.0 / dt))
-            baroreceptor_counter = baroreceptor_inter_act_counter
-            activation_level = 0
-        else:
-            # No baroreceptor so create an activation profile that
-            # predefines the stimulus
-            predefined_activation_level = \
-                0.5*(1+signal.square(np.pi+2*np.pi*activation_frequency*t,
-                                     duty=activation_duty_ratio))
+        dt = float(self.baro_params.simulation.time_step.cdata)
+
+        #activation_frequency = \
+        #    float(self.baro_params.activation.activation_frequency.cdata)
+
+        activation_duty_ratio = \
+            float(self.baro_params.simulation.duty_ratio.cdata)
+
+        t = dt*np.arange(1, no_of_time_points+1)
 
         # Run the simulation
         for i in np.arange(np.size(t)):
-            
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
+            if 50<=(100*i/np.size(t))and (100*i/np.size(t))<=70:
+                #self.v[-2] = 1.01*self.v[-2]
+                self.v[-2] = 0.9998*self.v[-2]
 
-            if (self.baroreceptor_active == 1):
-                # Baroreceptor mode
-                # Slide the pressure array across
-                self.baroreceptor_pressure_array = \
-                    np.roll(self.baroreceptor_pressure_array,1)
-                # Add in current aortic pressure
-                self.baroreceptor_pressure_array[0] = self.p[0]
-
-                # Decrement the counter
-                baroreceptor_counter = baroreceptor_counter - 1
-
-                # Initiate activation if appropriate
-                if (baroreceptor_counter <= 0):
-                    activation_level = 1.0
-                
-                # End activation if appropriate, and adjust for next beat
-                if (baroreceptor_counter <= -baroreceptor_act_counter):
-                    
-                    # End activation
-                    activation_level = 0.0
-
-                    # Deduce pressure error
-                    temp_p = self.baroreceptor_pressure_array[
-                            0:int(baroreceptor_inter_act_counter+
-                                  baroreceptor_act_counter-1)]
-                    pressure_error = \
-                        (temp_p.mean() - self.baroreceptor_target_aorta_pressure)
-                        
-                    # if error is negative, hr should speed up, so interact down
-                    baroreceptor_inter_act_counter = \
-                        (baroreceptor_inter_act_counter + 
-                        (self.baroreceptor_hr_gain * pressure_error))
-                    
-                    if (baroreceptor_inter_act_counter < (0.25 / dt)):
-                        baroreceptor_inter_act_counter = (0.25 / dt)
-                    
-                    baroreceptor_counter = baroreceptor_inter_act_counter
-
-                    # Update display
-                    print("Mean aortic pressure: %.0f Error: %.0f Heart-rate: %.2f" %
-                          (temp_p.mean(), pressure_error, 
-                          (1.0 / (dt*(baroreceptor_inter_act_counter + baroreceptor_act_counter)))))
-            else:
-                # Predefined
-                activation_level = predefined_activation_level[i]
+                #self.compliance[1]=0.5*self.compliance[1]
+            activation_level=self.syscon.return_activation()
 
             # Display
             if ( (i % 200) == 0):
                 print("Blood volume: %.3g, %.0f %% complete" %
                       (np.sum(self.v), (100*i/np.size(t))))
 
-            self.implement_time_step(dt, activation_level)
-            self.update_data_holders(dt, activation_level)
-            
+            implement_time_step(self, dt, activation_level,i)
+            update_data_holders(self, dt, activation_level)
+
             if (i==50000):
                 self.baroreceptor_target_aorta_pressure = 80
-            
+
             if (i==70000):
                 self.baroreceptor_target_aorta_pressure = 120
 
         # Concatenate data structures
-        self.data = pd.concat([self.data, self.hs.hs_data], axis=1)
+        self.data = pd.concat([self.data, self.hs.hs_data, self.syscon.sys_data], axis=1)
+        #self.data = pd.concat([self.data, self.syscon.sys_data], axis)
 
         # Make plots
         # Circulation
@@ -483,6 +271,9 @@ class single_circulation():
                       self.output_parameters.flows_figure.cdata)
         display_pv_loop(self.data,
                         self.output_parameters.pv_figure.cdata)
+        if(hasattr(self.data,'heart_period')):
+            display_baro_results(self.data,
+                            self.output_parameters.heart_period.cdata)
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
@@ -494,18 +285,18 @@ class single_circulation():
             wb = Workbook()
             ws_parameters = wb.active
             ws_parameters.title = 'Simulation parameters'
-    
+
             tree = etree.parse(self.input_xml_file_string)
             root = tree.getroot()
-    
+
             def build_xml_string(input_object, current_string, indent):
-                
+
                 def indent_string(indent):
                     ind_string = ""
                     for i in np.arange(0,indent):
                         ind_string = ("%s    " % ind_string)
                     return ind_string
-                
+
                 for child in input_object:
                     current_string = ("%s\n%s<%s>" %
                                       (current_string, indent_string(indent), child.tag))
@@ -521,23 +312,23 @@ class single_circulation():
                         current_string = ("%s\n%s</%s>" %
                                           (current_string, indent_string(indent), child.tag))
                 return current_string
-    
+
             xml_string = build_xml_string(root,"",0)
-    
-            
+
+
             if (self.input_xml_file_string):
                 f = open(self.input_xml_file_string, mode='r')
                 input_xml = f.read()
                 f.close
                 ws_parameters['A1'] = input_xml
             wb.save(self.output_parameters.data_file.cdata)
-    
+
             # Append data as a new sheet
             append_df_to_excel(self.output_parameters.data_file.cdata,self.data,
                                sheet_name='Data')
 
 def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
-                       truncate_sheet=False, 
+                       truncate_sheet=False,
                        **to_excel_kwargs):
     """
     Append a DataFrame [df] to existing Excel file [filename]
@@ -570,7 +361,7 @@ def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
 
     writer = pd.ExcelWriter(filename, engine='openpyxl')
 
-    # Python 2.x: define [FileNotFoundError] exception if it doesn't exist 
+    # Python 2.x: define [FileNotFoundError] exception if it doesn't exist
     try:
         FileNotFoundError
     except NameError:
