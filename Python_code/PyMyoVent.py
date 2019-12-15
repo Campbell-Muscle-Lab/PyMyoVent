@@ -19,11 +19,11 @@ if __name__ == "__main__":
     # Switch depending on number of arguments
     if (no_of_arguments == 1):
         print('PyMyoVent called with no inputs')
-    
+
     if (no_of_arguments == 2):
         if (sys.argv[1] == 'run_default_model'):
             print('Running default model')
-            run_simulation_from_xml_file('..\demo_files\demo_1\demo_1_model.xml')
+            run_simulation_from_xml_file('../demo_files/demo_1/demo_1_model.xml')
 
     if (no_of_arguments == 3):
         if (sys.argv[1] == 'run_defined_model'):
