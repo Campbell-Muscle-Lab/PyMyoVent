@@ -37,6 +37,7 @@ class system_control():
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.counter_systole = int(self.T_systole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
+            self.contractility_counter = self.counter_diastole
             self.activation_level=0.0
 
             # afferent pathway (baroreceptor control)
@@ -63,6 +64,7 @@ class system_control():
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.counter_systole = int(self.T_systole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
+            self.T_counter = self.counter_diastole
             self.activation_level=0.0
 
             #Afferent pathway
@@ -72,7 +74,7 @@ class system_control():
             self.f_max=float(baroreflex.afferent.f_max.cdata)
             self.P_n=float(baroreflex.afferent.P_n.cdata)
             self.k_a=float(baroreflex.afferent.k_a.cdata)
-            self.P_tilda=100.0
+            self.P_tilda=[0.0]
 
             #Effernet sympathetic pathway
             self.f_es_inf=float(baroreflex.efferent_sym.f_es_inf.cdata)
@@ -118,6 +120,11 @@ class system_control():
             self.tau_Tv=float(baroreflex.regulation_vagal.tau_Tv.cdata)
             self.delta_Tv=0.0
 
+            self.delta_E=0
+            self.delta_L=0
+            self.delta_k3=0
+            self.delta_kcb=0
+            self.delta_k_force=0
 
             #Initial condition for heart period change
             self.delta_Ti=[self.delta_Ts,self.delta_Tv]

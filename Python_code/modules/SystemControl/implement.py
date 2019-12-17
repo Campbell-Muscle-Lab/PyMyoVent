@@ -7,20 +7,19 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
 
     if (self.baro_scheme == "simple_model"):
         # baroreceptor control
-        self.bc = self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope))\
+        self.bc = self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope)\
             /(1+exp((arterial_pressure-self.P_n)/self.slope))
-
 
     if (self.baro_scheme=="Ursino_1998"):
 
         #print('arterial_pressure_rate',arterial_pressure_rate)
-        def P_tilda_derive(y,t):
+        def P_tilda_deriv(y,t):
             dy=np.zeros(1)
             dy[0]=1/self.tau_p*(arterial_pressure+self.tau_z*arterial_pressure_rate-self.P_tilda)
             return dy
             #determine the output variable of the linear dynamic block
             #print('self.P_tilda',self.P_tilda)
-        sol=solve_ivp(P_tilda_derive,[0,time_step],[self.P_tilda])#self.P_tilda)
+        sol=solve_ivp(P_tilda_deriv,[0,time_step],self.P_tilda)
         self.P_tilda=sol.y[:,-1]
 
         #determine the frequency of spikes in the affetent pathway
@@ -39,27 +38,31 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
         #return self.P_tilda,self.f_cs,self.f_es,self.f_es_min,self.f_ev
 def return_heart_period(self,time_step,i):
 
-    if self.baro_scheme == "simple_model"):
+    if (self.baro_scheme == "simple_model"):
         self.return_heart_period_control(self,time_step,i)
-        self.baroreceptor_counter -= 1
-        if (self.baroreceptor_counter <= -self.counter_systole):
+        self.T_counter -= 1
+        if (self.T_counterr <= -self.counter_systole):
             self.T=self.T_prime
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
-            self.baroreceptor_counter = self.counter_diastole
-    if self.baro_scheme == "Ursino_1998"):
-        self.return_heart_period_control(self,time_step,i)
-        self.baroreceptor_counter -= 1
-        if (self.baroreceptor_counter <= -self.counter_systole):
+            self.T_counter = self.counter_diastole
+    if (self.baro_scheme == "Ursino_1998"):
+        return_heart_period_control(self,time_step,i)
+        self.T_counter -= 1
+        if (self.T_counter <= -self.counter_systole):
             self.T=self.T_prime
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
-            self.baroreceptor_counter = self.counter_diastole
+            self.T_counter = self.counter_diastole
 
-def return_contractility(self,time_step,i):
-    if self.baro_scheme == "Ursino_1998"):
-        self.return_contractility_control(self,time_step,i)
-        self.baroreceptor_counter -= 1
+#def return_contractility(self,time_step,i):
+#        self.return_contractility_control(self,time_step,i)
+#        self.contractility_counter -= 1
+#        if (self.baroreceptor_counter <= -self.counter_systole):
+#            jj
+
+
+
 def return_heart_period_control(self,time_step,i):
 
     if (self.baro_scheme == "simple_model"):
@@ -94,7 +97,7 @@ def return_heart_period_control(self,time_step,i):
         sigma_Tv=self.G_Tv*self.f_ev[i-delay_Tv]
 
         #determine the heart rate change due to sympathetic and vagal activities
-        def delta_T_derives(y,t):
+        def delta_T_derivs(y,t):
 
             delta_T=np.zeros(2)
             #delta_Ts_deriv
@@ -103,17 +106,17 @@ def return_heart_period_control(self,time_step,i):
             delta_T[1]=1/self.tau_Tv*(sigma_Tv-self.delta_Tv)
             return delta_T
 
-        sol=solve_ivp(delta_T_derives,[0,time_step], [self.delta_Ts,self.delta_Tv])
+        sol=solve_ivp(delta_T_derivs,[0,time_step], [self.delta_Ts,self.delta_Tv])
         self.y=sol.y[:,-1]
         #print(self.y)
         self.delta_Ts=self.y[0]
         self.delta_Tv=self.y[1]
 
-        self.T_prime=self.delta_Ts+self.delta_Tv+self.T_prime
+        self.T_prime=self.delta_Ts+self.delta_Tv+self.T0
 
     return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
 
-def return_contractility_control(self,time_step,i):
+def return_contractility(self,time_step,i):
 
     if (self.baro_scheme == "simple_model"):
         def derivs(y,t):
@@ -147,28 +150,32 @@ def return_contractility_control(self,time_step,i):
         #determine the elastance rate change due to sympathetic
         def derivs(y,t):
             delta=np.zeros(5)
-            delta[0]=1/self.tau_E*(sigma_E-y)
-            delta[1]=1/self.tau_L*(sigma_L_factor-y)
-            delta[2]=1/self.tau_k3*(sigma_k_3_factor-y)
-            delta[3]=1/self.tau_kcb*(sigma_k_cb_factor-y)
-            delta[4]=1/self.tau_k_force*(sigma_k_force_factor-y)
+            delta[0]=1/self.tau_E*(sigma_E-self.delta_E)
+            delta[1]=1/self.tau_L*(sigma_L_factor-self.delta_L)
+            delta[2]=1/self.tau_k3*(sigma_k_3_factor-self.delta_k3)
+            delta[3]=1/self.tau_kcb*(sigma_k_cb_factor-self.delta_kcb)
+            delta[4]=1/self.tau_k_force*(sigma_k_force_factor-self.delta_k_force)
             return delta
         initial_values=np.zeros(5)
         initial_values[0]=self.delta_E0
+        initial_values[1]=self.delta_L
+        initial_values[2]=self.delta_k3
+        initial_values[3]=self.delta_kcb
+        initial_values[4]=self.delta_k_force
         sol=solve_ivp(derivs,[0,time_step], initial_values)
         y=sol.y[:,-1]
-        delta_E=y[0]
-        delta_L=y[1]
-        delta_k3=y[2]
-        delta_kcb=y[3]
-        delta_k_force=y[4]
+        self.delta_E=y[0]
+        self.delta_L=y[1]
+        self.delta_k3=y[2]
+        self.delta_kcb=y[3]
+        self.delta_k_force=y[4]
 
         #print('delta_E',delta_E)
-        E=delta_E+self.E_0
-        self.L_scale_factor=delta_L+1
-        self.k_3_scale_factor=delta_k3+1
-        self.k_cb_scale_factor=delta_kcb+1
-        self.k_force_scale_factor=delta_k_force+1
+        E=self.delta_E+self.E_0
+        self.L_scale_factor=self.delta_L+1
+        self.k_3_scale_factor=self.delta_k3+1
+        self.k_cb_scale_factor=self.delta_kcb+1
+        self.k_force_scale_factor=self.delta_k_force+1
 
     return self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
 
@@ -200,7 +207,7 @@ def update_data_holder(self,time_step):
     self.sys_time = self.sys_time + time_step
     self.data_buffer_index += 1
 
-    self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T_prime
+    self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T
     self.sys_data.at[self.data_buffer_index, 'T_prime']=self.T_prime
     self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
     self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
