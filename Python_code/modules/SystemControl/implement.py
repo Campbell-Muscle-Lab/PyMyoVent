@@ -5,7 +5,7 @@ from scipy import signal
 
 def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,i):
 
-    if (self.baro_scheme == "simple_model"):
+    if (self.baro_scheme == "simple_baroreceptor"):
         # baroreceptor control
         self.bc = np.append(self.bc,\
          self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope)\
@@ -39,10 +39,10 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
         #return self.P_tilda,self.f_cs,self.f_es,self.f_es_min,self.f_ev
 def return_heart_period(self,time_step,i):
 
-    if (self.baro_scheme == "simple_model"):
+    if (self.baro_scheme == "simple_baroreceptor"):
         return_heart_period_control(self,time_step,i)
         self.T_counter -= 1
-        if (self.T_counterr <= -self.counter_systole):
+        if (self.T_counter <= -self.counter_systole):
             self.T=self.T_prime
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
@@ -60,20 +60,20 @@ def return_heart_period(self,time_step,i):
 
 def return_heart_period_control(self,time_step,i):
 
-    if (self.baro_scheme == "simple_model"):
+    if (self.baro_scheme == "simple_baroreceptor"):
         #time delay
         if i < self.D_T:
             self.delay_T = int(0)
         else:
             self.delay_T = self.D_T
         def derivs(y,t):
-            delta_T_prime=np.zeros(0)
+            delta_T_prime=np.zeros(1)
             delta_T_prime[0] = self.G_T*(self.bc[i-self.delay_T]-self.bc_mid)
             return delta_T_prime
 
         sol = solve_ivp(derivs,[0,time_step],self.delta_T_prime)
         self.delta_T_prime=sol.y[:,-1]
-        self.T_prime=self.T_prime+self.delta_T_prime
+        self.T_prime=self.T0+self.delta_T_prime
 
     if (self.baro_scheme=="Ursino_1998"):
         #determine the outputs of static characteristics (steady-state changes)
@@ -114,11 +114,11 @@ def return_heart_period_control(self,time_step,i):
 
         self.T_prime=self.delta_Ts+self.delta_Tv+self.T0
 
-    return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
+        return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
 
 def return_contractility(self,time_step,i):
 
-    if (self.baro_scheme == "simple_model"):
+    if (self.baro_scheme == "simple_baroreceptor"):
         #time delay
         if i < self.D_k1:
             self.delay_k1 = int(0)
@@ -131,7 +131,7 @@ def return_contractility(self,time_step,i):
             self.delay_k3 = self.D_k3
 
         def derivs(y,t):
-            delta=np.zeros(0)
+            delta=np.zeros(2)
             # delta k1
             delta[0] = self.G_k1*(self.bc[i-self.delay_k1]-self.bc_mid)
             # delta k3
@@ -144,8 +144,8 @@ def return_contractility(self,time_step,i):
         y=sol.y[:,-1]
         self.delta_k1=y[0]
         self.delta_k3=y[1]
-        self.k1=self.k1+self.delta_k1
-        self.k3=self.k3+self.delta_k3
+        self.k1=self.k1_0+self.delta_k1
+        self.k3=self.k3_0+self.delta_k3
 
     if (self.baro_scheme=="Ursino_1998"):
         #determine the outputs of static characteristics (steady-state changes)
@@ -213,11 +213,12 @@ def update_data_holder(self,time_step):
         self.data_buffer_index += 1
         self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T
         self.sys_data.at[self.data_buffer_index, 'T_prime']=self.T_prime
-        self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
-        self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
         self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
 
+        if (self.baro_scheme == "Ursino_1998"):
+            self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
+            self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
     #self.sys_data.at[self.data_buffer_index, 'L_scale_factor'] = self.L_scale_factor
     #self.sys_data.at[self.data_buffer_index, 'k_3_scale_factor'] = self.k_3_scale_factor
     #self.sys_data.at[self.data_buffer_index, 'k_cb_scale_factor'] = self.k_cb_scale_factor

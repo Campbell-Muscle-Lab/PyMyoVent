@@ -28,7 +28,7 @@ class system_control():
             self.activation_counter=int(0)
             self.sys_data = pd.DataFrame({})
 
-        if (self.baro_scheme == "simple_model"):
+        if (self.baro_scheme == "simple_baroreceptor"):
             #Activation function
             self.T_systole = float(baroreflex.simulation.duration_of_systole.cdata)
             self.T_diastole = self.T-self.T_systole
@@ -41,16 +41,17 @@ class system_control():
 
             # afferent pathway (baroreceptor control)
             self.bc = np.array([])
-            self.bc_max = float(baroreflex.afferent.y_max.cdata)
-            self.bc_min =  float(baroreflex.afferent.y_min.cdata)
+            self.bc_max = float(baroreflex.afferent.bc_max.cdata)
+            self.bc_min =  float(baroreflex.afferent.bc_min.cdata)
             self.bc_mid = float((self.bc_max+self.bc_min)/2)
-            self.slope = float(baroreflex.slope.cdata)
-            self.P_n = float(baroreflex.P_n.cdata)
+            self.slope = float(baroreflex.afferent.slope.cdata)
+            self.P_n = float(baroreflex.afferent.P_n.cdata)
 
             #efferent pathway (regulation)
                 #heart period
             self.T_prime = self.T
-            self.delta_T_prime = 0.0
+            self.T0 = self.T
+            self.delta_T_prime = [0.0]
             self.G_T = float(baroreflex.regulation.heart_period.G_T.cdata)
             D_T_in_second = float(baroreflex.regulation.heart_period.D_T.cdata)
             self.D_T = int(D_T_in_second / self.dt)
@@ -58,6 +59,7 @@ class system_control():
                 #contractility
                     #k_1
             self.k1 = float(baroreflex.regulation.k_1.k1.cdata)
+            self.k1_0 = self.k1
             self.G_k1 = float(baroreflex.regulation.k_1.G_k1.cdata)
             D_k1_in_second = float(baroreflex.regulation.k_1.D_k1.cdata)
             self.D_k1 = int(D_k1_in_second / self.dt)
@@ -65,6 +67,7 @@ class system_control():
             self.delta_k1=0.0
                     #k_3
             self.k3 = float(baroreflex.regulation.k_3.k3.cdata)
+            self.k3_0 = self.k3
             self.G_k3 = float(baroreflex.regulation.k_3.G_k3.cdata)
             D_k3_in_second = float(baroreflex.regulation.k_3.D_k3.cdata)
             self.D_k3 = int(D_k3_in_second / self.dt)
@@ -144,6 +147,9 @@ class system_control():
             self.tau_Tv = float(baroreflex.regulation_vagal.tau_Tv.cdata)
             self.delta_Tv = 0.0
 
+
+        if self.baro_scheme == "Ursino_1998" or self.baro_scheme == "simple_baroreceptor":
+            # data
             self.data_buffer_size = data_buffer_size
             self.sys_time = 0.0
             self.data_buffer_index = 0
