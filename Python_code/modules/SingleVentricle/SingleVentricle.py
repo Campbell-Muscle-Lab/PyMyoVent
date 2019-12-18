@@ -12,18 +12,11 @@ from modules.SystemControl import system_control as syscon
 class single_circulation():
     """Class for a single ventricle circulation"""
 
-
-
-
-
     def __init__(self, single_circulation_simulation, xml_file_string=None):
 
         from .implement import return_lv_circumference,return_lv_pressure
         # Pull off stuff
         self.input_xml_file_string = xml_file_string
-
-        self.simulation_parameters = \
-            single_circulation_simulation.simulation_parameters
 
         self.baroreflex = \
             single_circulation_simulation.baroreflex
@@ -238,9 +231,9 @@ class single_circulation():
         for i in np.arange(np.size(t)):
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
-            if 50<=(100*i/np.size(t))and (100*i/np.size(t))<=70:
+            #if 50<=(100*i/np.size(t))and (100*i/np.size(t))<=60:
                 #self.v[-2] = 1.01*self.v[-2]
-                self.v[-2] = 0.9998*self.v[-2]
+            #    self.v[-2] = 0.9998*self.v[-2]
 
                 #self.compliance[1]=0.5*self.compliance[1]
             activation_level=self.syscon.return_activation()
