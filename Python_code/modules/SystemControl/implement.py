@@ -7,8 +7,9 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
 
     if (self.baro_scheme == "simple_model"):
         # baroreceptor control
-        self.bc = self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope)\
-            /(1+exp((arterial_pressure-self.P_n)/self.slope))
+        self.bc = np.append(self.bc,\
+         self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope)\
+            /(1+exp((arterial_pressure-self.P_n)/self.slope)))
 
     if (self.baro_scheme=="Ursino_1998"):
 
@@ -39,7 +40,7 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
 def return_heart_period(self,time_step,i):
 
     if (self.baro_scheme == "simple_model"):
-        self.return_heart_period_control(self,time_step,i)
+        return_heart_period_control(self,time_step,i)
         self.T_counter -= 1
         if (self.T_counterr <= -self.counter_systole):
             self.T=self.T_prime
@@ -55,20 +56,19 @@ def return_heart_period(self,time_step,i):
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.T_counter = self.counter_diastole
 
-#def return_contractility(self,time_step,i):
-#        self.return_contractility_control(self,time_step,i)
-#        self.contractility_counter -= 1
-#        if (self.baroreceptor_counter <= -self.counter_systole):
-#            jj
-
 
 
 def return_heart_period_control(self,time_step,i):
 
     if (self.baro_scheme == "simple_model"):
+        #time delay
+        if i < self.D_T:
+            self.delay_T = int(0)
+        else:
+            self.delay_T = self.D_T
         def derivs(y,t):
             delta_T_prime=np.zeros(0)
-            delta_T_prime[0] = self.G_T*(self.bc-self.bc)
+            delta_T_prime[0] = self.G_T*(self.bc[i-self.delay_T]-self.bc_mid)
             return delta_T_prime
 
         sol = solve_ivp(derivs,[0,time_step],self.delta_T_prime)
@@ -105,8 +105,8 @@ def return_heart_period_control(self,time_step,i):
             #delta_Tv_deriv
             delta_T[1]=1/self.tau_Tv*(sigma_Tv-self.delta_Tv)
             return delta_T
-
-        sol=solve_ivp(delta_T_derivs,[0,time_step], [self.delta_Ts,self.delta_Tv])
+        initial_condition = [self.delta_Ts,self.delta_Tv]
+        sol=solve_ivp(delta_T_derivs,[0,time_step],initial_condition)
         self.y=sol.y[:,-1]
         #print(self.y)
         self.delta_Ts=self.y[0]
@@ -119,68 +119,71 @@ def return_heart_period_control(self,time_step,i):
 def return_contractility(self,time_step,i):
 
     if (self.baro_scheme == "simple_model"):
-        def derivs(y,t):
-            delta_c_prime=np.zeros(0)
-            delta_c_prime[0] = self.G_k1*(self.bc-self.bc)
-            return delta_c_prime
+        #time delay
+        if i < self.D_k1:
+            self.delay_k1 = int(0)
+        else:
+            self.delay_k1 = self.D_k1
 
-        sol = solve_ivp(derivs,[0,time_step],self.delta_c_prime)
-        self.delta_c_prime=sol.y[:,-1]
-        self.c_prime=self.c_prime+self.delta_c_prime
+        if i < self.D_k3:
+            self.delay_k3 = int(0)
+        else:
+            self.delay_k3 = self.D_k3
+
+        def derivs(y,t):
+            delta=np.zeros(0)
+            # delta k1
+            delta[0] = self.G_k1*(self.bc[i-self.delay_k1]-self.bc_mid)
+            # delta k3
+            delta[1] = self.G_k3*(self.bc[i-self.delay_k3]-self.bc_mid)
+            return delta
+        initial_values=np.zeros(2)
+        initial_values[0]=self.delta_k1
+        initial_values[1]=self.delta_k3
+        sol = solve_ivp(derivs,[0,time_step],initial_values)
+        y=sol.y[:,-1]
+        self.delta_k1=y[0]
+        self.delta_k3=y[1]
+        self.k1=self.k1+self.delta_k1
+        self.k3=self.k3+self.delta_k3
 
     if (self.baro_scheme=="Ursino_1998"):
-        #update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate)
         #determine the outputs of static characteristics (steady-state changes)
-        if i<self.D_E:
-            delay_E=int(0)
+        if i<self.D_k1:
+            delay_k1=int(0)
         else:
-            delay_E=self.D_E
+            delay_k1=self.D_k1
+
+        if i<self.D_k3:
+            delay_k3=int(0)
+        else:
+            delay_k3=self.D_k3
+
         if self.f_es[i] >= self.f_es_min:
-            sigma_E=self.G_E*log(self.f_es[i-delay_E]-self.f_es_min+1)
-            sigma_L_factor=self.G_L*log(self.f_es[i]-self.f_es_min+1)
-            sigma_k_3_factor=self.G_k3*log(self.f_es[i]-self.f_es_min+1)
-            sigma_k_cb_factor=self.G_kcb*log(self.f_es[i]-self.f_es_min+1)
-            sigma_k_force_factor=self.G_k_force*log(self.f_es[i]-self.f_es_min+1)
+            sigma_k1=self.G_k1*log(self.f_es[i-delay_k1]-self.f_es_min+1)
+            sigma_k3=self.G_k3*log(self.f_es[i-delay_k3]-self.f_es_min+1)
         else:
-            sigma_E=0.0
-            sigma_L_factor=0
-            sigma_k_3_factor=0
-            sigma_k_cb_factor=0
-            sigma_k_force_factor=0
+            sigma_k1=0
+            sigma_k3=0
         #determine the elastance rate change due to sympathetic
         def derivs(y,t):
-            delta=np.zeros(5)
-            delta[0]=1/self.tau_E*(sigma_E-self.delta_E)
-            delta[1]=1/self.tau_L*(sigma_L_factor-self.delta_L)
-            delta[2]=1/self.tau_k3*(sigma_k_3_factor-self.delta_k3)
-            delta[3]=1/self.tau_kcb*(sigma_k_cb_factor-self.delta_kcb)
-            delta[4]=1/self.tau_k_force*(sigma_k_force_factor-self.delta_k_force)
+            delta=np.zeros(2)
+            delta[0]=1/self.tau_k1*(sigma_k1-self.delta_k1)
+            delta[1]=1/self.tau_k3*(sigma_k3-self.delta_k3)
             return delta
-        initial_values=np.zeros(5)
-        initial_values[0]=self.delta_E0
-        initial_values[1]=self.delta_L
-        initial_values[2]=self.delta_k3
-        initial_values[3]=self.delta_kcb
-        initial_values[4]=self.delta_k_force
-        sol=solve_ivp(derivs,[0,time_step], initial_values)
+        initial_condition=[self.delta_k1,self.delta_k3]
+        sol=solve_ivp(derivs,[0,time_step], initial_condition)
         y=sol.y[:,-1]
-        self.delta_E=y[0]
-        self.delta_L=y[1]
-        self.delta_k3=y[2]
-        self.delta_kcb=y[3]
-        self.delta_k_force=y[4]
+        self.delta_k1=y[0]
+        self.delta_k3=y[1]
 
-        #print('delta_E',delta_E)
-        E=self.delta_E+self.E_0
-        self.L_scale_factor=self.delta_L+1
-        self.k_3_scale_factor=self.delta_k3+1
-        self.k_cb_scale_factor=self.delta_kcb+1
-        self.k_force_scale_factor=self.delta_k_force+1
+        self.k1 = self.delta_k1 + self.k1_0
+        self.k3 = self.delta_k3 + self.k3_0
 
-    return self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
+    return self.k1,self.k3 #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
 
 def return_activation(self):
-    if (self.baro_scheme=="fixed_heart_rate"):
+    if (self.baro_scheme == "fixed_heart_rate"):
         #print('fixed heart rate is activated')
         predefined_activation_level =\
             0.5*(1+signal.square(np.pi+2*np.pi*self.activation_frequency*self.t,
@@ -189,7 +192,7 @@ def return_activation(self):
         self.activation_counter += 1
         return self.activation_level
 
-    if (self.baro_scheme=="Ursino_1998"):
+    if (self.baro_scheme != "fixed_heart_rate"):
 
         self.baroreceptor_counter -= 1
         if (self.baroreceptor_counter <= 0):
@@ -204,20 +207,24 @@ def return_activation(self):
 def update_data_holder(self,time_step):
 
     # Update data struct for system-control
-    self.sys_time = self.sys_time + time_step
-    self.data_buffer_index += 1
 
-    self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T
-    self.sys_data.at[self.data_buffer_index, 'T_prime']=self.T_prime
-    self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
-    self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
+    if (self.baro_scheme !="fixed_heart_rate"):
+        self.sys_time = self.sys_time + time_step
+        self.data_buffer_index += 1
+        self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T
+        self.sys_data.at[self.data_buffer_index, 'T_prime']=self.T_prime
+        self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
+        self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
+        self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
+        self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
+
+    #self.sys_data.at[self.data_buffer_index, 'L_scale_factor'] = self.L_scale_factor
+    #self.sys_data.at[self.data_buffer_index, 'k_3_scale_factor'] = self.k_3_scale_factor
+    #self.sys_data.at[self.data_buffer_index, 'k_cb_scale_factor'] = self.k_cb_scale_factor
+    #self.sys_data.at[self.data_buffer_index, 'k_force_scale_factor'] = self.k_force_scale_factor
 #    self.sys_data.at[self.data_buffer_index, 'f_es'] = self.f_es[-1]
 #    self.sys_data.at[self.data_buffer_index, 'f_es_min'] = self.f_es_min
 #    self.sys_data.at[self.data_buffer_index, 'f_ev'] = self.f_ev[-1]
 #    self.sys_data.at[self.data_buffer_index, 'delta_Ts'] = self.delta_Ts
 #    self.sys_data.at[self.data_buffer_index, 'delta_Tv'] = self.delta_Tv
 #    self.sys_data.at[self.data_buffer_index, 'LV_elastance'] = self.E
-    self.sys_data.at[self.data_buffer_index, 'L_scale_factor'] = self.L_scale_factor
-    self.sys_data.at[self.data_buffer_index, 'k_3_scale_factor'] = self.k_3_scale_factor
-    self.sys_data.at[self.data_buffer_index, 'k_cb_scale_factor'] = self.k_cb_scale_factor
-    self.sys_data.at[self.data_buffer_index, 'k_force_scale_factor'] = self.k_force_scale_factor
