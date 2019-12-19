@@ -15,6 +15,8 @@ class system_control():
         self.baro_scheme = baroreflex.baro_scheme.cdata
 
         self.T=float(baroreflex.simulation.basal_heart_period.cdata)
+        self.activation_duty_ratio = \
+        float(baroreflex.simulation.duty_ratio.cdata)
         self.dt = float(baroreflex.simulation.time_step.cdata)
 
         if (self.baro_scheme == "fixed_heart_rate"):
@@ -30,7 +32,7 @@ class system_control():
 
         if (self.baro_scheme == "simple_baroreceptor"):
             #Activation function
-            self.T_systole = float(baroreflex.simulation.duration_of_systole.cdata)
+            self.T_systole = self.activation_duty_ratio * self.T
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.counter_systole = int(self.T_systole/self.dt)
@@ -148,7 +150,8 @@ class system_control():
             self.delta_Tv = 0.0
 
 
-        if self.baro_scheme == "Ursino_1998" or self.baro_scheme == "simple_baroreceptor":
+        if self.baro_scheme == "Ursino_1998" or \
+            self.baro_scheme == "simple_baroreceptor":
             # data
             self.data_buffer_size = data_buffer_size
             self.sys_time = 0.0
@@ -160,6 +163,8 @@ class system_control():
                                           'P_tilda':
                                               np.zeros(self.data_buffer_size),
                                           'f_cs':
+                                              np.zeros(self.data_buffer_size),
+                                          'baroreceptor_output':
                                               np.zeros(self.data_buffer_size),
     #                                      'f_es':
     #                                          np.zeros(self.data_buffer_size),
@@ -189,6 +194,7 @@ class system_control():
             self.sys_data.at[0, 'T_prime'] = self.T
             self.sys_data.at[0, 'P_tilda'] = 0
             self.sys_data.at[0, 'f_cs'] = 0
+            self.sys_data.at[0, 'baroreceptor_output'] = 0
             self.sys_data.at[0, 'k_1'] = self.k1
             self.sys_data.at[0, 'k_3'] = self.k3
             #self.sys_data.at[0, 'L_scale_factor'] = 1

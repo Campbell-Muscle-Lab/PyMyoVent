@@ -8,8 +8,8 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
     if (self.baro_scheme == "simple_baroreceptor"):
         # baroreceptor control
         self.bc = np.append(self.bc,\
-         self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope)\
-            /(1+exp((arterial_pressure-self.P_n)/self.slope)))
+         ((self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope))\
+            /(1+exp((arterial_pressure-self.P_n)/self.slope))))
 
     if (self.baro_scheme=="Ursino_1998"):
 
@@ -192,13 +192,13 @@ def return_activation(self):
         self.activation_counter += 1
         return self.activation_level
 
-    if (self.baro_scheme != "fixed_heart_rate"):
-
+    else:
         self.baroreceptor_counter -= 1
         if (self.baroreceptor_counter <= 0):
             self.activation_level = 1.0
         if (self.baroreceptor_counter <= -self.counter_systole):
             self.activation_level = 0.0
+            self.T_systole = self.activation_duty_ratio * self.T
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
@@ -215,6 +215,10 @@ def update_data_holder(self,time_step):
         self.sys_data.at[self.data_buffer_index, 'T_prime']=self.T_prime
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
         self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
+
+        if (self.baro_scheme == "simple_baroreceptor"):
+            self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']\
+             = self.bc[-1]
 
         if (self.baro_scheme == "Ursino_1998"):
             self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
