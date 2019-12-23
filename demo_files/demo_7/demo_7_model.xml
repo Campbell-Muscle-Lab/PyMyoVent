@@ -13,34 +13,34 @@
 <baroreflex>
 	<baro_scheme>simple_baroreceptor</baro_scheme>
 	<simulation>
-		<no_of_time_points>15000</no_of_time_points>
+		<no_of_time_points>100000</no_of_time_points>
 		<time_step>0.001</time_step>
 		<duty_ratio>0.3</duty_ratio>
 		<basal_heart_period units="second">0.833</basal_heart_period>
 		<duration_of_systole units="second">0.3</duration_of_systole>
 	</simulation>
 	<afferent>
-		<bc_max>1</bc_max>
+		<bc_max>2</bc_max>
 		<bc_min>0</bc_min>
-		<slope units="mmHg">1</slope>
-		<P_n units="mmHg">50</P_n>
+		<slope units="mmHg">10</slope>
+		<P_n units="mmHg">45</P_n>
 	</afferent>
 	<regulation>
 		<heart_period>
-			<G_T units="s/v">0</G_T>
-			<D_T units="second">0</D_T>
+			<G_T units="s/v">0.5</G_T>
+			<D_T units="second">1</D_T>
 			<tau_T units="second">1</tau_T>
 		</heart_period>
 		<k_1>
 			<k1>2</k1>
-			<G_k1 units="unit/v">0.05</G_k1>
-			<D_k1 units="second">0</D_k1>
+			<G_k1 units="unit/v">-0.5</G_k1>
+			<D_k1 units="second">1</D_k1>
 			<tau_k1 units="second">1</tau_k1>
 		</k_1>
 		<k_3>
 			<k3>200</k3>
-			<G_k3 units="unit/v">0</G_k3>
-			<D_k3 units="second">0</D_k3>
+			<G_k3 units="unit/v">-20</G_k3>
+			<D_k3 units="second">1</D_k3>
 			<tau_k3 units="second">1</tau_k3>
 		</k_3>
 	</regulation>
