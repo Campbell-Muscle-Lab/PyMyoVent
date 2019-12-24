@@ -56,8 +56,6 @@ def return_heart_period(self,time_step,i):
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.T_counter = self.counter_diastole
 
-
-
 def return_heart_period_control(self,time_step,i):
 
     if (self.baro_scheme == "simple_baroreceptor"):
@@ -68,7 +66,7 @@ def return_heart_period_control(self,time_step,i):
             self.delay_T = self.D_T
         def derivs(y,t):
             delta_T_prime=np.zeros(1)
-            delta_T_prime[0] = self.G_T*(self.bc[i-self.delay_T]-self.bc_mid)
+            delta_T_prime[0] = 1/self.tau_T*self.G_T*(self.bc[i-self.delay_T]-self.bc_mid)*self.T0
             return delta_T_prime
 
         sol = solve_ivp(derivs,[0,time_step],self.delta_T_prime)
@@ -133,9 +131,9 @@ def return_contractility(self,time_step,i):
         def derivs(y,t):
             delta=np.zeros(2)
             # delta k1
-            delta[0] = self.G_k1*(self.bc[i-self.delay_k1]-self.bc_mid)
+            delta[0] = 1/self.tau_k1*self.G_k1*(self.bc[i-self.delay_k1]-self.bc_mid)*self.k1_0
             # delta k3
-            delta[1] = self.G_k3*(self.bc[i-self.delay_k3]-self.bc_mid)
+            delta[1] = 1/self.tau_k3*self.G_k3*(self.bc[i-self.delay_k3]-self.bc_mid)*self.k3_0
             return delta
         initial_values=np.zeros(2)
         initial_values[0]=self.delta_k1

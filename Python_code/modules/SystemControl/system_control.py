@@ -10,7 +10,7 @@ class system_control():
 
 
     def __init__(self,baro_params,data_buffer_size): #baro_params
-        """input constatn parameters"""
+        """input constant parameters"""
         baroreflex = baro_params#single_circulation_simulation.baroreflex
         self.baro_scheme = baroreflex.baro_scheme.cdata
 
