@@ -29,6 +29,7 @@ class single_circulation():
         self.T=\
             float(self.baroreflex.simulation.basal_heart_period.cdata)
 
+
         self.activation_level=0.0
         #self.output_buffer_size = \
         #    int(single_circulation_simulation.baroreflex.
@@ -45,27 +46,8 @@ class single_circulation():
                 self.volume_perturbation[(start_index+1):(stop_index+1)] =\
                     increment
 
-        # Look for baroreceptor module
-        """if (hasattr(single_circulation_simulation, 'baroreceptor')):
-            self.baroreceptor_active = 1
-            baroreceptor_max_memory = \
-                int(single_circulation_simulation.baroreceptor.
-                    max_memory.cdata)
-            self.baroreceptor_pressure_array = \
-                np.zeros(baroreceptor_max_memory)
-            self.baroreceptor_target_aorta_pressure = \
-                float(single_circulation_simulation.baroreceptor.
-                      target_aorta_pressure.cdata)
-            self.baroreceptor_hr_gain = \
-                float(single_circulation_simulation.baroreceptor.
-                      hr_gain.cdata)
-        else:
-             self.baroreceptor_active= 0"""
 
-        # Look for growth module
-        if (hasattr(single_circulation_simulation, 'growth_module')):
-            # do this
-            temp = 1
+
 
         # Initialize circulation object using data from the sim_object
         circ_params = single_circulation_simulation.circulation
@@ -108,13 +90,27 @@ class single_circulation():
                                     self.capillaries_compliance,
                                     self.veins_compliance,
                                     0])
+        # Look for growth module
+        self.growth_activation = False
+        if (hasattr(single_circulation_simulation, 'growth_module')):
+            # do this
+            from modules.Growth import growth as gr
+            growth_params = single_circulation_simulation.growth_module
+            internal_r = np.power((3.0 * 0.001 * 1.5*self.ventricle_slack_volume)/
+                        (2.0 * np.pi), (1.0 / 3.0))
+
+            internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
+            self.wall_thickness = 0.001 * self.ventricle_wall_volume /internal_area
+
+            self.gr = gr.growth(growth_params,self.output_buffer_size)
+
+            self.growth_activation = True
         # Baro
         self.baro_params = single_circulation_simulation.baroreflex
         self.baro_scheme = self.baro_params.baro_scheme.cdata
-        self.syscon=syscon.system_control(self.baro_params, self.output_buffer_size)
-        #self.P_tilda=[100.0]
-        #self.delta_Ts=1.0
-        #self.delta_Tv=1.0
+        self.syscon=syscon.system_control(self.baro_params, self.output_buffer_size\
+                    ,self.growth_activation)
+
         # Pull off the half_sarcomere parameters
         hs_params = single_circulation_simulation.half_sarcomere
         self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
@@ -188,7 +184,9 @@ class single_circulation():
                                   'volume_perturbation':
                                       np.zeros(self.output_buffer_size),
                                   'ventricle_wall_volume':
-                                      np.zeros(self.output_buffer_size)})
+                                      np.zeros(self.output_buffer_size),
+                                  'ventricle_wall_thickness':
+                                     np.zeros(self.output_buffer_size)})
 
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
@@ -206,12 +204,15 @@ class single_circulation():
         self.data.at[0, 'volume_ventricle'] = self.v[5]
 
         self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
-
+        self.data.at[0, 'ventricle_wall_thickness'] = self.wall_thickness
+        self.data.at[0, 'ventricle_slack_volume'] = self.ventricle_slack_volume
 
     def run_simulation(self):
         # Run the simulation
         from .implement import implement_time_step, update_data_holders
-        from .display import display_simulation, display_flows, display_pv_loop,display_baro_results
+        from .display import display_simulation, display_flows, display_pv_loop
+        from .display import display_baro_results,display_growth
+
         #baro_params = single_circulation_simulation.baroreflex
         # Set up some values for the simulation
         no_of_time_points = \
@@ -231,9 +232,9 @@ class single_circulation():
         for i in np.arange(np.size(t)):
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
-            #if 50<=(100*i/np.size(t))and (100*i/np.size(t))<=60:
+            #if 25<=(100*i/np.size(t))and (100*i/np.size(t))<=27.5:
                 #self.v[-2] = 1.01*self.v[-2]
-            #    self.v[-2] = 0.9998*self.v[-2]
+            #    self.v[-2] = 0.9997*self.v[-2]
 
                 #self.compliance[1]=0.5*self.compliance[1]
             activation_level=self.syscon.return_activation()
@@ -253,7 +254,8 @@ class single_circulation():
                 self.baroreceptor_target_aorta_pressure = 120
 
         # Concatenate data structures
-        self.data = pd.concat([self.data, self.hs.hs_data, self.syscon.sys_data], axis=1)
+        self.data = pd.concat([self.data, self.hs.hs_data, self.syscon.sys_data,
+                                self.gr.gr_data],axis=1)
         #self.data = pd.concat([self.data, self.syscon.sys_data], axis)
 
         # Make plots
@@ -266,11 +268,15 @@ class single_circulation():
                         self.output_parameters.pv_figure.cdata)
         if(hasattr(self.data,'heart_period')):
             display_baro_results(self.data,
-                            self.output_parameters.heart_period.cdata)
+                            self.output_parameters.baro_figure.cdata)
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
                                self.output_parameters.hs_fluxes_figure.cdata)
+        #Growth
+        if self.growth_activation:
+            display_growth(self.data,
+                                    self.output_parameters.growth_figure.cdata)
 
         if (self.output_parameters.data_file.cdata):
             # Write data to disk
