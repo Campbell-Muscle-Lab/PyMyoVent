@@ -14,7 +14,7 @@
 <baroreflex>
 	<baro_scheme>simple_baroreceptor</baro_scheme>
 	<simulation>
-		<no_of_time_points>20000</no_of_time_points>
+		<no_of_time_points>50000</no_of_time_points>
 		<time_step>0.001</time_step>
 		<duty_ratio>0.3</duty_ratio>
 		<basal_heart_period units="second">0.833</basal_heart_period>
@@ -24,7 +24,7 @@
 		<bc_max>2</bc_max>
 		<bc_min>0</bc_min>
 		<slope units="mmHg">10</slope>
-		<P_n units="mmHg">80</P_n>
+		<P_n units="mmHg">75</P_n>
 	</afferent>
 	<regulation>
 		<heart_period>
@@ -123,8 +123,19 @@
 </half_sarcomere>
 
 <growth_module>
-	<growth_scheme>stress_based</growth_scheme>
-	<memory units="cardiac_cycle">10</memory>
-
+	<stress_signal>
+		<memory units="cardiac_cycle">10</memory>
+		<critical_stress units="KN.m-2">40000</critical_stress>
+		<ventricle_mass>
+			<ventricle_wall_volume>0.03</ventricle_wall_volume>
+			<G_wall_volume>0.01</G_wall_volume>
+			<tau_wall_volume>2</tau_wall_volume>
+		</ventricle_mass>
+		<ventricle_volume>
+			<ventricle_slack_volume>0.08</ventricle_slack_volume>
+			<G_slack_volume>0.01</G_slack_volume>
+			<tau_slack_volume>2</tau_slack_volume>
+		</ventricle_volume>
+	</stress_signal>
 </growth_module>
 </single_circulation_simulation>
