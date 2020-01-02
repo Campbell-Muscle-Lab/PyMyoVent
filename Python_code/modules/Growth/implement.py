@@ -23,35 +23,35 @@ def return_lv_wall_thickness(self,time_step,cell_stress):
 def return_ventricle_mass(self,time_step,cell_stress):
 
     f=cell_stress
-    if f > self.f_cirt:
+#    if f > self.f_cirt:
 
-        def derivs(y,t):
-            delta_wall_vol = np.zeros(1)
-            delta_wall_vol[0] = 1/self.tau_w_vol*self.G_w_vol*(f-self.f_cirt)*self.w_vol_0
-            return delta_wall_vol
-        initial_conditions = self.delta_w_vol
-        sol = solve_ivp(derivs,[0,time_step],initial_conditions)
-        self.delta_w_vol=sol.y[:,-1]
-        self.ventricle_wall_volume = self.w_vol_0 + self.delta_w_vol
-    else:
-        self.ventricle_wall_volume=self.ventricle_wall_volume
+    def derivs(y,t):
+        delta_wall_vol = np.zeros(1)
+        delta_wall_vol[0] = 1/self.tau_w_vol*self.G_w_vol*(f-self.f_cirt)*self.w_vol_0
+        return delta_wall_vol
+    initial_conditions = self.delta_w_vol
+    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
+    self.delta_w_vol=sol.y[:,-1]
+    self.ventricle_wall_volume = self.w_vol_0 + self.delta_w_vol
+#    else:
+#        self.ventricle_wall_volume=self.ventricle_wall_volume
     return self.ventricle_wall_volume
 
 def return_ventricle_slack_volume(self,time_step,cell_stress):
 
     f=cell_stress
-    if f > self.f_cirt:
-        def derivs(y,t):
-            delta_slack_vol = np.zeros(1)
-            delta_slack_vol[0] = 1/self.tau_sl_vol*self.G_sl_vol*(f-self.f_cirt)*self.sl_vol_0
-            return delta_slack_vol
-        initial_conditions = self.delta_sl_vol
-        sol = solve_ivp(derivs,[0,time_step],initial_conditions)
-        self.delta_sl_vol=sol.y[:,-1]
-        self.ventricle_slack_volume = self.sl_vol_0 + self.delta_sl_vol
-    else:
-        self.ventricle_wall_volume=self.ventricle_wall_volume
-    return self.ventricle_wall_volume
+#    if f > self.f_cirt:
+    def derivs(y,t):
+        delta_slack_vol = np.zeros(1)
+        delta_slack_vol[0] = 1/self.tau_sl_vol*self.G_sl_vol*(f-self.f_cirt)*self.sl_vol_0
+        return delta_slack_vol
+    initial_conditions = self.delta_sl_vol
+    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
+    self.delta_sl_vol=sol.y[:,-1]
+    self.ventricle_slack_volume = self.sl_vol_0 + self.delta_sl_vol
+#    else:
+#        self.ventricle_slack_volume=self.ventricle_slack_volume
+    return self.ventricle_slack_volume
 
 
 def steady_state_identifier(self):
