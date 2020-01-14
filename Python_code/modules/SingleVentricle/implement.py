@@ -7,26 +7,36 @@ def implement_time_step(self, time_step, activation,i):
     """ Steps circulatory system forward in time """
     # Update the half-sarcomere
     self.hs.update_simulation(time_step, 0.0, activation, 1)
-
+#    self.slack_hsl = self.hs.myof.return_hs_length_for_force(0.0)
     # steps solution forward in time
     self.v = evolve_volumes(self, time_step, self.v)
-    # Implements the length change on the half-sarcomere
     new_lv_circumference = return_lv_circumference(self,self.v[-1])
-    delta_hsl = self.hs.hs_length *\
-        ((new_lv_circumference / self.lv_circumference) - 1.0)
+
+    #calculating half-sarcomere length change with considering eccentric growth
+    if self.growth_activation:
+
+        f = self.hs.myof.check_myofilament_forces(0)
+        passive_force = f['pas_force']
+        new_number_of_hs = \
+            self.gr.return_number_of_hs(time_step,passive_force)
+
+        new_hs_length = 10e9*new_lv_circumference / new_number_of_hs
+        delta_hsl = new_hs_length - self.hs.hs_length
+
+    #calculating half-sarcomere length change without considering any growth
+    else:
+        delta_hsl = self.hs.hs_length *\
+            ((new_lv_circumference / self.lv_circumference) - 1.0)
+    # Implements the length change on the half-sarcomere
     self.hs.update_simulation(0.0, delta_hsl, 0.0, 1)
+
     self.lv_circumference = new_lv_circumference
-
-
-
 
     # Update the pressures
     vi = range(self.no_of_compartments-1)
     for x in vi:
         self.p[x] = self.v[x] / self.compliance[x]
     self.p[-1] = return_lv_pressure(self,self.v[-1])
-
-
 
     "New section added by HS"
     if (self.baro_scheme !="fixed_heart_rate"):
@@ -45,18 +55,13 @@ def implement_time_step(self, time_step, activation,i):
 
         self.hs.myof.update_contractility(k_1, k_3)
 
-    #growth
+    #Concentric growth
     if self.growth_activation:
         f = self.hs.myof.check_myofilament_forces(delta_hsl)
         total_force = f['total_force']
 
         self.ventricle_wall_volume = \
-        self.gr.return_ventricle_mass(time_step,total_force)
-
-        self.ventricle_slack_volume = \
-        self.gr.return_ventricle_slack_volume(time_step,total_force)        
-
-
+        self.gr.return_lv_mass(time_step,total_force)
 
 def update_data_holders(self, time_step, activation):
 
@@ -94,12 +99,24 @@ def update_data_holders(self, time_step, activation):
     self.data.at[self.data_buffer_index, 'volume_perturbation'] = \
         self.volume_perturbation[self.data_buffer_index]
 
-    self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] = \
-        self.ventricle_wall_volume
-    self.data.at[self.data_buffer_index, 'ventricle_wall_thickness'] =\
-        self.wall_thickness
-    self.data.at[self.data_buffer_index, 'ventricle_slack_volume'] = \
-        self.ventricle_slack_volume
+    #self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] = \
+    #    self.ventricle_wall_volume
+#    self.data.at[self.data_buffer_index, 'ventricle_wall_thickness'] =\
+#        self.wall_thickness
+#    self.data.at[self.data_buffer_index, 'slack_hsl'] =\
+#        self.slack_hsl
+#    self.data.at[self.data_buffer_index, 'lv_circumference'] = \
+#        self.lv_circumference
+#    self.data.at[self.data_buffer_index, 'slack_lv_circumference'] =\
+#        self.slack_lv_circumference
+
+    if self.growth_activation:
+#        self.data.at[self.data_buffer_index, 'cell_strain'] =\
+#            self.cell_strain
+        self.data.at[self.data_buffer_index, 'ventricle_wall_thickness'] =\
+            self.wall_thickness
+#    self.data.at[self.data_buffer_index, 'ventricle_slack_volume'] = \
+#        self.ventricle_slack_volume
 
     # Now update data structure for half_sarcomere
     self.hs.update_data_holder(time_step, activation)
@@ -173,8 +190,7 @@ def return_lv_circumference(self, lv_volume):
         #print('ventricle_wall_volume',self.ventricle_wall_volume)
         lv_circum = (2.0 * np.pi *
             np.power((3 * 0.001 *
-                     (lv_volume + (self.ventricle_wall_volume / 2.0)) /
-                     (2 * np.pi)) , (1.0 / 3.0)))
+                     (lv_volume + (self.ventricle_wall_volume / 2.0))/(2 * np.pi)) , (1.0 / 3.0)))
     else:
         lv_circum = (2.0 * np.pi *
             np.power((3 * 0.001 *
@@ -217,3 +233,7 @@ def return_lv_pressure(self,lv_volume):
     P_in_mmHg = P_in_pascals / mmHg_in_pascals
 
     return P_in_mmHg
+def return_ventricle_slack_volume(self,circumference):
+    ventricle_slack_volume = 2*1000*np.pi/3*np.power(circumference/(2*np.pi),3)
+
+    return ventricle_slack_volume

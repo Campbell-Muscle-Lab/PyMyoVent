@@ -90,26 +90,7 @@ class single_circulation():
                                     self.capillaries_compliance,
                                     self.veins_compliance,
                                     0])
-        # Look for growth module
-        self.growth_activation = False
-        if (hasattr(single_circulation_simulation, 'growth_module')):
-            # do this
-            from modules.Growth import growth as gr
-            growth_params = single_circulation_simulation.growth_module
-            internal_r = np.power((3.0 * 0.001 * 1.5*self.ventricle_slack_volume)/
-                        (2.0 * np.pi), (1.0 / 3.0))
 
-            internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
-            self.wall_thickness = 0.001 * self.ventricle_wall_volume /internal_area
-
-            self.gr = gr.growth(growth_params,self.output_buffer_size)
-
-            self.growth_activation = True
-        # Baro
-        self.baro_params = single_circulation_simulation.baroreflex
-        self.baro_scheme = self.baro_params.baro_scheme.cdata
-        self.syscon=syscon.system_control(self.baro_params, self.output_buffer_size\
-                    ,self.growth_activation)
 
         # Pull off the half_sarcomere parameters
         hs_params = single_circulation_simulation.half_sarcomere
@@ -123,6 +104,29 @@ class single_circulation():
 
         self.lv_circumference =\
          return_lv_circumference(self,self.ventricle_slack_volume)
+
+        # Look for growth module
+        self.growth_activation = False
+        if (hasattr(single_circulation_simulation, 'growth_module')):
+            # do this
+            from modules.Growth import growth as gr
+            growth_params = single_circulation_simulation.growth_module
+            internal_r = np.power((3.0 * 0.001 * 1.5*self.ventricle_slack_volume)/
+                        (2.0 * np.pi), (1.0 / 3.0))
+
+            internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
+            self.wall_thickness = 0.001 * self.ventricle_wall_volume /internal_area
+
+            initial_numbers_of_hs = 10e9*self.lv_circumference / slack_hsl
+            self.gr = gr.growth(growth_params,initial_numbers_of_hs,self.output_buffer_size)
+
+            self.growth_activation = True
+        # Baro
+        self.baro_params = single_circulation_simulation.baroreflex
+        self.baro_scheme = self.baro_params.baro_scheme.cdata
+        self.syscon=syscon.system_control(self.baro_params, self.output_buffer_size\
+                    ,self.growth_activation)
+
 
         print("hsl: %f" % self.hs.hs_length)
         print("slack hsl: %f" % slack_hsl)
@@ -183,10 +187,18 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'volume_perturbation':
                                       np.zeros(self.output_buffer_size),
-                                  'ventricle_wall_volume':
-                                      np.zeros(self.output_buffer_size),
                                   'ventricle_wall_thickness':
-                                     np.zeros(self.output_buffer_size)})
+                                     np.zeros(self.output_buffer_size),
+                                    'ventricle_slack_volume':
+                                     np.zeros(self.output_buffer_size),
+                                   'cell_strain':
+                                     np.zeros(self.output_buffer_size),
+                                  'slack_hsl':
+                                     np.zeros(self.output_buffer_size),
+                                     'lv_circumference':
+                                     np.zeros(self.output_buffer_size),
+                                     'slack_lv_circumference':
+                                      np.zeros(self.output_buffer_size)})
 
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
@@ -203,8 +215,12 @@ class single_circulation():
         self.data.at[0, 'volume_veins'] = self.v[4]
         self.data.at[0, 'volume_ventricle'] = self.v[5]
 
-        self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
+        #self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
         self.data.at[0, 'ventricle_wall_thickness'] = self.wall_thickness
+        self.data.at[0, 'cell_strain'] = 1
+        self.data.at[0, 'slack_hsl'] = slack_hsl
+        self.data.at[0, 'lv_circumference'] = self.lv_circumference
+        self.data.at[0, 'slack_lv_circumference'] = self.lv_circumference
         self.data.at[0, 'ventricle_slack_volume'] = self.ventricle_slack_volume
 
     def run_simulation(self):
@@ -232,10 +248,23 @@ class single_circulation():
         for i in np.arange(np.size(t)):
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
-            #if 25<=(100*i/np.size(t))and (100*i/np.size(t))<=27.5:
-                #self.v[-2] = 1.01*self.v[-2]
-            #    self.v[-2] = 0.9997*self.v[-2]
 
+            #if 25<=(100*i/np.size(t))and (100*i/np.size(t))<=27.5:
+            #self.v[-2] = 1.01*self.v[-2]
+            #self.v[-2] = 0.9997*self.v[-2]
+
+#            if (100*i/np.size(t)) == 20:
+#                self.ventricle_slack_volume = \
+#                2*self.ventricle_slack_volume
+#                print('ventricle_slack_volume=',self.ventricle_slack_volume)
+#            if (100*i/np.size(t)) == 40:
+#                self.ventricle_slack_volume = \
+#                2*self.ventricle_slack_volume
+#                print('ventricle_slack_volume=',self.ventricle_slack_volume)
+#            if (100*i/np.size(t)) == 60:
+#                self.ventricle_slack_volume = \
+#                2*self.ventricle_slack_volume
+#                print('ventricle_slack_volume=',self.ventricle_slack_volume)
                 #self.compliance[1]=0.5*self.compliance[1]
             activation_level=self.syscon.return_activation()
 
