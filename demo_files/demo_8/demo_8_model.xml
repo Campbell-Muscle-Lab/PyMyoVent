@@ -24,7 +24,7 @@
 		<bc_max>2</bc_max>
 		<bc_min>0</bc_min>
 		<slope units="mmHg">10</slope>
-		<P_n units="mmHg">75</P_n>
+		<P_n units="mmHg">80</P_n>
 	</afferent>
 	<regulation>
 		<heart_period>
@@ -125,17 +125,16 @@
 <growth_module>
 	<stress_signal>
 		<memory units="cardiac_cycle">10</memory>
-		<critical_stress units="KN.m-2">40000</critical_stress>
-		<ventricle_mass>
+		<critical_total_stress units="KN.m-2">40000</critical_total_stress>
+		<critical_passive_stress units="KN.m-2">7000</critical_passive_stress>
+		<concenrtric_growth>
 			<ventricle_wall_volume>0.03</ventricle_wall_volume>
-			<G_wall_volume>0.01</G_wall_volume>
-			<tau_wall_volume>2</tau_wall_volume>
-		</ventricle_mass>
-		<ventricle_volume>
-			<ventricle_slack_volume>0.08</ventricle_slack_volume>
-			<G_slack_volume>0.01</G_slack_volume>
-			<tau_slack_volume>2</tau_slack_volume>
-		</ventricle_volume>
+			<G_wall_volume>0.0001</G_wall_volume>
+			<tau_wall_volume>1</tau_wall_volume>
+		</concenrtric_growth>
+		<eccenrtric_growth>
+			<G_number_of_hs>0.00001</G_number_of_hs>
+		</eccenrtric_growth>
 	</stress_signal>
 </growth_module>
 </single_circulation_simulation>
