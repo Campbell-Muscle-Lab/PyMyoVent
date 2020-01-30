@@ -9,27 +9,28 @@ class half_sarcomere():
 
     from .implement import update_simulation, update_data_holder
     from .display import display_fluxes
+    #from .update_contractility import update_contractility
 
     def __init__(self, hs_params, data_buffer_size):
 
-        self.hs_length = float(hs_params.initial_hs_length.cdata)
+        self.hs_length = float(hs_params["initial_hs_length"][0])
         self.Ca_conc = 1.0e-9
         self.activation = 0.0
 
         # Pull of class parameters
-        self.max_rate = float(hs_params.max_rate.cdata)
-        self.temperature = float(hs_params.temperature.cdata)
-        self.cb_number_density = float(hs_params.cb_number_density.cdata)
+        self.max_rate = float(hs_params["max_rate"][0])
+        self.temperature = float(hs_params["temperature"][0])
+        self.cb_number_density = float(hs_params["cb_number_density"][0])
 
         # Pull of membrane parameters
-        membr_params = hs_params.membranes
+        membr_params = hs_params["membranes"]
         self.membr = membranes.membranes(membr_params, self)
 
         # Initialise hs_force, required for myofilament kinetics
         self.hs_force = 0
 
         # Pull off the mofilament_params
-        myofil_params = hs_params.myofilaments
+        myofil_params = hs_params["myofilaments"]
         self.myof = myofilaments.myofilaments(myofil_params, self)
 
         print(self.myof.cb_force)
