@@ -14,7 +14,7 @@
 <baroreflex>
 	<baro_scheme>simple_baroreceptor</baro_scheme>
 	<simulation>
-		<no_of_time_points>50000</no_of_time_points>
+		<no_of_time_points>300000</no_of_time_points>
 		<time_step>0.001</time_step>
 		<duty_ratio>0.3</duty_ratio>
 		<basal_heart_period units="second">0.833</basal_heart_period>
@@ -23,29 +23,37 @@
 	<afferent>
 		<bc_max>2</bc_max>
 		<bc_min>0</bc_min>
-		<slope units="mmHg">10</slope>
-		<P_n units="mmHg">80</P_n>
+		<slope units="mmHg">50</slope>
+		<P_n units="mmHg">65</P_n>
 	</afferent>
 	<regulation>
 		<heart_period>
-			<G_T units="s/v">0.1</G_T>
+			<G_T units="s/v">0.2</G_T>
 			<D_T units="second">1</D_T>
 			<tau_T units="second">1</tau_T>
 		</heart_period>
 		<k_1>
 			<k1>2</k1>
-			<G_k1 units="unit/v">-0.1</G_k1>
+			<G_k1 units="unit/v">-0.2</G_k1>
 			<D_k1 units="second">1</D_k1>
 			<tau_k1 units="second">1</tau_k1>
 		</k_1>
 		<k_3>
 			<k3>200</k3>
-			<G_k3 units="unit/v">-0.1</G_k3>
+			<G_k3 units="unit/v">-0.2</G_k3>
 			<D_k3 units="second">1</D_k3>
 			<tau_k3 units="second">1</tau_k3>
 		</k_3>
 	</regulation>
 </baroreflex>
+
+<perturbations>
+	<volume>
+		<start_index>50000</start_index>
+		<stop_index>60000</stop_index>
+		<increment>5e-5</increment>
+	</volume>
+</perturbations>
 
 <circulation>
 	<no_of_compartments>6</no_of_compartments>
@@ -122,19 +130,25 @@
 	</membranes>
 </half_sarcomere>
 
-<growth_module>
+<growth>
+	<start_time_percentage>20</start_time_percentage>
+  <driven_signal>stress</driven_signal>
 	<stress_signal>
 		<memory units="cardiac_cycle">10</memory>
-		<critical_total_stress units="KN.m-2">40000</critical_total_stress>
-		<critical_passive_stress units="KN.m-2">7000</critical_passive_stress>
+		<critical_total_stress units="N.m-2">25000</critical_total_stress>
+		<critical_passive_stress units="N.m-2">3000</critical_passive_stress>
 		<concenrtric_growth>
 			<ventricle_wall_volume>0.03</ventricle_wall_volume>
-			<G_wall_volume>0.0001</G_wall_volume>
-			<tau_wall_volume>1</tau_wall_volume>
+			<ventricle_slack_volume units = "liters">0.08</ventricle_slack_volume>
+			<G_wall_thickness>0</G_wall_thickness>
+			<G_wall_volume>0</G_wall_volume>
 		</concenrtric_growth>
-		<eccenrtric_growth>
-			<G_number_of_hs>0.00001</G_number_of_hs>
-		</eccenrtric_growth>
+		<eccentric_growth>
+			<G_number_of_hs>1e-5</G_number_of_hs>
+		</eccentric_growth>
 	</stress_signal>
-</growth_module>
+	<strain_signal>
+		<critical_strain>0.075</critical_strain>
+	</strain_signal>
+</growth>
 </single_circulation_simulation>
