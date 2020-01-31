@@ -1,25 +1,27 @@
 import numpy as np
+from math import *
 from scipy.integrate import solve_ivp
 import pandas as pd
 
 
-
+# stress driven growth
 def return_lv_wall_thickness(self,time_step,cell_stress):
 
     f=cell_stress
-    if f > self.f_cirt:
 
-        def derivs(y,t):
-            delta_tw = np.zeros(1)
-            delta_tw[0] = 1/self.tau_tw*self.G_tw*(f-self.f_cirt)*self.tw_0
-            return delta_tw
-        initial_conditions = self.delta_tw
-        sol = solve_ivp(derivs,[0,time_step],initial_conditions)
-        self.delta_tw=sol.y[:,-1]
-        self.tw = self.tw_0 + self.delta_tw
-    else:
-        self.tw=self.tw
+    def derivs(y,t):
+        delta_tw = np.zeros(1)
+        delta_tw[0] = self.G_tw*(f-self.f_cirt)*self.tw
+        return delta_tw
+    initial_conditions = self.delta_tw
+    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
+    self.delta_tw=sol.y[:,-1]
+    #print('tw_0',self.tw_0)
+    #print('tw',self.tw)
+    self.tw = self.tw_0 + self.delta_tw
+
     return self.tw
+
 def return_lv_mass(self,time_step,cell_stress):
 
     f=cell_stress
@@ -27,7 +29,7 @@ def return_lv_mass(self,time_step,cell_stress):
 
     def derivs(y,t):
         delta_wall_vol = np.zeros(1)
-        delta_wall_vol[0] = 1/self.tau_w_vol*self.G_w_vol*(f-self.f_cirt)*self.w_vol_0
+        delta_wall_vol[0] = self.G_w_vol*(f-self.f_cirt)*self.ventricle_wall_volume
         return delta_wall_vol
     initial_conditions = self.delta_w_vol
     sol = solve_ivp(derivs,[0,time_step],initial_conditions)
@@ -37,35 +39,87 @@ def return_lv_mass(self,time_step,cell_stress):
 #        self.ventricle_wall_volume=self.ventricle_wall_volume
     return self.ventricle_wall_volume
 
-def return_number_of_hs(self,time_step,passive_stress):
+def return_number_of_hs(self,time_step,passive_stress,lv_volume):
     f= passive_stress
+    self.pas_set = retun_pass_set_point(self,lv_volume)
+    #print(self.pas_set)
+    n_1 = self.n_of_hs
+    dndt = self.G_n_hs * self.n_of_hs* np.power((f - self.pas_set),1)
+    n=dndt*time_step+n_1
 
-    def derivs(y,t):
+    self.n_of_hs = n
+    return self.n_of_hs
+
+"""    def derivs(y,t):
         delta_number_of_hs = np.zeros(1)
-        delta_number_of_hs[0] = self.G_n_hs * self.n_of_hs_0 * (f - self.pas_cirt)
+
+        delta_number_of_hs[0] = self.G_n_hs * self.n_of_hs* np.power((f - self.pas_set),1)
         return delta_number_of_hs
     initial_conditions = self.delta_n_hs
     sol = solve_ivp(derivs,[0,time_step],initial_conditions)
     self.delta_n_hs = sol.y[:,-1]
     self.n_of_hs = self.n_of_hs_0 + self.delta_n_hs
+#    print('n_of_hs',self.n_of_hs)
+#    if self.n_of_hs<=self.min_n_hs or self.n_of_hs >= self.max_n_hs:
+#        if self.n_of_hs >= self.max_n_hs:
+#            self.n_of_hs = self.max_n_hs
+#        else:
+#            self.n_of_hs = self.min_n_hs
+    if self.n_of_hs<=self.min_n_hs:
+        self.n_of_hs = self.min_n_hs"""
+
+#    return self.n_of_hs
+
+# strain driven
+def retun_pass_set_point(self,v):
+#    self.pas_set = \
+#         ((self.pas_set_min+self.pas_set_max*exp((self.n_of_hs-self.n_hs_set)/self.pas_set_slope))\
+#            /(1+exp((self.n_of_hs-self.n_hs_set)/self.pas_set_slope)))
+
+    self.pas_set = \
+             ((self.pas_set_min+self.pas_set_max*exp((v-self.v_set)/self.v_slope))\
+                /(1+exp((v-self.v_set)/self.v_slope)))
+    return self.pas_set
+
+def return_lv_wall_thickness_strain(self,time_step,cell_strain):
+
+    s=cell_strain
+
+    def derivs(y,t):
+        delta_tw = np.zeros(1)
+        delta_tw[0] = self.G_tw*(s-self.s_cirt)*self.tw
+        return delta_tw
+    initial_conditions = self.delta_tw
+    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
+    self.delta_tw=sol.y[:,-1]
+    #print('tw_0',self.tw_0)
+    #print('tw',self.tw)
+    self.tw = self.tw_0 + self.delta_tw
+
+    return self.tw
+
+def return_number_of_hs_strain(self,time_step,cell_strain):
+    s= cell_strain
+
+    def derivs(y,t):
+        delta_number_of_hs = np.zeros(1)
+
+        delta_number_of_hs[0] = self.G_n_hs * self.n_of_hs* np.power((s - self.s_cirt),1)
+        return delta_number_of_hs
+    initial_conditions = self.delta_n_hs
+    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
+    self.delta_n_hs = sol.y[:,-1]
+    self.n_of_hs = self.n_of_hs_0 + self.delta_n_hs
+#    print('n_of_hs',self.n_of_hs)
+#    if self.n_of_hs<=self.min_n_hs or self.n_of_hs >= self.max_n_hs:
+#        if self.n_of_hs >= self.max_n_hs:
+#            self.n_of_hs = self.max_n_hs
+#        else:
+#            self.n_of_hs = self.min_n_hs
+    if self.n_of_hs<=self.min_n_hs:
+        self.n_of_hs = self.min_n_hs
 
     return self.n_of_hs
-def return_lv_slack_volume_change(self,time_step,cell_stretch):
-
-    s=cell_stretch
-#    if f > self.f_cirt:
-    def derivs(y,t):
-        delta_slack_vol = np.zeros(1)
-        delta_slack_vol[0] = 1/self.tau_sl_vol*self.G_sl_vol*(s-self.s_cirt)*self.sl_vol_0
-        return delta_slack_vol
-    initial_conditions = self.delta_sl_vol
-    sol = solve_ivp(derivs,[0,time_step],initial_conditions)
-    self.delta_sl_vol=sol.y[:,-1]
-    #self.ventricle_slack_volume = self.sl_vol_0 + self.delta_sl_vol
-#    else:
-#        self.ventricle_slack_volume=self.ventricle_slack_volume
-    return self.delta_sl_vol
-
 
 def steady_state_identifier(self):
 
@@ -107,5 +161,7 @@ def update_data_holder(self,time_step):
     self.gr_time = self.gr_time + time_step
     self.data_buffer_index += 1
 
-    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_volume'] = self.ventricle_wall_volume
+#    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_volume'] = self.ventricle_wall_volume
+#    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = self.tw
     self.gr_data.at[self.data_buffer_index, 'number_of_hs'] = self.n_of_hs
+    self.gr_data.at[self.data_buffer_index, 'passive_set'] = self.pas_set
