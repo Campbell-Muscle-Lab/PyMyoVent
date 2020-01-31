@@ -3,7 +3,7 @@ from math import *
 from scipy.integrate import solve_ivp
 from scipy import signal
 
-def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,i):
+def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate):
 
     if (self.baro_scheme == "simple_baroreceptor"):
         # baroreceptor control
@@ -16,7 +16,8 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate,
         #print('arterial_pressure_rate',arterial_pressure_rate)
         def P_tilda_deriv(y,t):
             dy=np.zeros(1)
-            dy[0]=1/self.tau_p*(arterial_pressure+self.tau_z*arterial_pressure_rate-self.P_tilda)
+            dy[0]=1/self.tau_p*(arterial_pressure\
+                    +self.tau_z*arterial_pressure_rate-self.P_tilda)
             return dy
             #determine the output variable of the linear dynamic block
             #print('self.P_tilda',self.P_tilda)
@@ -43,19 +44,28 @@ def return_heart_period(self,time_step,i):
         return_heart_period_control(self,time_step,i)
         self.T_counter -= 1
         if (self.T_counter <= -self.counter_systole):
-            self.T=self.T_prime
-            self.T_diastole = self.T-self.T_systole
-            self.counter_diastole = int(self.T_diastole/self.dt)
-            self.T_counter = self.counter_diastole
-    if (self.baro_scheme == "Ursino_1998"):
-        return_heart_period_control(self,time_step,i)
-        self.T_counter -= 1
-        if (self.T_counter <= -self.counter_systole):
+
             self.T=self.T_prime
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.T_counter = self.counter_diastole
 
+#            if self.growth_activation:
+#                self.cardiac_cycle_counter += 1
+
+    if (self.baro_scheme == "Ursino_1998"):
+        return_heart_period_control(self,time_step,i)
+        self.T_counter -= 1
+        if (self.T_counter <= -self.counter_systole):
+
+            self.T=self.T_prime
+            self.T_diastole = self.T-self.T_systole
+            self.counter_diastole = int(self.T_diastole/self.dt)
+            self.T_counter = self.counter_diastole
+
+#            if self.growth_activation:
+#                self.cardiac_cycle_counter += 1
+    return self.T
 def return_heart_period_control(self,time_step,i):
 
     if (self.baro_scheme == "simple_baroreceptor"):
@@ -66,13 +76,18 @@ def return_heart_period_control(self,time_step,i):
             self.delay_T = self.D_T
         def derivs(y,t):
             delta_T_prime=np.zeros(1)
-            delta_T_prime[0] = 1/self.tau_T*self.G_T*(self.bc[i-self.delay_T]-self.bc_mid)*self.T0
+            delta_T_prime[0] = 1/self.tau_T*self.G_T\
+                                *(self.bc[i-self.delay_T]-self.bc_mid)*self.T0
             return delta_T_prime
 
         sol = solve_ivp(derivs,[0,time_step],self.delta_T_prime)
         self.delta_T_prime=sol.y[:,-1]
         self.T_prime=self.T0+self.delta_T_prime
-
+        #implement minimum range of heart period for human
+        if self.T_prime <= 0.4:
+            self.T_prime = 0.4
+        if self.T_prime >= 1.5:
+            self.T_prime = 1.5
     if (self.baro_scheme=="Ursino_1998"):
         #determine the outputs of static characteristics (steady-state changes)
         # apply time delay
@@ -112,7 +127,7 @@ def return_heart_period_control(self,time_step,i):
 
         self.T_prime=self.delta_Ts+self.delta_Tv+self.T0
 
-        return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
+        #return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
 
 def return_contractility(self,time_step,i):
 
@@ -182,11 +197,8 @@ def return_contractility(self,time_step,i):
 
 def return_activation(self):
     if (self.baro_scheme == "fixed_heart_rate"):
-        #print('fixed heart rate is activated')
-        predefined_activation_level =\
-            0.5*(1+signal.square(np.pi+2*np.pi*self.activation_frequency*self.t,
-            duty=self.activation_duty_ratio))
-        self.activation_level = predefined_activation_level[self.activation_counter]
+
+        self.activation_level = self.predefined_activation_level[self.activation_counter]
         self.activation_counter += 1
         return self.activation_level
 
@@ -221,13 +233,3 @@ def update_data_holder(self,time_step):
         if (self.baro_scheme == "Ursino_1998"):
             self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
             self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
-    #self.sys_data.at[self.data_buffer_index, 'L_scale_factor'] = self.L_scale_factor
-    #self.sys_data.at[self.data_buffer_index, 'k_3_scale_factor'] = self.k_3_scale_factor
-    #self.sys_data.at[self.data_buffer_index, 'k_cb_scale_factor'] = self.k_cb_scale_factor
-    #self.sys_data.at[self.data_buffer_index, 'k_force_scale_factor'] = self.k_force_scale_factor
-#    self.sys_data.at[self.data_buffer_index, 'f_es'] = self.f_es[-1]
-#    self.sys_data.at[self.data_buffer_index, 'f_es_min'] = self.f_es_min
-#    self.sys_data.at[self.data_buffer_index, 'f_ev'] = self.f_ev[-1]
-#    self.sys_data.at[self.data_buffer_index, 'delta_Ts'] = self.delta_Ts
-#    self.sys_data.at[self.data_buffer_index, 'delta_Tv'] = self.delta_Tv
-#    self.sys_data.at[self.data_buffer_index, 'LV_elastance'] = self.E
