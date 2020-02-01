@@ -29,37 +29,86 @@ class single_circulation():
                 no_of_time_points.cdata)
 
         # Look for perturbations
-        self.volume_perturbation = np.zeros(self.output_buffer_size+1)
+        self.perturbation_volume = np.zeros(self.output_buffer_size+1)
+        self.perturbation_venous_compliance = np.zeros(self.output_buffer_size+1)
+        self.perturbation_aorta_resistance = np.zeros(self.output_buffer_size+1)
+        
         if (hasattr(single_circulation_simulation, 'perturbations')):
             if hasattr(single_circulation_simulation.perturbations, 'volume'):
                 temp = single_circulation_simulation.perturbations.volume
                 start_index = int(temp.start_index.cdata)
                 stop_index = int(temp.stop_index.cdata)
                 increment = float(temp.increment.cdata)
-                self.volume_perturbation[(start_index+1):(stop_index+1)] =\
+                self.perturbation_volume[(start_index+1):(stop_index+1)] =\
                     increment
+
+        if hasattr(single_circulation_simulation.perturbations, 'venous_compliance'):
+                temp = single_circulation_simulation.perturbations.venous_compliance
+                start_index = int(temp.start_index.cdata)
+                stop_index = int(temp.stop_index.cdata)
+                increment = float(temp.increment.cdata)
+                self.perturbation_venous_compliance[(start_index+1):(stop_index+1)] =\
+                    increment
+
+        if hasattr(single_circulation_simulation.perturbations, 'aorta_resistance'):
+                temp = single_circulation_simulation.perturbations.aorta_resistance
+                start_index = int(temp.start_index.cdata)
+                stop_index = int(temp.stop_index.cdata)
+                increment = float(temp.increment.cdata)
+                self.perturbation_aorta_resistance[(start_index+1):(stop_index+1)] =\
+                    increment
+
 
         # Look for baroreceptor module
         if (hasattr(single_circulation_simulation, 'baroreceptor')):
             self.baroreceptor_active = 1
-            baroreceptor_max_memory = \
+            self.baroreceptor_signal = 0
+            self.baroreceptor_start_index = \
                 int(single_circulation_simulation.baroreceptor.
-                    max_memory.cdata)
-            self.baroreceptor_pressure_array = \
-                np.zeros(baroreceptor_max_memory)
-            self.baroreceptor_target_aorta_pressure = \
+                    start_index.cdata)
+            self.barorecetor_target_aorta_pressure = \
                 float(single_circulation_simulation.baroreceptor.
                       target_aorta_pressure.cdata)
+            self.baroreceptor_sensitivity = \
+                float(single_circulation_simulation.baroreceptor.
+                      sensitivity.cdata)
             self.baroreceptor_hr_gain = \
                 float(single_circulation_simulation.baroreceptor.
                       hr_gain.cdata)
+            self.baroreceptor_k1_gain = \
+                float(single_circulation_simulation.baroreceptor.
+                      k1_gain.cdata)
         else:
-             self.baroreceptor_active= 0
+             self.baroreceptor_active = 0
+             self.baroreceptor_signal = 0
 
         # Look for growth module
-        if (hasattr(single_circulation_simulation, 'growth_module')):
-            # do this
-            temp = 1
+        if (hasattr(single_circulation_simulation, 'growth')):
+            self.growth_active = 1
+            self.growth_memory = \
+                int(single_circulation_simulation.growth.
+                    memory.cdata)
+            self.growth_eccentric_start_index = \
+                int(single_circulation_simulation.growth.
+                    eccentric_start_index.cdata)
+            self.growth_eccentric_k = \
+                float(single_circulation_simulation.growth.
+                      eccentric_k.cdata)
+            self.growth_eccentric_target = \
+                float(single_circulation_simulation.growth.
+                      eccentric_target.cdata)
+
+            self.growth_concentric_start_index = \
+                int(single_circulation_simulation.growth.
+                    concentric_start_index.cdata)
+            self.growth_concentric_k = \
+                float(single_circulation_simulation.growth.
+                      concentric_k.cdata)
+            self.growth_concentric_target = \
+                float(single_circulation_simulation.growth.
+                      concentric_target.cdata)
+        else:
+            self.growth_active = 0
 
         # Initialize circulation object using data from the sim_object
         circ_params = single_circulation_simulation.circulation
@@ -115,10 +164,14 @@ class single_circulation():
         self.lv_circumference = \
             self.return_lv_circumference(self.ventricle_slack_volume)
         
+        # Set the number of half-sarcomeres
+        self.no_of_hs = self.lv_circumference / (1.0e-9 * slack_hsl)
+        
         print("hsl: %f" % self.hs.hs_length)
         print("slack hsl: %f" % slack_hsl)
         print("slack_lv_circumference %f" % self.lv_circumference)
-
+        print("no_of_hs: %f" % self.no_of_hs)
+        
 
         # Set the initial volumes with most of the blood in the veins
         initial_ventricular_volume = 1.5 * self.ventricle_slack_volume
@@ -172,7 +225,25 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'flow_veins_to_ventricle':
                                       np.zeros(self.output_buffer_size),
-                                  'volume_perturbation':
+                                  'perturbation_volume':
+                                      np.zeros(self.output_buffer_size),
+                                  'perturbation_venous_compliance':
+                                      np.zeros(self.output_buffer_size),
+                                  'venous_compliance':
+                                      np.zeros(self.output_buffer_size),
+                                  'perturbation_aorta_resistance':
+                                      np.zeros(self.output_buffer_size),
+                                  'aorta_resistance':
+                                      np.zeros(self.output_buffer_size),
+                                  'baroreceptor_signal':
+                                      np.zeros(self.output_buffer_size),
+                                  'heart_rate':
+                                      np.zeros(self.output_buffer_size),
+                                  'growth_eccentric':
+                                      np.zeros(self.output_buffer_size),
+                                  'no_of_half_sarcomeres':
+                                      np.zeros(self.output_buffer_size),
+                                  'growth_concentric':
                                       np.zeros(self.output_buffer_size),
                                   'ventricle_wall_volume':
                                       np.zeros(self.output_buffer_size)})
@@ -190,8 +261,27 @@ class single_circulation():
         self.data.at[0, 'volume_capillaries'] = self.v[3]
         self.data.at[0, 'volume_veins'] = self.v[4]
         self.data.at[0, 'volume_ventricle'] = self.v[5]
+        
+        self.data.at[0, 'venous_compliance'] = self.compliance[-2]
+        self.data.at[0, 'aorta_resistance'] = self.resistance[0]
+        
+        self.data.at[0, 'baroreceptor_signal'] = self.baroreceptor_signal
 
+        dt = float(self.simulation_parameters.time_step.cdata)
+        activation_frequency = float(self.simulation_parameters.activation_frequency.cdata)
+        self.heart_rate = activation_frequency
+
+        self.data.at[0, 'heart_rate'] = self.heart_rate
+
+        self.growth_eccentric = 0
+        self.data.at[0, 'growth_eccentric'] = self.growth_eccentric
+        self.data.at[0, 'no_of_half_sarcomeres'] = self.no_of_hs
+        self.growth_eccentric_array = np.zeros([self.growth_memory])
+
+        self.growth_concentric = 0
+        self.data.at[0, 'growth_concentric'] = self.growth_concentric
         self.data.at[0, 'ventricle_wall_volume'] = self.ventricle_wall_volume
+        self.growth_concentric_array = np.zeros([self.growth_memory])
 
     def return_flows(self, v):
         # returns fluxes between different compartments
@@ -268,11 +358,23 @@ class single_circulation():
         self.v = sol.y[:, -1]
 
         # Implements the length change on the half-sarcomere
+        # using the chain rule to account for changes in no_of_hs
         new_lv_circumference = self.return_lv_circumference(self.v[-1])
-        delta_hsl = self.hs.hs_length *\
-            ((new_lv_circumference / self.lv_circumference) - 1.0)
+        delta_lv_circumference = new_lv_circumference - self.lv_circumference;
+        
+        delta_no_of_hs = self.growth_eccentric * self.no_of_hs
+        delta_wall_volume = self.growth_concentric * self.ventricle_wall_volume        
+        
+#        print("ge: %g  delta_no_of_hs: %g" % (self.growth_eccentric, delta_no_of_hs))
+        
+        delta_hsl = (1 / self.no_of_hs) * \
+            ((1e9 * delta_lv_circumference) - \
+             (self.hs.hs_length * delta_no_of_hs))
+
         self.hs.update_simulation(0.0, delta_hsl, 0.0, 1)
         self.lv_circumference = new_lv_circumference
+        self.no_of_hs = self.no_of_hs + delta_no_of_hs
+        self.ventricle_wall_volume = self.ventricle_wall_volume + delta_wall_volume
 
         # Update the pressures
         vi = range(self.no_of_compartments-1)
@@ -314,9 +416,30 @@ class single_circulation():
         self.data.at[self.data_buffer_index, 'flow_veins_to_ventricle'] = \
             flows['veins_to_ventricle']
 
-        self.data.at[self.data_buffer_index, 'volume_perturbation'] = \
-            self.volume_perturbation[self.data_buffer_index]
+        self.data.at[self.data_buffer_index, 'perturbation_volume'] = \
+            self.perturbation_volume[self.data_buffer_index]
+        self.data.at[self.data_buffer_index, 'perturbation_venous_compliance'] = \
+            self.perturbation_venous_compliance[self.data_buffer_index]
+        self.data.at[self.data_buffer_index, 'venous_compliance'] = \
+            self.compliance[-2]
+        self.data.at[self.data_buffer_index, 'perturbation_aorta_resistance'] = \
+            self.perturbation_aorta_resistance[self.data_buffer_index]
+        self.data.at[self.data_buffer_index, 'aorta_resistance'] = \
+            self.resistance[0]
 
+        self.data.at[self.data_buffer_index, 'baroreceptor_signal'] = \
+            self.baroreceptor_signal
+
+        self.data.at[self.data_buffer_index, 'heart_rate'] = \
+            self.heart_rate
+            
+        self.data.at[self.data_buffer_index, 'growth_eccentric'] = \
+            self.growth_eccentric
+        self.data.at[self.data_buffer_index, 'no_of_half_sarcomeres'] = \
+            self.no_of_hs
+
+        self.data.at[self.data_buffer_index, 'growth_concentric'] = \
+            self.growth_concentric
         self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] = \
             self.ventricle_wall_volume
 
@@ -408,20 +531,38 @@ class single_circulation():
 
         # Run the simulation
         for i in np.arange(np.size(t)):
-            
+
             # Apply volume perturbation to veins
-            self.v[-2] = self.v[-2] + self.volume_perturbation[i]
+            self.v[-2] = self.v[-2] + self.perturbation_volume[i]
+            
+            # Apply other perturbations
+            self.resistance[0] = self.resistance[0] + \
+                self.perturbation_aorta_resistance[i]
+            self.compliance[-2] = self.compliance[-2] + \
+                self.perturbation_venous_compliance[i]
 
-            if (self.baroreceptor_active == 1):
-                # Baroreceptor mode
-                # Slide the pressure array across
-                self.baroreceptor_pressure_array = \
-                    np.roll(self.baroreceptor_pressure_array,1)
-                # Add in current aortic pressure
-                self.baroreceptor_pressure_array[0] = self.p[0]
+            if (self.baroreceptor_active):
+                # Calculate baroreceptor_signal
+                self.baroreceptor_signal = -0.5 + (1.0 / (1.0 + 
+                            np.exp(-(self.p[0] - self.barorecetor_target_aorta_pressure)
+                                * self.baroreceptor_sensitivity)))
 
-                # Decrement the counter
-                baroreceptor_counter = baroreceptor_counter - 1
+                if (i > self.baroreceptor_start_index):
+                    # Implement control
+                    baroreceptor_inter_act_counter = \
+                        baroreceptor_inter_act_counter + \
+                        (self.baroreceptor_signal * self.baroreceptor_hr_gain)
+                    
+                    baroreceptor_counter = \
+                        baroreceptor_counter - 1 + \
+                        (self.baroreceptor_signal * self.baroreceptor_hr_gain)
+                        
+                    self.hs.myof.k_1 = self.hs.myof.k_1 - \
+                        (self.baroreceptor_signal *
+                         self.baroreceptor_k1_gain * self.hs.myof.k_1);
+                else:
+                    # Decrement the counter
+                    baroreceptor_counter = baroreceptor_counter - 1
 
                 # Initiate activation if appropriate
                 if (baroreceptor_counter <= 0):
@@ -432,45 +573,59 @@ class single_circulation():
                     
                     # End activation
                     activation_level = 0.0
-
-                    # Deduce pressure error
-                    temp_p = self.baroreceptor_pressure_array[
-                            0:int(baroreceptor_inter_act_counter+
-                                  baroreceptor_act_counter-1)]
-                    pressure_error = \
-                        (temp_p.mean() - self.baroreceptor_target_aorta_pressure)
-                        
-                    # if error is negative, hr should speed up, so interact down
-                    baroreceptor_inter_act_counter = \
-                        (baroreceptor_inter_act_counter + 
-                        (self.baroreceptor_hr_gain * pressure_error))
-                    
-                    if (baroreceptor_inter_act_counter < (0.25 / dt)):
-                        baroreceptor_inter_act_counter = (0.25 / dt)
-                    
                     baroreceptor_counter = baroreceptor_inter_act_counter
 
                     # Update display
-                    print("Mean aortic pressure: %.0f Error: %.0f Heart-rate: %.2f" %
-                          (temp_p.mean(), pressure_error, 
-                          (1.0 / (dt*(baroreceptor_inter_act_counter + baroreceptor_act_counter)))))
+                    self.heart_rate = 1.0 / \
+                        (dt*(baroreceptor_inter_act_counter + baroreceptor_act_counter))
+                    print("Heart-rate: %.2f" % self.heart_rate)
+
             else:
                 # Predefined
                 activation_level = predefined_activation_level[i]
 
+            if (self.growth_active):
+
+                # Eccentric
+                if (i > self.growth_eccentric_start_index):
+                    ge = self.growth_eccentric_k * \
+                        (self.hs.myof.pas_force - self.growth_eccentric_target)
+                    # Slide the eccentric array
+                    self.growth_eccentric_array = \
+                        np.roll(self.growth_eccentric_array,1)
+                    # Add in new value
+                    self.growth_eccentric_array[0] = ge
+
+                # Concentric
+                if (i > self.growth_concentric_start_index):
+                    gc = self.growth_concentric_k * \
+                        (self.hs.myof.cb_force - self.growth_concentric_target)
+                    # Slide the eccentric array
+                    self.growth_concentric_array = \
+                        np.roll(self.growth_concentric_array,1)
+                    # Add in new value
+                    self.growth_concentric_array[0] = gc
+
+                # Set values
+                self.growth_eccentric = self.growth_eccentric_array.mean()
+                self.growth_concentric = self.growth_concentric_array.mean()
+
+            else:
+                self.growth_eccentric = 0
+                self.growth_concentric = 0
+
+
             # Display
             if ( (i % 200) == 0):
-                print("Blood volume: %.3g, %.0f %% complete" %
-                      (np.sum(self.v), (100*i/np.size(t))))
+                print("Blood volume: %.3g, no_of_hs: %g, wall_volume: %g, %.0f %% complete" %
+                      (np.sum(self.v),
+                      self.no_of_hs,
+                      self.ventricle_wall_volume,
+                      (100*i/np.size(t))))
 
             self.implement_time_step(dt, activation_level)
             self.update_data_holders(dt, activation_level)
             
-            if (i==50000):
-                self.baroreceptor_target_aorta_pressure = 80
-            
-            if (i==70000):
-                self.baroreceptor_target_aorta_pressure = 120
 
         # Concatenate data structures
         self.data = pd.concat([self.data, self.hs.hs_data], axis=1)
