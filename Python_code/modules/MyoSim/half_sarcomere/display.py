@@ -7,7 +7,7 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
                    kinetic_scheme='3state_with_SRX',
                    dpi=None):
     no_of_rows = 3
-    no_of_cols = 1
+    no_of_cols = 2
 
     f = plt.figure(constrained_layout=True)
     f.set_size_inches([6, 4.5])
@@ -35,6 +35,43 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
         ax2.set_xlabel('Time (s)')
         ax2.set_ylabel('Flux')
         ax2.legend(bbox_to_anchor=(1.05, 1))
+
+        ax3 = f.add_subplot(spec2[2, 0])
+        ax3.plot('time', 'Jon', data=data_structure, label='Jon')
+        ax3.plot('time', 'Joff', data=data_structure, label='Joff')
+        ax3.set_xlabel('Time (s)')
+        ax3.set_ylabel('Flux')
+        ax3.legend(bbox_to_anchor=(1.05, 1))
+        
+    if (kinetic_scheme=='4state_with_SRX'):
+        
+        ax1 = f.add_subplot(spec2[0, 0])
+        ax1.plot('time', 'J1', data=data_structure, label='J1')
+        ax1.plot('time', 'J2', data=data_structure, label='J2')
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Flux')
+        ax1.legend(bbox_to_anchor=(1.05, 1))
+
+        ax2 = f.add_subplot(spec2[1, 0])
+        ax2.plot('time', 'J3', data=data_structure, label='J3')
+        ax2.plot('time', 'J4', data=data_structure, label='J4')
+        ax2.set_xlabel('Time (s)')
+        ax2.set_ylabel('Flux')
+        ax2.legend(bbox_to_anchor=(1.05, 1))
+
+        ax_0_1 = f.add_subplot(spec2[0, 1])
+        ax_0_1.plot('time', 'J5', data=data_structure, label='J5')
+        ax_0_1.plot('time', 'J6', data=data_structure, label='J6')
+        ax_0_1.set_xlabel('Time (s)')
+        ax_0_1.set_ylabel('Flux')
+        ax_0_1.legend(bbox_to_anchor=(1.05, 1))
+
+        ax_1_1 = f.add_subplot(spec2[1, 1])
+        ax_1_1.plot('time', 'J7', data=data_structure, label='J7')
+        ax_1_1.plot('time', 'J8', data=data_structure, label='J8')
+        ax_1_1.set_xlabel('Time (s)')
+        ax_1_1.set_ylabel('Flux')
+        ax_1_1.legend(bbox_to_anchor=(1.05, 1))
 
         ax3 = f.add_subplot(spec2[2, 0])
         ax3.plot('time', 'Jon', data=data_structure, label='Jon')

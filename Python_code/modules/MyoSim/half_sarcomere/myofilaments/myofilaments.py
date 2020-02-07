@@ -57,6 +57,30 @@ class myofilaments():
             self.y[0] = 1.0
             self.y[-2] = 1.0
 
+
+        if (self.kinetic_scheme == '4state_with_SRX'):
+
+            self.k_1 = float(myofil_params.k_1.cdata)
+            self.k_force = float(myofil_params.k_force.cdata)
+            self.k_2 = float(myofil_params.k_2.cdata)
+            self.k_3 = float(myofil_params.k_3.cdata)
+            self.k_4_0 = float(myofil_params.k_4_0.cdata)
+            self.k_4_1 = float(myofil_params.k_4_1.cdata)
+            self.k_5_0 = float(myofil_params.k_5_0.cdata)
+            self.k_5_1 = float(myofil_params.k_5_1.cdata)
+            self.k_6 = float(myofil_params.k_6.cdata)
+            self.k_7_0 = float(myofil_params.k_7_0.cdata)
+            self.k_7_1 = float(myofil_params.k_7_1.cdata)
+            self.k_8 = float(myofil_params.k_8.cdata)
+            self.k_cb = float(myofil_params.k_cb.cdata)
+            self.x_ps = float(myofil_params.x_ps.cdata)
+
+            self.y_length = (2*self.no_of_x_bins) + 4
+            self.y = np.zeros(self.y_length)
+            # Start with all myosins in M1 and all binding sites off
+            self.y[0] = 1.0
+            self.y[-2] = 1.0            
+
         # Set up passive forces
         self.passive_mode = \
             myofil_params.passive_mode.cdata
@@ -79,6 +103,7 @@ class myofilaments():
         self.pas_force = 0.0
         self.total_force= 0.0
         self.set_myofilament_forces()
+
 
     def return_n_overlap(self):
         """ returns n_overlap """

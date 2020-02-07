@@ -197,6 +197,14 @@ def display_simulation(data_structure, output_file_string="", t_limits=[],
     ax_6_1.set_ylabel('Pert aorta resistance')
     ax_6_1.legend(bbox_to_anchor=(1.05, 1))
     
+    ax_7_1 = f.add_subplot(spec2[7, 1])
+    ax_7_1.plot('time', 'perturbation_k_1', data=data_structure,
+                label='pert_k_1')
+    if t_limits:
+        ax_7_1.set_xlim(t_limits)
+    ax_7_1.set_ylabel('Pert k_1')
+    ax_7_1.legend(bbox_to_anchor=(1.05, 1))
+    
     ax_0_2 = f.add_subplot(spec2[0, 2])
     ax_0_2.plot('time', 'growth_eccentric', data=data_structure, label='growth_eccentric')
     if t_limits:
@@ -241,6 +249,12 @@ def display_simulation(data_structure, output_file_string="", t_limits=[],
     ax_6_2.set_ylabel('Aorta resistance')
     ax_6_2.legend(bbox_to_anchor=(1.05, 1))
 
+    ax_7_2 = f.add_subplot(spec2[7, 2])
+    ax_7_2.plot('time', 'k_1', data=data_structure, label='k_1')
+    if t_limits:
+        ax_7_2.set_xlim(t_limits)
+    ax_7_2.set_ylabel('k_1')
+    ax_7_2.legend(bbox_to_anchor=(1.05, 1))
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

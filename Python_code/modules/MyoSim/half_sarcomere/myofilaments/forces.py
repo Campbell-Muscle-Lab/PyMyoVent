@@ -26,10 +26,22 @@ def return_cb_force(self, delta_hsl):
             np.sum(bin_pops * (self.x + self.x_ps +
                                (self.filament_compliance_factor * delta_hsl)))
         return cb_force
+    
+    if (self.kinetic_scheme == '4state_with_SRX'):
+        M3_indices = 2 + np.arange(0, self.no_of_x_bins)
+        M4_indices = (2 + self.no_of_x_bins) + \
+                    np.arange(0, self.no_of_x_bins)
 
-def return_x(self,x):
-    return x
+        M3 = self.y[M3_indices]
+        M4 = self.y[M4_indices]
 
+        cb_force = \
+            self.parent_hs.cb_number_density * self.k_cb * 1e-9 * ( 
+            np.sum(M3 * (self.x + (self.filament_compliance_factor * delta_hsl))) + 
+            np.sum(M4 * ((self.x + self.x_ps) + 
+                    (self.filament_compliance_factor * delta_hsl))))
+
+        return cb_force
 
 
 def return_passive_force(self, delta_hsl):

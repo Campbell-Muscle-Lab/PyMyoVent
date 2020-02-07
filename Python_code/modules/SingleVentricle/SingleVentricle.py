@@ -32,6 +32,7 @@ class single_circulation():
         self.perturbation_volume = np.zeros(self.output_buffer_size+1)
         self.perturbation_venous_compliance = np.zeros(self.output_buffer_size+1)
         self.perturbation_aorta_resistance = np.zeros(self.output_buffer_size+1)
+        self.perturbation_k_1 = np.zeros(self.output_buffer_size+1)
         
         if (hasattr(single_circulation_simulation, 'perturbations')):
             if hasattr(single_circulation_simulation.perturbations, 'volume'):
@@ -58,6 +59,14 @@ class single_circulation():
                 self.perturbation_aorta_resistance[(start_index+1):(stop_index+1)] =\
                     increment
 
+        if hasattr(single_circulation_simulation.perturbations, 'k_1'):
+                temp = single_circulation_simulation.perturbations.k_1
+                start_index = int(temp.start_index.cdata)
+                stop_index = int(temp.stop_index.cdata)
+                increment = float(temp.increment.cdata)
+                self.perturbation_k_1[(start_index+1):(stop_index+1)] =\
+                    increment
+
 
         # Look for baroreceptor module
         if (hasattr(single_circulation_simulation, 'baroreceptor')):
@@ -78,6 +87,9 @@ class single_circulation():
             self.baroreceptor_k1_gain = \
                 float(single_circulation_simulation.baroreceptor.
                       k1_gain.cdata)
+            self.baroreceptor_k3_gain = \
+                float(single_circulation_simulation.baroreceptor.
+                      k3_gain.cdata)
         else:
              self.baroreceptor_active = 0
              self.baroreceptor_signal = 0
@@ -235,6 +247,8 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'aorta_resistance':
                                       np.zeros(self.output_buffer_size),
+                                  'k_1':
+                                      np.zeros(self.output_buffer_size),
                                   'baroreceptor_signal':
                                       np.zeros(self.output_buffer_size),
                                   'heart_rate':
@@ -264,6 +278,7 @@ class single_circulation():
         
         self.data.at[0, 'venous_compliance'] = self.compliance[-2]
         self.data.at[0, 'aorta_resistance'] = self.resistance[0]
+        self.data.at[0, 'k_1'] = self.hs.myof.k_1
         
         self.data.at[0, 'baroreceptor_signal'] = self.baroreceptor_signal
 
@@ -426,6 +441,10 @@ class single_circulation():
             self.perturbation_aorta_resistance[self.data_buffer_index]
         self.data.at[self.data_buffer_index, 'aorta_resistance'] = \
             self.resistance[0]
+        self.data.at[self.data_buffer_index, 'perturbation_k_1'] = \
+            self.perturbation_k_1[self.data_buffer_index]
+        self.data.at[self.data_buffer_index, 'k_1'] = \
+            self.hs.myof.k_1
 
         self.data.at[self.data_buffer_index, 'baroreceptor_signal'] = \
             self.baroreceptor_signal
@@ -540,6 +559,8 @@ class single_circulation():
                 self.perturbation_aorta_resistance[i]
             self.compliance[-2] = self.compliance[-2] + \
                 self.perturbation_venous_compliance[i]
+            self.hs.myof.k_1 = self.hs.myof.k_1 + \
+                self.perturbation_k_1[i]
 
             if (self.baroreceptor_active):
                 # Calculate baroreceptor_signal
@@ -560,6 +581,10 @@ class single_circulation():
                     self.hs.myof.k_1 = self.hs.myof.k_1 - \
                         (self.baroreceptor_signal *
                          self.baroreceptor_k1_gain * self.hs.myof.k_1);
+
+                    self.hs.myof.k_3 = self.hs.myof.k_3 - \
+                        (self.baroreceptor_signal *
+                         self.baroreceptor_k3_gain * self.hs.myof.k_3);
                 else:
                     # Decrement the counter
                     baroreceptor_counter = baroreceptor_counter - 1
@@ -598,8 +623,12 @@ class single_circulation():
 
                 # Concentric
                 if (i > self.growth_concentric_start_index):
-                    gc = self.growth_concentric_k * \
-                        (self.hs.myof.cb_force - self.growth_concentric_target)
+                    if (self.hs.myof.kinetic_scheme == '4state_with_SRX'):
+                        gc = self.growth_concentric_k * \
+                            (self.hs.hs_data.at[i-1, 'J7'] - self.growth_concentric_target)
+                    else:
+                        gc = self.growth_concentric_k * \
+                            (self.hsmyof.cb_force - self.growth_concentric_target)
                     # Slide the eccentric array
                     self.growth_concentric_array = \
                         np.roll(self.growth_concentric_array,1)
@@ -641,7 +670,8 @@ class single_circulation():
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
-                               self.output_parameters.hs_fluxes_figure.cdata)
+                               self.output_parameters.hs_fluxes_figure.cdata,
+                               kinetic_scheme = self.hs.myof.kinetic_scheme)
 
         if (self.output_parameters.data_file.cdata):
             # Write data to disk
