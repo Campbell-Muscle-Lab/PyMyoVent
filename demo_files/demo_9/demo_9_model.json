@@ -2,6 +2,7 @@
   "output_parameters": {
 
     "summary_figure": ["..\\temp\\demo_9\\demo_9_summary.png"],
+    "force_length": ["..\\temp\\demo_9\\demo_9_F_L.png"],
     "pv_figure": ["..\\temp\\demo_9\\demo_9_pv.png"],
     "baro_figure": ["..\\temp\\demo_9\\demo_9_baro.png"],
     "flows_figure": ["..\\temp\\demo_9\\demo_9_flows.png"],
@@ -12,7 +13,7 @@
   "baroreflex": {
     "baro_scheme": ["simple_baroreceptor"],
     "simulation":{
-      "no_of_time_points": [300000],
+      "no_of_time_points": [500000],
       "time_step": [0.001],
       "duty_ratio": [0.3],
       "basal_heart_period": [0.833,"s"],
@@ -46,9 +47,48 @@
   },
   "perturbations": {
     "volume":{
-      "start_index": [50000],
-      "stop_index": [60000],
+      "start_index": [300000],
+      "stop_index": [310000],
       "increment": [0]
+    },
+    "compliance": {
+      "aorta":{
+        "start_index": [200000],
+        "stop_index": [205000],
+        "increment": [0]
+      },
+      "capillaries": {
+        "start_index": [200000],
+        "stop_index": [205000],
+        "increment": [0]
+      },
+      "venous":{
+        "start_index": [500000],
+        "stop_index": [505000],
+        "increment": [1.4e-5]
+      }
+    },
+    "resistance": {
+      "aorta":{
+        "start_index": [500000],
+        "stop_index": [505000],
+        "increment": [3.6e-3]
+      },
+      "capillaries": {
+        "start_index": [500000],
+        "stop_index": [505000],
+        "increment": [0]
+      },
+      "venous":{
+        "start_index": [500000],
+        "stop_index": [505000],
+        "increment": [-7.2e-3]
+      },
+      "ventricle":{
+        "start_index": [500000],
+        "stop_index": [505000],
+        "increment": [-3.6e-3]
+      }
     }
   },
 
@@ -124,25 +164,25 @@
     }
   },
   "growth": {
-    "start_time_percentage": [40],
+    "start_time_seconds": [200],
+    "ventricle_wall_volume": [0.03,"liters"],
+    "ventricle_slack_volume": [0.08, "liters"],
     "driven_signal": ["stress"],
     "stress_signal":{
-      "critical_total_stress": [25000,"N.m-2"],
-      "passive_set_point": [3000,"N.m-2"],
-      "max_passive_set_point": [8000,"N.m-2"],
-      "min_passive_set_point": [2000,"N.m-2"],
-      "slope_passive_set_point": [5e4,"N.m-2/(1 hs)"],
       "concenrtric_growth": {
-        "ventricle_wall_volume": [0.03,"liters"],
-        "ventricle_slack_volume": [0.08, "liters"],
-        "G_wall_thickness": [0]
+        "G_wall_thickness": [1e-6]
       },
       "eccentric_growth": {
-        "G_number_of_hs": [1e-5]
+        "G_number_of_hs": [-3e-6]
       }
     },
     "strain_signal":{
-      "critical_strain": [0.075]
+      "concenrtric_growth" :{
+        "Gs_wall_thickness": [0]
+      },
+      "eccentric_growth" :{
+        "Gs_number_of_hs": [-0.1]
+      }
     }
   }
 }
