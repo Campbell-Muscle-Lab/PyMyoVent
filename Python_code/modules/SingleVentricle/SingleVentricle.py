@@ -27,6 +27,7 @@ class single_circulation():
 
         self.output_buffer_size = \
             int(self.baroreflex["simulation"]["no_of_time_points"][0])
+        self.dt= float(self.baroreflex["simulation"]["time_step"][0])
         self.T=\
             float(self.baroreflex["simulation"]["basal_heart_period"][0])
 
@@ -35,18 +36,6 @@ class single_circulation():
         #self.output_buffer_size = \
         #    int(single_circulation_simulation.baroreflex.
         #        no_of_time_points.cdata)
-
-        # Look for perturbations
-        self.volume_perturbation = np.zeros(self.output_buffer_size+1)
-        if (hasattr(single_circulation_simulation, 'perturbations')):
-            if hasattr(single_circulation_simulation["perturbations"], 'volume'):
-                temp = single_circulation_simulation["perturbations"]["volume"]
-                start_index = int(temp["start_index"][0])
-                stop_index = int(temp["stop_index"][0])
-                increment = float(temp["increment"][0])
-                self.volume_perturbation[(start_index+1):(stop_index+1)] =\
-                    increment
-
 
 
 
@@ -92,7 +81,86 @@ class single_circulation():
                                     self.veins_compliance,
                                     0])
 
+        # Look for perturbations
+        self.volume_perturbation = np.zeros(self.output_buffer_size+1)
+        self.aorta_compliance_perturbation=\
+        np.zeros(self.output_buffer_size+1)
+        self.capillaries_compliance_perturbation=\
+        np.zeros(self.output_buffer_size+1)
+        self.venous_compliance_perturbation =\
+        np.zeros(self.output_buffer_size+1)
+        self.aorta_resistance_perturbation=\
+        np.zeros(self.output_buffer_size+1)
+        self.capillaries_resistance_perturbation=\
+        np.zeros(self.output_buffer_size+1)
+        self.venous_resistance_perturbation =\
+        np.zeros(self.output_buffer_size+1)
+        self.ventricle_resistance_perturbation =\
+        np.zeros(self.output_buffer_size+1)
+        if 'perturbations' in single_circulation_simulation:
+            pert = single_circulation_simulation['perturbations']
+            if 'volume' in pert:
+                temp_vol=pert["volume"]
+                start_index = int(temp_vol["start_index"][0])
+                stop_index = int(temp_vol["stop_index"][0])
+                increment = float(temp_vol["increment"][0])
+                self.volume_perturbation[(start_index+1):(stop_index+1)] =\
+                    increment
+            if 'compliance' in pert:
+                temp_c = pert["compliance"]
+                if 'aorta' in temp_c:
+                    temp_ac = temp_c['aorta']
+                    start_index = int(temp_ac["start_index"][0])
+                    stop_index = int(temp_ac["stop_index"][0])
+                    increment = float(temp_ac["increment"][0])
+                    self.aorta_compliance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
+                if 'capillaries' in temp_c:
+                    temp_cc = temp_c['capillaries']
+                    start_index = int(temp_cc["start_index"][0])
+                    stop_index = int(temp_cc["stop_index"][0])
+                    increment = float(temp_cc["increment"][0])
+                    self.capillaries_compliance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
+                if 'venous' in temp_c:
+                    temp_vc = temp_c['venous']
+                    start_index = int(temp_vc["start_index"][0])
+                    stop_index = int(temp_vc["stop_index"][0])
+                    increment = float(temp_vc["increment"][0])
+                    self.venous_compliance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
 
+            if "resistance" in pert:
+                temp_r = pert["resistance"]
+                if 'aorta' in temp_r:
+                    temp_ar = temp_r['aorta']
+                    start_index = int(temp_ar["start_index"][0])
+                    stop_index = int(temp_ar["stop_index"][0])
+                    increment = float(temp_ar["increment"][0])
+                    self.aorta_resistance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
+
+                if 'capillaries' in temp_r:
+                    temp_cr = temp_r['capillaries']
+                    start_index = int(temp_cr["start_index"][0])
+                    stop_index = int(temp_cr["stop_index"][0])
+                    increment = float(temp_cr["increment"][0])
+                    self.capillaries_resistance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
+                if 'venous' in temp_r:
+                    temp_vr = temp_r['venous']
+                    start_index = int(temp_vr["start_index"][0])
+                    stop_index = int(temp_vr["stop_index"][0])
+                    increment = float(temp_vr["increment"][0])
+                    self.venous_resistance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
+                if 'ventricle' in temp_r:
+                    temp_vtr = temp_r['ventricle']
+                    start_index = int(temp_vtr["start_index"][0])
+                    stop_index = int(temp_vtr["stop_index"][0])
+                    increment = float(temp_vtr["increment"][0])
+                    self.ventricle_resistance_perturbation[(start_index+1):(stop_index+1)]=\
+                    increment
         # Pull off the half_sarcomere parameters
         hs_params = single_circulation_simulation["half_sarcomere"]
         self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
@@ -122,13 +190,17 @@ class single_circulation():
         if 'growth' in single_circulation_simulation:
             # do this
             from modules.Growth import growth as gr
-
+            self.growth = True
             growth_params = single_circulation_simulation["growth"]
-            start_time_percentage = int(growth_params["start_time_percentage"][0])
+
+            start_time_second = int(growth_params["start_time_seconds"][0])
             start_index=\
-            int(start_time_percentage*self.output_buffer_size/100)
+            int(start_time_second/self.dt)
 
             self.driven_signal = growth_params["driven_signal"][0]
+
+            if self.driven_signal != "stress" and "strain":
+                print('Growth driven signal is not defined correctly!')
 
             if self.driven_signal == "strain":
                 self.strain = self.delta_hsl/self.slack_hsl
@@ -140,7 +212,8 @@ class single_circulation():
 #            self.wall_thickness = 0.001 * self.ventricle_wall_volume /internal_area
 
             initial_numbers_of_hs = self.n_hs#10e9*self.lv_circumference / self.slack_hsl
-            self.gr = gr.growth(growth_params,initial_numbers_of_hs,self.output_buffer_size)
+            self.gr = \
+            gr.growth(growth_params,initial_numbers_of_hs,self.output_buffer_size,start_index)
 
             self.growth_activation_array[start_index:] = True
             self.growth_activation = self.growth_activation_array[0]
@@ -249,14 +322,14 @@ class single_circulation():
         # Run the simulation
         from .implement import implement_time_step, update_data_holders
         from .display import display_simulation, display_flows, display_pv_loop
-        from .display import display_baro_results,display_growth
+        from .display import display_baro_results,display_growth, display_force_length
 
         #baro_params = single_circulation_simulation.baroreflex
         # Set up some values for the simulation
         no_of_time_points = \
             int(self.baro_params["simulation"]["no_of_time_points"][0])
 
-        dt = float(self.baro_params["simulation"]["time_step"][0])
+        dt = self.dt#float(self.baro_params["simulation"]["time_step"][0])
 
         #activation_frequency = \
         #    float(self.baro_params.activation.activation_frequency.cdata)
@@ -272,6 +345,25 @@ class single_circulation():
         for i in np.arange(np.size(t)):
             # Apply volume perturbation to veins
             self.v[-2] = self.v[-2] + self.volume_perturbation[i]
+            # Apply perturbation to compliances
+            self.compliance[0]=self.compliance[0]+\
+                            self.aorta_compliance_perturbation[i]
+            self.compliance[2]=self.compliance[2] +\
+                            self.capillaries_compliance_perturbation[i]
+            self.compliance[-2]=self.compliance[-2] +\
+                            self.venous_compliance_perturbation[i]
+            # Apply perturbation to resistances
+            self.resistance[0]=self.resistance[0]+\
+                            self.aorta_resistance_perturbation[i]
+            self.resistance[2]=self.resistance[2] +\
+                            self.capillaries_resistance_perturbation[i]
+            self.resistance[-2]=self.resistance[-2] +\
+                            self.venous_resistance_perturbation[i]
+            self.resistance[-1] = self.resistance[-1] +\
+                            self.ventricle_resistance_perturbation[i]
+
+
+
             # Apply growth activation
             self.growth_activation = self.growth_activation_array[i]
             # Apply heart rate activation
@@ -308,6 +400,8 @@ class single_circulation():
                       self.output_parameters["flows_figure"][0])
         display_pv_loop(self.data,
                         self.output_parameters["pv_figure"][0])
+        display_force_length(self.data,
+                        self.output_parameters["force_length"][0])
         if(hasattr(self.data,'heart_period')):
             display_baro_results(self.data,
                             self.output_parameters["baro_figure"][0])
@@ -318,7 +412,7 @@ class single_circulation():
         #Growth
         if self.growth_activation:
             display_growth(self.data,
-                                    self.output_parameters["growth_figure"][0])
+            self.output_parameters["growth_figure"][0],self.driven_signal)
         if "data_file" in  self.output_parameters.values():
         #if not (self.output_parameters["data_file"]):
             # Write data to disk
