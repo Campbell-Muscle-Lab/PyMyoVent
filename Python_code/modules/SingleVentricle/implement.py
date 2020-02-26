@@ -8,84 +8,19 @@ def implement_time_step(self, time_step, activation,i):
     """ Steps circulatory system forward in time """
     # Update the half-sarcomere
     self.hs.update_simulation(time_step, 0.0, activation, 1)
-#    self.slack_hsl = self.hs.myof.return_hs_length_for_force(0.0)
-    # steps solution forward in time
     self.v = evolve_volumes(self, time_step, self.v)
     new_lv_circumference = return_lv_circumference(self,self.v[-1])
 
-    #calculating half-sarcomere length change with considering eccentric growth
-
+    #Growth module
     if self.growth_activation:
-        #stress driven signal
-        if self.driven_signal == "stress":
-            #calculate cell stress set-point
-            if self.growth_activation_array[i-1]==False:
+            #Calculating null stress for growth module
+        if self.growth_activation_array[i-1]==False:
+            self.gr.growth_driver()
+        self.gr.update_growth(time_step)
 
-                self.pass_force_null= np.mean(self.hs.hs_data["pas_force"][i-100000:i])
-#                self.pass_force_null =3200
-                self.data['pas_force_null'] = \
-                pd.Series(np.full(self.output_buffer_size,self.pass_force_null))
+        self.wall_thickness = self.gr.wall_thickness
+        self.n_hs = self.gr.number_of_hs
 
-                self.cb_force_null = np.mean(self.hs.hs_data["cb_force"][i-100000:i])
-#                self.cb_force_null = 22000
-                self.data['cb_force_null'] = \
-                pd.Series(np.full(self.output_buffer_size,self.cb_force_null))
-
-                self.total_force_null = np.mean(self.hs.hs_data["hs_force"][:i])
-                self.data['hs_force_null'] = \
-                pd.Series(np.full(self.output_buffer_size,self.total_force_null))
-
-                print('***')
-                print('Growth module is started to work!')
-                print('with passive force_null of ',self.pass_force_null)
-                print('and active force_null of',self.cb_force_null)
-                print('and total force null of',self.total_force_null)
-                print('***')
-
-
-            passive_force = self.hs.myof.pas_force #f['pas_force']
-            cb_force = self.hs.myof.cb_force#f['cb_force']
-            total_force = self.hs.myof.total_force
-
-
-            #concentric
-            self.wall_thickness = \
-            self.gr.return_lv_wall_thickness(time_step,cb_force,self.cb_force_null)
-            #eccentric
-            #new_number_of_hs = \
-            self.n_hs = \
-            self.gr.return_number_of_hs(time_step,passive_force,
-                            self.pass_force_null,self.v[-1],self.hs.hs_length)
-        #strain driven signal
-        elif self.driven_signal == "strain":
-#            hsl_pre_gr = 10e9*new_lv_circumference/self.gr.n_of_hs
-#            self.strain = (hsl_pre_gr - self.slack_hsl)/self.slack_hsl
-            if self.growth_activation_array[i-1]==False:
-                self.cell_strain_null = np.mean(self.data["cell_strain"][:i])
-                self.data['cell_strain_null'] = \
-                pd.Series(np.full(self.output_buffer_size,self.cell_strain_null))
-                print('cell_strain_null',self.cell_strain_null)
-            #concentric
-            self.wall_thickness = \
-            self.gr.return_lv_wall_thickness_strain(time_step,self.strain,self.cell_strain_null)
-            #eccentric
-            #new_number_of_hs = \
-            self.n_hs = \
-            self.gr.return_number_of_hs_strain(time_step,self.strain,
-            self.cell_strain_null,self.v[-1],self.hs.hs_length)
-
-
-#        self.ventricle_wall_volume = return_wall_volume(self, self.v[-1])
-#        self.wall_thickness = return_wall_thickness(self,self.v[-1])
-
-
-#        new_hs_length = 10e9*new_lv_circumference / self.n_hs#new_number_of_hs
-#        delta_hsl = new_hs_length - self.hs.hs_length
-
-    #calculating half-sarcomere length change without considering any growth
-#    else:
-#        delta_hsl = self.hs.hs_length *\
-#            ((new_lv_circumference / self.lv_circumference) - 1.0)
     if self.growth_activation_array[-1]:
         self.ventricle_wall_volume = return_wall_volume(self, self.v[-1])
     new_hs_length = 10e9*new_lv_circumference / self.n_hs
@@ -93,8 +28,6 @@ def implement_time_step(self, time_step, activation,i):
     delta_hsl = new_hs_length - self.hs.hs_length
     # Implements the length change on the half-sarcomere
     self.hs.update_simulation(0.0, delta_hsl, 0.0, 1)
-
-#    total_force = self.hs.myof.total_force
 
     self.lv_circumference = new_lv_circumference
 
@@ -115,13 +48,10 @@ def implement_time_step(self, time_step, activation,i):
 
         self.syscon.update_baroreceptor(time_step,arterial_pressure, arterial_pressure_rate)
 
-        heart_period = self.syscon.return_heart_period(time_step,i)
+        self.syscon.return_heart_period(time_step,i)
 
         self.hs.myof.k_1, self.hs.myof.k_3 =\
         self.syscon.return_contractility(time_step,i)
-
-
-
 
 def update_data_holders(self, time_step, activation):
 
@@ -158,8 +88,8 @@ def update_data_holders(self, time_step, activation):
 
     self.data.at[self.data_buffer_index, 'volume_perturbation'] = \
         self.volume_perturbation[self.data_buffer_index]
-    self.data.at[self.data_buffer_index, 'ventricle_wall_thickness'] =\
-            self.wall_thickness
+#    self.data.at[self.data_buffer_index, 'ventricle_wall_thickness'] =\
+#            self.wall_thickness
     self.data.at[self.data_buffer_index, 'cell_strain'] = self.strain
     if self.growth_activation_array[-1]:
         self.data.at[self.data_buffer_index, 'ventricle_wall_volume'] =\
