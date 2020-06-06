@@ -10,7 +10,7 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
-    f.set_size_inches([6, 4.5])
+    f.set_size_inches([10, 4.5])
     spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
                               figure=f)
 
@@ -21,7 +21,7 @@ def display_fluxes(data_structure, output_file_string="", t_limits=[], \
         data_structure = data_structure.iloc[vi]
 
     if (kinetic_scheme=='3state_with_SRX'):
-        
+
         ax1 = f.add_subplot(spec2[0, 0])
         ax1.plot('time', 'J1', data=data_structure, label='J1')
         ax1.plot('time', 'J2', data=data_structure, label='J2')
@@ -51,7 +51,7 @@ def save_figure_to_file(f, im_file_string, dpi=None, verbose=1):
 
     import os
     from skimage.io import imsave
-    
+
     # Check directory exists and save image file
     dir_path = os.path.dirname(im_file_string)
     if not os.path.isdir(dir_path):

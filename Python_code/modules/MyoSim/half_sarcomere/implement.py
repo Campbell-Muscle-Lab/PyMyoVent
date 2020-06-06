@@ -21,6 +21,7 @@ def update_simulation(self, time_step, delta_hsl, activation, set_data = 0):
         self.hs_length = self.hs_length + delta_hsl
 
     # Update forces
+
     self.myof.set_myofilament_forces()
     self.hs_force = self.myof.total_force
 
@@ -59,6 +60,10 @@ def update_data_holder(self, dt, activation):
         self.hs_data.at[self.data_buffer_index, 'J4'] = np.sum(fluxes['J4'])
         self.hs_data.at[self.data_buffer_index, 'Jon'] = fluxes['Jon']
         self.hs_data.at[self.data_buffer_index, 'Joff'] = fluxes['Joff']
+        self.hs_data.at[self.data_buffer_index, 'N_overlap'] = self.myof.n_overlap
+
+        if self.ATPase_activation:    
+            self.hs_data.at[self.data_buffer_index, 'ATPase'] = self.ATPase
 
     if (self.membr.kinetic_scheme == "Ten_Tusscher_2004"):
         # Ten Tusscher membrane voltage is in mV
@@ -67,4 +72,3 @@ def update_data_holder(self, dt, activation):
 
     self.hs_data.at[self.data_buffer_index, 'cb_number_density'] = \
         self.cb_number_density
-

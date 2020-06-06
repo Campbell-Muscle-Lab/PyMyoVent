@@ -22,6 +22,11 @@ class half_sarcomere():
         self.temperature = float(hs_params["temperature"][0])
         self.cb_number_density = float(hs_params["cb_number_density"][0])
 
+        self.ATPase_activation = hs_params["ATPase_activation"][0]
+        self.delta_G = float(hs_params["delta_energy"][0])
+        self.N_A = float(hs_params["avagadro_number"][0])
+        self.L0 = float(hs_params["referench_hs_length"][0])
+
         # Pull of membrane parameters
         membr_params = hs_params["membranes"]
         self.membr = membranes.membranes(membr_params, self)
@@ -44,6 +49,7 @@ class half_sarcomere():
         self.hs_time = 0.0
         self.data_buffer_index = int(0)
         self.hs_data = pd.DataFrame({'hs_time' : np.zeros(self.data_buffer_size),
+                                     'activation': np.zeros(self.data_buffer_size),
                                      'hs_length' : self.hs_length * np.ones(self.data_buffer_size),
                                      'hs_force' : np.zeros(self.data_buffer_size),
                                      'cb_force' : np.zeros(self.data_buffer_size),
@@ -75,6 +81,12 @@ class half_sarcomere():
             self.hs_data['J4'] = pd.Series(np.zeros(self.data_buffer_size))
             self.hs_data['Jon'] = pd.Series(np.zeros(self.data_buffer_size))
             self.hs_data['Joff'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['N_overlap'] = pd.Series(np.full(self.data_buffer_size,self.myof.n_overlap))
+
+            #ATPase
+            if self.ATPase_activation:
+                self.ATPase = 0
+                self.hs_data['ATPase'] = pd.Series(np.zeros(self.data_buffer_size))
 
         if (self.membr.kinetic_scheme == "Ten_Tusscher_2004"):
             self.hs_data['membrane_voltage'] = pd.Series(np.zeros(self.data_buffer_size))
