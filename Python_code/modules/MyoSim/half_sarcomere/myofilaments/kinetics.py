@@ -9,7 +9,6 @@ def evolve_kinetics(self, time_step, Ca_conc):
     if (self.kinetic_scheme == '3state_with_SRX'):
         update_3state_with_SRX(self, time_step, Ca_conc)
 
-
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
     if (self.kinetic_scheme == '3state_with_SRX'):
@@ -30,7 +29,7 @@ def return_fluxes(self, y, Ca_conc):
         J2 = r2 * M_ON
 
         r3 = self.k_3 * \
-                np.exp(-self.k_cb * (self.x**2) / 
+                np.exp(-self.k_cb * (self.x**2) /
                     (2.0 * 1e18 * scipy_constants.Boltzmann * self.parent_hs.temperature))
         r3[r3 > self.parent_hs.max_rate] = self.parent_hs.max_rate
         J3 = r3 * self.bin_width * M_ON * (n_on - n_bound)
@@ -94,16 +93,33 @@ def update_3state_with_SRX(self, time_step, Ca_conc):
     self.y = sol.y[:, -1]
     self.n_on = y[-1]
     self.n_bound = np.sum(self.y[2 + np.arange(0, self.no_of_x_bins)])
-    
+
     # Do some tidying for extreme situations
     self.y[np.nonzero(self.y > 1.0)] = 1.0
     self.y[np.nonzero(self.y < 0.0)] = 0.0
     sum_of_heads = np.sum(self.y[np.arange(2+self.no_of_x_bins)])
     # These appear in M_off
     self.y[0] = self.y[0] + (1.0-sum_of_heads)
-    
+
 #    print("Total: %f" % np.sum(self.y[np.arange(0, self.no_of_x_bins+2)]))
 #    if any(self.y < -1e-2):
 #        print(self.y)
 #        print("self.y is less than 0")
 #        quit()
+    #
+def return_ATPase(self,wall_volume):
+
+    N0 = self.parent_hs.cb_number_density
+    delta_G = self.parent_hs.delta_G
+
+    L0 = 1e-9*self.parent_hs.L0
+    N_A = self.parent_hs.N_A
+
+    fluxes = return_fluxes(self,self.y,self.parent_hs.Ca_conc)
+    J4 = np.sum(fluxes['J4'])
+    # convert liter to meter^3
+    w_vol = wall_volume*0.001
+
+    self.ATPase = (N0 * w_vol * delta_G * J4)/(L0 * N_A)
+
+    return self.ATPase

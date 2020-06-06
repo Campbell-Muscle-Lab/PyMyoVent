@@ -4,11 +4,10 @@ import numpy as np
 class myofilaments():
     """Class for myofilaments"""
 
-    from .kinetics import evolve_kinetics, return_fluxes
+    from .kinetics import evolve_kinetics, return_fluxes, return_ATPase
     from .move import move_cb_distributions
     from .forces import set_myofilament_forces, check_myofilament_forces, \
         return_hs_length_for_force, return_passive_force
-    from .update_contractility import update_contractility
 
     def __init__(self, myofil_params, parent_half_sarcomere):
         self.parent_hs = parent_half_sarcomere
