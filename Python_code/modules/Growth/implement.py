@@ -4,8 +4,8 @@ from scipy.integrate import solve_ivp
 import pandas as pd
 
 def update_growth(self,time_step):
-
-    self.wall_thickness = return_lv_wall_thickness(self,time_step)
+    self.wall_volume = return_lv_wall_volume(self,time_step)
+    #self.wall_thickness = return_lv_wall_thickness(self,time_step)
     self.number_of_hs = return_number_of_hs(self,time_step)
 
 # stress driven growth
@@ -14,11 +14,11 @@ def return_lv_wall_thickness(self,time_step):
     if self.growth["driven_signal"][0] == "stress":
 
         f = self.hs.myof.cb_force
-#         f_null = self.cb_stress_null
-        window_null = int(self.start_index)
-        self.cb_array = np.append(self.cb_array,f)
-        f_null =np.mean(self.cb_array)
-        self.cb_stress_null = f_null
+        f_null = self.cb_stress_null
+#        window_null = int(self.start_index)
+#        self.cb_array = np.append(self.cb_array,f)
+#        f_null =np.mean(self.cb_array)
+#        self.cb_stress_null = f_null
 
         window = self.ma_window
 
@@ -56,15 +56,27 @@ def return_lv_wall_thickness(self,time_step):
         self.tw = dwdt*time_step + self.tw
 
     return self.tw
+def return_lv_wall_volume(self,time_step):
+    f = self.hs.myof.cb_force
+    f_null = self.cb_stress_null
 
+    window = self.ma_window
+    wv_0 = self.wall_volume
+    dwvdt_0 = self.G_wv*(f-f_null)*self.wall_volume
+    self.wv_rate = np.append(self.wv_rate,dwvdt_0)
+    dwvdt = np.mean(self.wv_rate[-window:])
+    wv = dwvdt*time_step+dwvdt_0
+
+    self.wall_volume
+    return self.wall_volume
 def return_number_of_hs(self,time_step):
     p = self.hs.myof.pas_force
-#    p_null = self.passive_stress_null
+    p_null = self.passive_stress_null
 
-    window_null = int(self.start_index/1)
-    self.pass_array = np.append(self.pass_array,p)
-    p_null =np.mean(self.pass_array)
-    self.passive_stress_null = p_null
+#    window_null = int(self.start_index/1)
+#    self.pass_array = np.append(self.pass_array,p)
+#    p_null =np.mean(self.pass_array)
+#    self.passive_stress_null = p_null
 
     window = self.ma_window
 
@@ -96,5 +108,6 @@ def update_data_holder(self,time_step):
     if self.growth["driven_signal"][0] == "ATPase":
         self.gr_data.at[self.data_buffer_index,'ATPase_null'] = self.ATPase_null
     # 1000 is to convert liter to mili liter
-    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = 1000*self.wall_thickness
+#    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = 1000*self.wall_thickness
+    self.gr_data.at[self.data_buffer_index, 'wall_volume'] = self.wall_volume
     self.gr_data.at[self.data_buffer_index, 'number_of_hs'] = self.number_of_hs

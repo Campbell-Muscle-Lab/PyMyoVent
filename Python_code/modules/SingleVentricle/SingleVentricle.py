@@ -133,6 +133,12 @@ class single_circulation():
 
             self.k_4_0_perturbation = self.pert.k_4_0_perturbation
 
+            self.ca_uptake_perturbation = self.pert.ca_uptake_perturbation
+
+            self.ca_leak_perturbation = self.pert.ca_leak_perturbation
+
+            self.g_cal_perturbation = self.pert.g_cal_perturbation
+
         # Pull off the half_sarcomere parameters
         hs_params = single_circulation_simulation["half_sarcomere"]
         self.hs = hs.half_sarcomere(hs_params, self.output_buffer_size)
@@ -299,8 +305,8 @@ class single_circulation():
     def run_simulation(self):
         # Run the simulation
         from .implement import implement_time_step, update_data_holders,analyze_data
-        from .display import display_simulation, display_flows, display_pv_loop
-        from .display import display_Ca,display_pres,display_simulation_publish
+        from .display import display_simulation, display_flows, display_pv_loop,display_N_overlap
+        from .display import display_Ca,display_pres,display_simulation_publish,display_active_force
 
         # Set up some values for the simulation
         no_of_time_points = \
@@ -350,6 +356,12 @@ class single_circulation():
                 self.hs.myof.k_2 = self.hs.myof.k_2 + self.k_2_perturbation[i]
                 self.hs.myof.k_4_0 = self.hs.myof.k_4_0 +self.k_4_0_perturbation[i]
 
+                self.hs.membr.Ca_Vmax_up_factor =\
+                            self.hs.membr.Ca_Vmax_up_factor + self.ca_uptake_perturbation[i]
+                self.hs.membr.Ca_V_leak_factor =\
+                            self.hs.membr.Ca_V_leak_factor + self.ca_leak_perturbation[i]
+                self.hs.membr.g_CaL_factor =  \
+                            self.hs.membr.g_CaL_factor + self.g_cal_perturbation[i]
             # Apply growth activation
             self.growth_activation = self.growth_activation_array[i]
             # Apply heart rate activation
@@ -382,15 +394,19 @@ class single_circulation():
         # Make plots
         # Circulation
         display_simulation(self.data,
-                           self.output_parameters["summary_figure"][0],[41.4,43.4])#,[81.6,82.6])
+                           self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
+
         #display_simulation_publish(self.data,
         #                   self.output_parameters["summary_figure"][0],[8.4,9.4])
+        display_N_overlap(self.data,self.output_parameters["N_overlap"][0] )
+        display_active_force(self.data,
+                            self.output_parameters["active"][0])#,[75,120])
         display_flows(self.data,
                       self.output_parameters["flows_figure"][0])
         display_pv_loop(self.data,
-                        self.output_parameters["pv_figure"][0],[41.4,42.4])
+                        self.output_parameters["pv_figure"][0])
         display_pres(self.data,
-                    self.output_parameters["pres"][0],[41.4,43.4])
+                    self.output_parameters["pres"][0],[38.4,39.4])
         syscon.system_control.display_arterial_pressure(self.data,
                         self.output_parameters["arterial"][0])
 
@@ -400,8 +416,8 @@ class single_circulation():
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
-                               self.output_parameters["hs_fluxes_figure"][0])
-    #    display_Ca(self.data,self.output_parameters["Ca"][0])
+                               self.output_parameters["hs_fluxes_figure"][0])#,[30,60])
+        display_Ca(self.data,self.output_parameters["Ca"][0])#,[75,120])
 
         #Growth
         if self.growth_activation:

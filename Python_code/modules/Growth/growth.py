@@ -31,6 +31,10 @@ class growth():
         self.tw_rate = np.zeros(self.start_index)
         self.min_tw = 0.8*self.tw
 
+        self.wall_volume = ventricle_wall_volume
+        self.wv_array = np.full(self.start_index,self.wall_volume)
+        self.wv_rate = np.zeros(self.start_index)
+
         #Eccentric growth (number of hs in sereis)
         self.n_of_hs = initial_numbers_of_hs
         self.n_of_hs_array = np.full(self.start_index,self.n_of_hs)
@@ -40,16 +44,20 @@ class growth():
 
         if self.growth["driven_signal"][0] == "stress":
             self.G_tw = float(self.growth["concenrtric"]["G_stress_driven"][0])
+            self.G_wv =self.G_tw
             self.G_n_hs = float(self.growth["eccentric"]["G_number_of_hs"][0])
         if self.growth["driven_signal"][0] == "ATPase":
             self.G_tw = float(self.growth["concenrtric"]["G_ATPase_driven"][0])
             self.G_n_hs = float(self.growth["eccentric"]["G_ATPase_driven"][0])
-            
+
         #data
         self.data_buffer_size = data_buffer_size
         self.gr_time = 0.0
         self.data_buffer_index = self.start_index
-        self.gr_data = pd.DataFrame({'ventricle_wall_thickness':
-                                            np.full(self.data_buffer_size,1000*self.tw),
+        self.gr_data = pd.DataFrame({
+#                                    'ventricle_wall_thickness':
+#                                            np.full(self.data_buffer_size,1000*self.tw),
+                                    'wall_volume':
+                                            np.full(self.data_buffer_size,self.wall_volume),
                                     'number_of_hs':
                                             np.full(self.data_buffer_size,self.n_of_hs)})

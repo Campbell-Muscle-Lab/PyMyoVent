@@ -27,8 +27,6 @@ class system_control():
             self.no_of_time_points = \
                 int(temp["simulation"]["no_of_time_points"][0])
             self.activation_frequency = float(1/self.T)
-            self.activation_duty_ratio = \
-                    float(temp["simulation"]["duty_ratio"][0])
             self.t = self.dt*np.arange(1, self.no_of_time_points+1)
 
             self.predefined_activation_level =\
@@ -90,12 +88,25 @@ class system_control():
             self.D_k3 = int(D_k3_in_second / self.dt)
             self.tau_k3 = float(temp["regulation"]["k_3"]["tau_k3"][0])
             self.delta_k3 = 0.0
+                    #ca_uptake
+            self.ca_uptake = float(hs_params["membranes"]["Ten_Tusscher_2004"]["Ca_Vmax_up_factor"][0])
+            self.ca_uptake_0 = self.ca_uptake
+            self.G_up = float(temp["regulation"]["ca_uptake"]["G_up"][0])
+            D_ca_uptake_in_second = float(temp["regulation"]["ca_uptake"]["D_up"][0])
+            self.D_ca_uptake = int(D_ca_uptake_in_second/self.dt)
+                    #g_cal
+            self.g_cal = float(hs_params["membranes"]["Ten_Tusscher_2004"]["g_CaL_factor"][0])
+            self.g_cal_0 = self.g_cal
+            self.G_gcal = float(temp["regulation"]["g_cal"]["G_gcal"][0])
+            D_gcal_in_second = float(temp["regulation"]["g_cal"]["D_gcal"][0])
+            self.D_gcal = int(D_gcal_in_second/self.dt)
+
                     #Venous resistance
             self.Rv = float(circ_params["veins"]["resistance"][0])#float(temp["regulation"]["k_3"]["k3"][0])
             self.Rv_0 = self.Rv
             self.G_Rv = float(temp["regulation"]["Rv"]["G_Rv"][0])
-            D_k3_in_second = float(temp["regulation"]["Rv"]["D_Rv"][0])
-            self.D_Rv = int(D_k3_in_second / self.dt)
+            D_Rv_in_second = float(temp["regulation"]["Rv"]["D_Rv"][0])
+            self.D_Rv = int(D_Rv_in_second / self.dt)
 
         if (self.baro_scheme == "Ursino_1998"):
 
@@ -181,9 +192,14 @@ class system_control():
 
             self.sys_data['k_1'] = pd.Series(np.zeros(self.data_buffer_size))
             self.sys_data['k_3'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.sys_data['Ca_Vmax_up_factor'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.sys_data['g_CaL_factor'] = pd.Series(np.zeros(self.data_buffer_size))
+
 
             self.sys_data.at[0, 'k_1'] = self.k1
             self.sys_data.at[0, 'k_3'] = self.k3
+            self.sys_data.at[0, 'Ca_Vmax_up_factor'] = self.ca_uptake
+            self.sys_data.at[0, 'g_CaL_factor'] = self.g_cal
         # Add in specific fields for each scheme
         if self.baro_scheme == "simple_baroreceptor":
 

@@ -6,7 +6,7 @@ import numpy as np
 
 
 def display_baro_results (data_structure, output_file_string="",dpi=None):
-    no_of_rows = 6
+    no_of_rows = 8
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
@@ -63,7 +63,21 @@ def display_baro_results (data_structure, output_file_string="",dpi=None):
     #ax6.set_xlabel('time (s)', fontsize = 15)
     ax6.set_ylabel('$k_3$', fontsize = 15)
     ax6.tick_params(labelsize = 15)
-    ax6.set_xlabel('time (s)', fontsize = 15)
+    #ax6.set_xlabel('time (s)', fontsize = 15)
+
+    ax7=f.add_subplot(spec2[6,0])
+    ax7.plot('time','Ca_Vmax_up_factor',data=data_structure)
+    #ax6.set_xlabel('time (s)', fontsize = 15)
+    ax7.set_ylabel('SERCA up', fontsize = 15)
+    ax7.tick_params(labelsize = 15)
+    #ax7.set_xlabel('time (s)', fontsize = 15)
+
+    ax8=f.add_subplot(spec2[7,0])
+    ax8.plot('time','g_CaL_factor',data=data_structure)
+    #ax6.set_xlabel('time (s)', fontsize = 15)
+    ax8.set_ylabel('g_cal', fontsize = 15)
+    ax8.tick_params(labelsize = 15)
+    ax8.set_xlabel('time (s)', fontsize = 15)
 
 #    ax7=f.add_subplot(spec2[6,0])
 #    ax7.set_xlabel('time (s)', fontsize = 15)

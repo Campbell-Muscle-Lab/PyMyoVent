@@ -39,6 +39,12 @@ class perturbation():
         self.k_2_perturbation = np.zeros(data_buffer_size+1)
         #myosim k_4_0 perturbation
         self.k_4_0_perturbation = np.zeros(data_buffer_size+1)
+        #ca_handling ca_uptake perturbation
+        self.ca_uptake_perturbation = np.zeros(data_buffer_size+1)
+        #ca_handling ca_leak perturbation
+        self.ca_leak_perturbation = np.zeros(data_buffer_size+1)
+        #ca_handling g_ca_L perturbation
+        self.g_cal_perturbation = np.zeros(data_buffer_size+1)
 
         #blood volume
         temp_vol=pert["volume"]
@@ -135,3 +141,25 @@ class perturbation():
         stop_index = int(temp_k4_0["stop_index"][0])
         increment = float(temp_k4_0["increment"][0])
         self.k_4_0_perturbation[(start_index+1):(stop_index+1)] = increment
+
+        #Ca_handling
+        temp_ca = pert["ca_handling"]
+            #ca_uptake
+        temp_ca_up = temp_ca["ca_uptake"]
+        start_index = int(temp_ca_up["start_index"][0])
+        stop_index = int(temp_ca_up["stop_index"][0])
+        increment = float(temp_ca_up["increment"][0])
+        self.ca_uptake_perturbation[(start_index+1):(stop_index+1)] = increment
+            #ca_leak
+        temp_ca_leak = temp_ca["ca_leak"]
+        start_index = int(temp_ca_leak["start_index"][0])
+        stop_index = int(temp_ca_leak["stop_index"][0])
+        increment = float(temp_ca_leak["increment"][0])
+        self.ca_leak_perturbation[(start_index+1):(stop_index+1)] = increment
+
+            #g_cal
+        temp_g_cal = temp_ca["g_cal"]
+        start_index = int(temp_g_cal["start_index"][0])
+        stop_index = int(temp_g_cal["stop_index"][0])
+        increment = float(temp_g_cal["increment"][0])
+        self.g_cal_perturbation[(start_index+1):(stop_index+1)] = increment

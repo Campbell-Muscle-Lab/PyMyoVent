@@ -131,6 +131,16 @@ def return_contractility(self,time_step,i):
         else:
             delay_k3 = self.D_k3
 
+        if i < self.D_ca_uptake:
+            delay_ca_uptake = int(0)
+        else:
+            delay_ca_uptake = self.D_ca_uptake
+
+        if i < self.D_gcal:
+            delay_gcal = int(0)
+        else:
+            delay_gcal = self.D_gcal
+
         k1_0 = self.k1
         dk1dt = self.G_k1*(self.bc[i-delay_k1]-self.bc_mid)*self.k1_0
         k1 = dk1dt*time_step+k1_0
@@ -140,6 +150,17 @@ def return_contractility(self,time_step,i):
         dk3dt = self.G_k3*(self.bc[i-delay_k3]-self.bc_mid)*self.k3_0
         k3 = dk3dt*time_step + k3_0
         self.k3 = k3
+
+        ca_up_0 = self.ca_uptake
+        dupdt = self.G_up*(self.bc[i-delay_ca_uptake]-self.bc_mid)*self.ca_uptake_0
+        ca_uptake = dupdt*time_step+ca_up_0
+        self.ca_uptake = ca_uptake
+
+        gcal_0 = self.g_cal
+        dgcaldt = self.G_gcal*(self.bc[i-delay_gcal]-self.bc_mid)*self.g_cal_0
+        g_cal = dgcaldt*time_step+gcal_0
+        self.g_cal = g_cal
+
 
 
     if (self.baro_scheme=="Ursino_1998"):
@@ -175,7 +196,7 @@ def return_contractility(self,time_step,i):
         self.k1 = self.delta_k1 + self.k1_0
         self.k3 = self.delta_k3 + self.k3_0
 
-    return self.k1,self.k3 #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
+    return self.k1,self.k3, self.ca_uptake,self.g_cal  #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
 
 def return_activation(self):
     if (self.baro_scheme == "fixed_heart_rate"):
@@ -219,6 +240,8 @@ def update_data_holder(self,time_step):
     if (self.baro_scheme !="fixed_heart_rate"):
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
         self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
+        self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = self.ca_uptake
+        self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = self.g_cal
 
         if (self.baro_scheme == "simple_baroreceptor"):
             self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']\
