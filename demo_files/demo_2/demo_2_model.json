@@ -19,14 +19,15 @@
     "ATPase":["..\\temp\\demo_2\\demo_2_ATPase.png"],
     "Ca":["..\\temp\\demo_2\\demo_2_Ca.png"],
     "arterial": ["..\\temp\\demo_2\\demo_2_arterial.png"],
-    "pres": ["..\\temp\\demo_2\\demo_2_pres.png"]
+    "pres": ["..\\temp\\demo_2\\demo_2_pres.png"],
+    "N_overlap": ["..\\temp\\demo_2\\demo_2_N_over.png"]
   },
 
   "baroreflex": {
     "baro_scheme": ["simple_baroreceptor"],
     "fixed_heart_rate":{
       "simulation":{
-        "no_of_time_points": [100000],
+        "no_of_time_points": [160000],
         "time_step": [0.001],
         "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
@@ -34,7 +35,7 @@
     },
     "simple_baroreceptor":{
       "simulation":{
-        "no_of_time_points": [250000],
+        "no_of_time_points": [10000],
         "time_step": [0.001],
         "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
@@ -47,19 +48,29 @@
       },
       "regulation":{
         "heart_period":{
-          "G_T": [0.05],
+          "G_T": [0.03],
           "D_T": [1,"s"],
           "tau_T": [1,"s"]
         },
         "k_1":{
-          "G_k1": [-0.05],
+          "G_k1": [-0.03],
           "D_k1": [1,"s"],
           "tau_k1": [1,"s"]
         },
         "k_3":{
-          "G_k3": [-0.05],
+          "G_k3": [-0.03],
           "D_k3": [1,"s"],
           "tau_k3": [1,"s"]
+        },
+        "ca_uptake":{
+          "G_up": [-0.02],
+          "D_up": [1,"s"],
+          "tau_up": [1,"s"]
+        },
+        "g_cal":{
+          "G_gcal": [-0.04],
+          "D_gcal": [1,"s"],
+          "tau_G_gcal": [1,"s"]
         },
         "Rv":{
           "G_Rv": [-0.0],
@@ -70,11 +81,11 @@
     }
   },
   "perturbations": {
-    "perturbation_activation":[true],
+    "perturbation_activation":[false],
     "volume":{
-      "start_index": [50000],
-      "stop_index": [55000],
-      "increment": [-6e-4]
+      "start_index": [85000],
+      "stop_index": [90000],
+      "increment": [0]
     },
     "valve":{
       "aortic":{
@@ -117,9 +128,9 @@
         "increment": [0]
       },
       "venous":{
-        "start_index": [500000],
-        "stop_index": [505000],
-        "increment": [0]
+        "start_index": [85000],
+        "stop_index": [90000],
+        "increment": [-3e-2]
       },
       "ventricle":{
         "start_index": [500000],
@@ -141,6 +152,23 @@
       "k_4_0":{
         "start_index": [200000],
         "stop_index": [210000],
+        "increment": [0]
+      }
+    },
+    "ca_handling":{
+      "ca_uptake":{
+        "start_index": [40000],
+        "stop_index": [41000],
+        "increment": [0]
+      },
+      "ca_leak":{
+        "start_index": [40000],
+        "stop_index": [41000],
+        "increment": [0]
+      },
+      "g_cal":{
+        "start_index": [40000],
+        "stop_index": [41000],
         "increment": [0]
       }
     }
@@ -235,7 +263,7 @@
 },
   "growth": {
     "growth_activation": [false],
-    "start_index": [25000],
+    "start_index": [50000],
     "moving_average_window": [5000],
     "driven_signal": ["stress"],
     "concenrtric":{
@@ -248,12 +276,12 @@
     }
   },
   "profiling":{
-    "profiling_activation":[false]
+    "profiling_activation":[true]
   },
   "saving_to_spreadsheet":{
     "saving_data_activation":[false],
     "start_index":[0],
-    "stop_index":[10000]
+    "stop_index":[20000]
   },
   "multi_threads" :{
     "multithreading_activation":[false],
