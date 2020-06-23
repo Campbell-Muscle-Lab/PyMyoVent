@@ -1,3 +1,15 @@
+---
+Title: MyoSim
+nav_order: 2
+has_children: False
+parent: Modules
+
+---
+## MyoSim
+{:.no_toc}
+
+* Toc 
+{:toc}
 ### Overview
 
 MyoSim is software that [Ken Campbell](http://www.campbellmusclelab.org) originally wrote to simulate the mechanical properties of half-sarcomeres. It extends [Huxley-based cross-bridge distribution techniques](https://www.ncbi.nlm.nih.gov/pubmed/4449057) with Ca<sup>2+</sup> activation and cooperative effects.

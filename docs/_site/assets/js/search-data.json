@@ -1,0 +1,76 @@
+{
+  
+  "0": {
+    "title": "MyoSim",
+    "content": "MyoSim . Overview | Theory | . Overview . MyoSim is software that Ken Campbell originally wrote to simulate the mechanical properties of half-sarcomeres. It extends Huxley-based cross-bridge distribution techniques with Ca2+ activation and cooperative effects. . This repository contains an implementation of MyoSim written in Python. Other versions of MyoSim have been written in C++ and MATLAB. None of the versions are completely interchangeable. All have strengths and weaknesses. The C++ code is the fastest, but also (by far) the most complicated. . Theory . MyoSim calculates the force produced by populations of cycling cross-bridges by tracking the number of myosin heads attached to actin with different strains. This approach was originally developed by Andrew Huxley. . The techniques required to simulate cross-bridge distributions using a computer (solving differential equations and interpolation) were described in some of Ken Campbell’s earlier papers. . A cross-bridge mechanism can explain the thixotropic short-range elastic component of relaxed frog skeletal muscle | A thixotropic effect in contracting rabbit psoas muscle: prior movement reduces the initial tension response to stretch | History-dependent mechanical properties of permeabilized rat soleus muscle fibers | . The models described in these papers only simulated half-sarcomeres held at a fixed level of activation (i.e. they were not sensitive to the intracellular Ca2+ concentration). MyoSim overcame this limitation by coupling cycling cross-bridges to a population of binding sites that were activated by Ca2+ and cooperativity. The original paper explained the theory and showed how the software could be used to simulate myosin heads cycling through a variety of different kinetic schemes. . Dynamic coupling of regulated binding sites and cycling myosin heads in striated muscle | . Additional papers building on this technique include: . Compliance Accelerates Relaxation in Muscle by Allowing Myosin Heads to Move Relative to Actin | Myocardial relaxation is accelerated by fast stretch, not reduced afterload | . MyoSim can also simulate dynamic transitions within the thick filament (OFF to ON states of myosin). The first paper investigating these transitions was: . Force-Dependent Recruitment from the Myosin Off State Contributes to Length-Dependent Activation | .",
+    "url": "http://localhost:4000/pages/modules/MyoSim/background.html",
+    "relUrl": "/pages/modules/MyoSim/background.html"
+  }
+  ,"1": {
+    "title": "Installation",
+    "content": "Installation . Overview | Anaconda Tutorial | . Overview . PyMyoVent is written in Python version 3 and uses a number of packages and libraries. We at the Campbell-Muscell-Lab, highly recommend every users to use Anaconda as the Python environment management. . Anaconda Tutorial . Anaconda Tutorial helps you to set the required environment and packages useful for running a simulation with PyMyoVent. .",
+    "url": "http://localhost:4000/pages/environment/environment.html",
+    "relUrl": "/pages/environment/environment.html"
+  }
+  ,"2": {
+    "title": "Growth",
+    "content": "Growth .",
+    "url": "http://localhost:4000/pages/modules/growth/growth.html",
+    "relUrl": "/pages/modules/growth/growth.html"
+  }
+  ,"3": {
+    "title": "Help",
+    "content": "Help .",
+    "url": "http://localhost:4000/pages/help_and_resources/help.html",
+    "relUrl": "/pages/help_and_resources/help.html"
+  }
+  ,"4": {
+    "title": "How to create an issue",
+    "content": "How to create an issue . Okay, something has gone wrong, you’ve worked through the trouble-shooting tips, and you’ve come to the conclusion that there is a problem with the code. . Go to the PyMyoVent respository . | Click on the Issues tab . | Click on the Green “New issue” button . | .",
+    "url": "http://localhost:4000/pages/help_and_resources/how-to-create-an-issue.html",
+    "relUrl": "/pages/help_and_resources/how-to-create-an-issue.html"
+  }
+  ,"5": {
+    "title": "PyMyoVent",
+    "content": "PyMyoVent . This is the homepage for PyMyoVent, a software written with Python language for simulating a single ventricle pumping blood around a closed circulation. . PyMyoVent is built on various sub-modules and trying to simulate a multi-scale modeling method for the left ventricle. . .",
+    "url": "http://localhost:4000/",
+    "relUrl": "/"
+  }
+  ,"6": {
+    "title": "Model Files",
+    "content": "Model Files . Overview | . Overview . PyMyoVent uses JSON format files as the input files where an individual user can have control every single modules. . Here is PyMyoVent’s default model. You can find the file in &lt;repo&gt;demo_files demo_1 demo_1_model.xml .",
+    "url": "http://localhost:4000/pages/model_files/model_files.html",
+    "relUrl": "/pages/model_files/model_files.html"
+  }
+  ,"7": {
+    "title": "Modules",
+    "content": "Modules . PyMyoVent is built on a number of sub-modules representing diffetent functionality of the software in various scale level. .",
+    "url": "http://localhost:4000/pages/modules/modules.html",
+    "relUrl": "/pages/modules/modules.html"
+  }
+  ,"8": {
+    "title": "Perturbation",
+    "content": "Perturbation .",
+    "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html",
+    "relUrl": "/pages/modules/perturbation/perturbation.html"
+  }
+  ,"9": {
+    "title": "Single Ventricle",
+    "content": "Single Ventricle .",
+    "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html",
+    "relUrl": "/pages/modules/single_ventricle/single_ventricle.html"
+  }
+  ,"10": {
+    "title": "System Control",
+    "content": "System Control .",
+    "url": "http://localhost:4000/pages/modules/system_control/system_control.html",
+    "relUrl": "/pages/modules/system_control/system_control.html"
+  }
+  ,"11": {
+    "title": "Things you should check first",
+    "content": "Things you should check first . Okay, something has gone wrong, and you’re not quite sure what to do. . Here are some good steps. . Go back and run the demos | . If those don’t work, it’s unlikely that anything else will work. . You could ask somebody who knows about computers to help you, and if that doesn’t work, consider copying your work to a new directory (in case you need to come back to), delete the PyMyoVent folder, and start again with a clean install. . If you’re still stuck, check whether somebody has alerted us to the same problem . Go to the PyMyoVent respository Click on the Issues tab | . | . If so, we know about it, and are probably working on it. .",
+    "url": "http://localhost:4000/pages/help_and_resources/things-you-should-check-first.html",
+    "relUrl": "/pages/help_and_resources/things-you-should-check-first.html"
+  }
+  
+}

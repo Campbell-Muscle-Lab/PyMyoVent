@@ -1,3 +1,8 @@
+---
+Title: Things you should check first
+nav_order: 2
+parent: Help
+---
 ### Things you should check first
 
 Okay, something has gone wrong, and you're not quite sure what to do.

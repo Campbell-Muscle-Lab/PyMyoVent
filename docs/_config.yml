@@ -1,1 +1,24 @@
-theme: jekyll-theme-minimal
+remote_theme: pmarsceill/just-the-docs
+
+# Auxiliary links for the upper right navigation.
+aux_links:
+  "Campbell Muscle Lab":
+    - "http://www.campbellmusclelab.org"
+  "Lab GitHub":
+    - "http://campbell-muscle-lab.github.io"
+  "\"Repo Name\" PyMyoVent Rep":
+    - "https://github.com/Campbell-Muscle-Lab/PyMyoVent"
+  
+
+# Not a big fan of dark mode. I think the light looks better.
+# color_scheme: "dark"
+
+# You can display an image instead of the site's title like this.
+# logo: "/assets/images/example-image.png"
+
+# Footer
+footer_content: "Written by the Campbell Muscle Lab"
+
+# This is the title of the website
+title: PyMyoVent
+  #"Title in `_config.yml`"
