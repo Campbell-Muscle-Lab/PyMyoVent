@@ -130,6 +130,7 @@ class single_circulation():
                       concentric_target.cdata)
         else:
             self.growth_active = 0
+            self.growth_memory = 1
 
         # Initialize circulation object using data from the sim_object
         circ_params = single_circulation_simulation.circulation
