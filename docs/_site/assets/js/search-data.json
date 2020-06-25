@@ -7,66 +7,96 @@
     "relUrl": "/pages/modules/MyoSim/background.html"
   }
   ,"1": {
+    "title": "Baroreceptor",
+    "content": "Baroreceptor .",
+    "url": "http://localhost:4000/pages/models/baroreceptor/baroreceptor.html",
+    "relUrl": "/pages/models/baroreceptor/baroreceptor.html"
+  }
+  ,"2": {
     "title": "Installation",
-    "content": "Installation . Overview | Anaconda Tutorial | . Overview . PyMyoVent is written in Python version 3 and uses a number of packages and libraries. We at the Campbell-Muscell-Lab, highly recommend every users to use Anaconda as the Python environment management. . Anaconda Tutorial . Anaconda Tutorial helps you to set the required environment and packages useful for running a simulation with PyMyoVent. .",
+    "content": "Installation . Overview | Setting up Python environement | Cloning PyMyoVent | Installing Secondary Libraries | . Overview . PyMyoVent is written in Python version 3 and uses a number of packages and libraries. We at the Campbell-Muscell-Lab, highly recommend every users to use Anaconda as the Python environment management. . Setting up Python environement . Python How Tos helps you to setup the required python environment and management usefule for running a simulation with PyMyoVent. . Cloning PyMyoVent . PyMyoVent repository is hosted on Github website. The best way for cloning the repository and have the version control over the source code is using GitHub Desktop software. . Please check Github Repos to get more familiar with how to clone a reposirtory from GitHub. . Installing Secondary Libraries . There are some other libraries that might be not included in the Anaconda environment. In order to install these libraries you need to use the pip install method in the terminal command line. .",
     "url": "http://localhost:4000/pages/environment/environment.html",
     "relUrl": "/pages/environment/environment.html"
   }
-  ,"2": {
+  ,"3": {
+    "title": "Getting Started",
+    "content": "Getting Started . Instruction | Instruction file | Outputs | . Instruction . Lunch Anaconda prompt. . | Navigate to Python_code folder in PyMyoVent’s repository directory: $ cd path_to_PyMyoVent_repo Python_code | . | Use the following command to run the Getting_started demo. $ python PyMyoVent.py run_default_model | After a few seconds you should see this: | . | . Instruction file . The instruction file is written in JSON format and is located at path_to_PyMyoVent_repo demo_files getting_started getting_started_model.json. | . { &quot;output_parameters&quot;: { &quot;excel_file&quot;: [&quot;.. temp getting_started getting_started.xlsx&quot;], &quot;input_file&quot;: [&quot;.. temp getting_started getting_started.json&quot;], &quot;summary_figure&quot;: [&quot;.. temp getting_started getting_started_summary.png&quot;], &quot;pv_figure&quot;: [&quot;.. temp getting_started getting_started_pv.png&quot;], &quot;baro_figure&quot;: [&quot;.. temp getting_started getting_started_baro.png&quot;], &quot;flows_figure&quot;: [&quot;.. temp getting_started getting_started_flows.png&quot;], &quot;hs_fluxes_figure&quot;: [&quot;.. temp getting_started getting_started_hs_fluxes.png&quot;], &quot;multi_threading&quot;:[&quot;.. temp getting_started getting_started_multi_thread.png&quot;], &quot;circulatory&quot;: [&quot;.. temp getting_started getting_started_arterial.png&quot;] }, &quot;baroreflex&quot;: { &quot;baro_scheme&quot;: [&quot;fixed_heart_rate&quot;], &quot;fixed_heart_rate&quot;:{ &quot;simulation&quot;:{ &quot;no_of_time_points&quot;: [10000], &quot;time_step&quot;: [0.001], &quot;duty_ratio&quot;: [0.3], &quot;basal_heart_period&quot;: [1,&quot;s&quot;] } }, &quot;simple_baroreceptor&quot;:{ &quot;simulation&quot;:{ &quot;start_index&quot;:[2000], &quot;memory&quot;:[2,&quot;s&quot;], &quot;no_of_time_points&quot;: [150000], &quot;time_step&quot;: [0.001], &quot;duty_ratio&quot;: [0.003], &quot;basal_heart_period&quot;: [1,&quot;s&quot;] }, &quot;afferent&quot;: { &quot;bc_max&quot;: [2], &quot;bc_min&quot;: [0], &quot;slope&quot;: [15,&quot;mmHg&quot;], &quot;P_n&quot;: [90,&quot;mmHg&quot;] }, &quot;regulation&quot;:{ &quot;heart_period&quot;:{ &quot;G_T&quot;: [0.03], &quot;D_T&quot;: [1,&quot;s&quot;], &quot;tau_T&quot;: [1,&quot;s&quot;] }, &quot;k_1&quot;:{ &quot;G_k1&quot;: [-0.03], &quot;D_k1&quot;: [1,&quot;s&quot;], &quot;tau_k1&quot;: [1,&quot;s&quot;] }, &quot;k_3&quot;:{ &quot;G_k3&quot;: [-0.03], &quot;D_k3&quot;: [1,&quot;s&quot;], &quot;tau_k3&quot;: [1,&quot;s&quot;] }, &quot;ca_uptake&quot;:{ &quot;G_up&quot;: [-0.02], &quot;D_up&quot;: [1,&quot;s&quot;], &quot;tau_up&quot;: [1,&quot;s&quot;] }, &quot;g_cal&quot;:{ &quot;G_gcal&quot;: [-0.03], &quot;D_gcal&quot;: [1,&quot;s&quot;], &quot;tau_G_gcal&quot;: [1,&quot;s&quot;] } } } }, &quot;perturbations&quot;: { &quot;perturbation_activation&quot;:[false], &quot;volume&quot;:{ &quot;start_index&quot;: [85000], &quot;stop_index&quot;: [90000], &quot;increment&quot;: [0] }, &quot;valve&quot;:{ &quot;aortic&quot;:{ &quot;start_index&quot;: [0], &quot;stop_index&quot;: [505000], &quot;increment&quot;: [0.0] }, &quot;mitral&quot;:{ &quot;start_index&quot;: [400000], &quot;stop_index&quot;: [1000000], &quot;increment&quot;: [0.0] } }, &quot;compliance&quot;: { &quot;aorta&quot;:{ &quot;start_index&quot;: [200000], &quot;stop_index&quot;: [205000], &quot;increment&quot;: [0] }, &quot;capillaries&quot;: { &quot;start_index&quot;: [200000], &quot;stop_index&quot;: [205000], &quot;increment&quot;: [0] }, &quot;venous&quot;:{ &quot;start_index&quot;: [500000], &quot;stop_index&quot;: [505000], &quot;increment&quot;: [0] } }, &quot;resistance&quot;: { &quot;aorta&quot;:{ &quot;start_index&quot;: [400000], &quot;stop_index&quot;: [410000], &quot;increment&quot;: [0.0] }, &quot;capillaries&quot;: { &quot;start_index&quot;: [500000], &quot;stop_index&quot;: [505000], &quot;increment&quot;: [0] }, &quot;venous&quot;:{ &quot;start_index&quot;: [85000], &quot;stop_index&quot;: [90000], &quot;increment&quot;: [-3e-2] }, &quot;ventricle&quot;:{ &quot;start_index&quot;: [500000], &quot;stop_index&quot;: [505000], &quot;increment&quot;: [0] } }, &quot;myosim&quot;:{ &quot;k_1&quot;:{ &quot;start_index&quot;: [25000], &quot;stop_index&quot;: [25001], &quot;increment&quot;: [0] }, &quot;k_2&quot;:{ &quot;start_index&quot;: [25000], &quot;stop_index&quot;: [35000], &quot;increment&quot;: [0.0] }, &quot;k_4_0&quot;:{ &quot;start_index&quot;: [200000], &quot;stop_index&quot;: [210000], &quot;increment&quot;: [0] } }, &quot;ca_handling&quot;:{ &quot;ca_uptake&quot;:{ &quot;start_index&quot;: [40000], &quot;stop_index&quot;: [41000], &quot;increment&quot;: [0] }, &quot;ca_leak&quot;:{ &quot;start_index&quot;: [40000], &quot;stop_index&quot;: [41000], &quot;increment&quot;: [0] }, &quot;g_cal&quot;:{ &quot;start_index&quot;: [40000], &quot;stop_index&quot;: [41000], &quot;increment&quot;: [0] } } }, &quot;circulation&quot;:{ &quot;no_of_compartments&quot;: [6], &quot;blood&quot;:{ &quot;volume&quot;:[5,&quot;liters&quot;] }, &quot;aorta&quot;:{ &quot;resistance&quot;: [40,&quot;s&quot;], &quot;compliance&quot;: [0.0005,&quot;liter_per_mmHg&quot;] }, &quot;arteries&quot;:{ &quot;resistance&quot;: [20,&quot;s&quot;], &quot;compliance&quot;: [0.0011,&quot;liter_per_mmHg&quot;] }, &quot;arterioles&quot;:{ &quot;resistance&quot;: [520,&quot;s&quot;], &quot;compliance&quot;: [0.005,&quot;liter_per_mmHg&quot;] }, &quot;capillaries&quot;:{ &quot;resistance&quot;: [310,&quot;s&quot;], &quot;compliance&quot;: [0.03,&quot;liter_per_mmHg&quot;] }, &quot;veins&quot;:{ &quot;resistance&quot;: [300,&quot;s&quot;], &quot;compliance&quot;: [0.5,&quot;liter_per_mmHg&quot;] }, &quot;ventricle&quot;:{ &quot;resistance&quot;: [10,&quot;s&quot;], &quot;wall_volume&quot;: [0.1,&quot;liters&quot;], &quot;slack_volume&quot;: [0.08,&quot;liters&quot;], &quot;wall_density&quot;: [1055,&quot;g/l&quot;], &quot;body_surface_area&quot;: [1.90,&quot;m^2&quot;] } }, &quot;half_sarcomere&quot;:{ &quot;max_rate&quot;: [5000,&quot;s^-1&quot;], &quot;temperature&quot;: [288, &quot;Kelvin&quot;], &quot;cb_number_density&quot;: [6.9e16, &quot;number of cb&#39;s/m^2&quot;], &quot;initial_hs_length&quot;: [900, &quot;nm&quot;], &quot;ATPase_activation&quot;:[false], &quot;delta_energy&quot;:[70,&quot;kJ/mol&quot;], &quot;avagadro_number&quot;:[6.02e23,&quot;mol^-1&quot;], &quot;referench_hs_length&quot;:[1100,&quot;nm&quot;], &quot;myofilaments&quot;:{ &quot;kinetic_scheme&quot;: [&quot;3state_with_SRX&quot;], &quot;k_1&quot;: [1.75,&quot;s^-1&quot;], &quot;k_force&quot;: [1e-3, &quot;(N^-1)(m^2)&quot;], &quot;k_2&quot;: [200, &quot;s^-1&quot;], &quot;k_3&quot;: [100, &quot;(nm^-1)(s^-1)&quot;], &quot;k_4_0&quot;: [200, &quot;s^-1&quot;], &quot;k_4_1&quot;: [0.5, &quot;nm^-4&quot;], &quot;k_cb&quot;: [0.001, &quot;N*m^-1&quot;], &quot;x_ps&quot;: [5, &quot;nm&quot;], &quot;k_on&quot;: [1e8, &quot;(M^-1)(s^-1)&quot;], &quot;k_off&quot;: [200, &quot;s^-1&quot;], &quot;k_coop&quot;: [5], &quot;bin_min&quot;: [-10, &quot;nm&quot;], &quot;bin_max&quot;: [10, &quot;nm&quot;], &quot;bin_width&quot;: [1, &quot;nm&quot;], &quot;filament_compliance_factor&quot;: [0.5], &quot;thick_filament_length&quot;: [815, &quot;nm&quot;], &quot;thin_filament_length&quot;: [1120, &quot;nm&quot;], &quot;bare_zone_length&quot;: [80, &quot;nm&quot;], &quot;k_falloff&quot;: [0.0024], &quot;passive_mode&quot;: [&quot;exponential&quot;], &quot;passive_exp_sigma&quot;: [500], &quot;passive_exp_L&quot;: [80], &quot;passive_l_slack&quot;: [900, &quot;nm&quot;] }, &quot;membranes&quot;: { &quot;kinetic_scheme&quot;: [&quot;simple_2_compartment&quot;], &quot;simple_2_compartment&quot;:{ &quot;Ca_content&quot;: [1e-3], &quot;k_leak&quot;: [2e-3], &quot;k_act&quot;: [5e-2], &quot;k_serca&quot;: [10.0] }, &quot;Ten_Tusscher_2004&quot;:{ &quot;g_to_factor&quot;: [1], &quot;g_Kr_factor&quot;: [1], &quot;g_Ks_factor&quot;: [1], &quot;Ca_a_rel_factor&quot;: [1], &quot;Ca_V_leak_factor&quot;: [1], &quot;Ca_Vmax_up_factor&quot;: [1], &quot;g_CaL_factor&quot;: [1] } } }, &quot;growth&quot;: { &quot;growth_activation&quot;: [false], &quot;start_index&quot;: [200000], &quot;moving_average_window&quot;: [5000], &quot;driven_signal&quot;: [&quot;stress&quot;], &quot;concenrtric&quot;:{ &quot;G_stress_driven&quot;:[1e-6], &quot;G_ATPase_driven&quot;:[-2] }, &quot;eccentric&quot;:{ &quot;G_number_of_hs&quot;:[-3e-6], &quot;G_ATPase_driven&quot;:[0] } }, &quot;profiling&quot;:{ &quot;profiling_activation&quot;:[false] }, &quot;saving_to_spreadsheet&quot;:{ &quot;saving_data_activation&quot;:[false], &quot;start_index&quot;:[0], &quot;stop_index&quot;:[5000] }, &quot;multi_threads&quot; :{ &quot;multithreading_activation&quot;:[false], &quot;parameters_in&quot;:{ &quot;G_wall_thickness&quot;: { &quot;values&quot;:[25,50,100,200,300], &quot;param_out&quot;:[&quot;ventricle_wall_thickness&quot;], &quot;section&quot;: [&quot;growth&quot;] }, &quot;G_number_of_hs&quot;: { &quot;values&quot;:[25,50,100,200,300], &quot;param_out&quot;:[&quot;number_of_hs&quot;], &quot;section&quot;: [&quot;growth&quot;] } }, &quot;output_main_folder&quot;: [&quot;.. temp getting_started demo_i_j demo_i_j.json&quot;] } } . Outputs . Simmulation summary output | . . P_V loop output | . . Fluxes output . | Blood flows output . | . .",
+    "url": "http://localhost:4000/pages/models/getting_started/getting_started.html",
+    "relUrl": "/pages/models/getting_started/getting_started.html"
+  }
+  ,"4": {
     "title": "Growth",
     "content": "Growth .",
     "url": "http://localhost:4000/pages/modules/growth/growth.html",
     "relUrl": "/pages/modules/growth/growth.html"
   }
-  ,"3": {
+  ,"5": {
+    "title": "Growth - ATPase Driven",
+    "content": "Growth - ATPase Driven .",
+    "url": "http://localhost:4000/pages/models/growth_ATPase_driven/growth_ATPase_driven.html",
+    "relUrl": "/pages/models/growth_ATPase_driven/growth_ATPase_driven.html"
+  }
+  ,"6": {
+    "title": "Growth - Stress Driven",
+    "content": "Growth - Stress Driven .",
+    "url": "http://localhost:4000/pages/models/growth_stress_driven/growth_stress_driven.html",
+    "relUrl": "/pages/models/growth_stress_driven/growth_stress_driven.html"
+  }
+  ,"7": {
     "title": "Help",
     "content": "Help .",
     "url": "http://localhost:4000/pages/help_and_resources/help.html",
     "relUrl": "/pages/help_and_resources/help.html"
   }
-  ,"4": {
+  ,"8": {
     "title": "How to create an issue",
     "content": "How to create an issue . Okay, something has gone wrong, you’ve worked through the trouble-shooting tips, and you’ve come to the conclusion that there is a problem with the code. . Go to the PyMyoVent respository . | Click on the Issues tab . | Click on the Green “New issue” button . | .",
     "url": "http://localhost:4000/pages/help_and_resources/how-to-create-an-issue.html",
     "relUrl": "/pages/help_and_resources/how-to-create-an-issue.html"
   }
-  ,"5": {
+  ,"9": {
     "title": "PyMyoVent",
-    "content": "PyMyoVent . This is the homepage for PyMyoVent, a software written with Python language for simulating a single ventricle pumping blood around a closed circulation. . PyMyoVent is built on various sub-modules and trying to simulate a multi-scale modeling method for the left ventricle. . .",
+    "content": "PyMyoVent . This is the homepage for PyMyoVent, a software written with Python language for simulating a single ventricle pumping blood around a closed circulation. . PyMyoVent is built on various sub-modules and trying to simulate a multi-scale modeling method for the left ventricle. . . To get started: . 1- Get familiar with how to setup the required environment. | 2- Then try Getting Started. | .",
     "url": "http://localhost:4000/",
     "relUrl": "/"
   }
-  ,"6": {
-    "title": "Model Files",
-    "content": "Model Files . Overview | . Overview . PyMyoVent uses JSON format files as the input files where an individual user can have control every single modules. . Here is PyMyoVent’s default model. You can find the file in &lt;repo&gt;demo_files demo_1 demo_1_model.xml .",
-    "url": "http://localhost:4000/pages/model_files/model_files.html",
-    "relUrl": "/pages/model_files/model_files.html"
+  ,"10": {
+    "title": "Instruction File",
+    "content": "Instruction File . Overview | . Overview . PyMyoVent uses JSON format files as the input files where an individual user can have control every single modules. . PyMyoVent’s instruction files are placed in the demos folder in the repository. . `` Here is PyMyoVent’s default model. You can find the file in &lt;repo&gt;demo_files demo_1 demo_1_model.xml | .",
+    "url": "http://localhost:4000/pages/instruction_files/instruction_files.html",
+    "relUrl": "/pages/instruction_files/instruction_files.html"
   }
-  ,"7": {
+  ,"11": {
+    "title": "Models",
+    "content": "Models .",
+    "url": "http://localhost:4000/pages/models/models.html",
+    "relUrl": "/pages/models/models.html"
+  }
+  ,"12": {
     "title": "Modules",
     "content": "Modules . PyMyoVent is built on a number of sub-modules representing diffetent functionality of the software in various scale level. .",
     "url": "http://localhost:4000/pages/modules/modules.html",
     "relUrl": "/pages/modules/modules.html"
   }
-  ,"8": {
+  ,"13": {
     "title": "Perturbation",
     "content": "Perturbation .",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html",
     "relUrl": "/pages/modules/perturbation/perturbation.html"
   }
-  ,"9": {
+  ,"14": {
     "title": "Single Ventricle",
     "content": "Single Ventricle .",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html"
   }
-  ,"10": {
+  ,"15": {
     "title": "System Control",
     "content": "System Control .",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html",
     "relUrl": "/pages/modules/system_control/system_control.html"
   }
-  ,"11": {
+  ,"16": {
     "title": "Things you should check first",
     "content": "Things you should check first . Okay, something has gone wrong, and you’re not quite sure what to do. . Here are some good steps. . Go back and run the demos | . If those don’t work, it’s unlikely that anything else will work. . You could ask somebody who knows about computers to help you, and if that doesn’t work, consider copying your work to a new directory (in case you need to come back to), delete the PyMyoVent folder, and start again with a clean install. . If you’re still stuck, check whether somebody has alerted us to the same problem . Go to the PyMyoVent respository Click on the Issues tab | . | . If so, we know about it, and are probably working on it. .",
     "url": "http://localhost:4000/pages/help_and_resources/things-you-should-check-first.html",

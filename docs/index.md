@@ -14,4 +14,8 @@ PyMyoVent is built on various sub-modules and trying to simulate a multi-scale m
 
 ![Model Schematic](model_sample.png)
 
+To get started:
+* 1- Get familiar with how to setup the required [environment](../pages/environment/environment.html).
+* 2- Then try [Getting Started](../pages/models/getting_started/getting_started.html).
+
 
