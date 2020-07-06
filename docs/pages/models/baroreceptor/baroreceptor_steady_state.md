@@ -1,14 +1,16 @@
 ---
-Title: Getting Started
+Title: Baroreceptor Steady State
 nav_order: 1
 has_children: False
-parent: Models
+parent: Baroreceptor
+grand_parent: Models
 ---
-## Getting Started
+## Baroreceptor Steady State
 {:.no_toc}
 
 * TOC
 {:toc}
+
 ## Instruction
 
 * Lunch [Anaconda](http://anaconda.org) prompt. 
@@ -16,33 +18,42 @@ parent: Models
 * Navigate to **Python_code** folder in PyMyoVent's repository directory:
     * `$ cd path_to_PyMyoVent_repo\Python_code`
 
-* Use the following command to run the `Getting_started` demo.
-    * `$ python PyMyoVent.py run_default_model`
-    * After a few seconds you should see this:
-    ![prompt_line](getting_started_prompt.png) 
+* Use the following command to run the `Baroreceptor` demo with no perturbation applied to the system.
+    * `$ python PyMyoVent.py run_defined_model ..\demo_files\baroreceptor\baroreceptor_model.json`
+    * After a few minutes the simulation would be finished. 
+
+## Note 
+
+* In this model, the baroreceptor module is activated by putting `"baro_scheme": ["simple_baroreceptor"]` in the instruction file.  
+* The baroreceptor module starts to regulate the arterial pressure after `"start_index":[2000]`, which can be modified by user.  
+* The baroreceptor module tries to maintain the mean arterial pressure at `90 mm Hg` by continously regulation of heart rate, myofilaments contractility, and calcium handling.
+* This model uses an electrophys model proposed by [Ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
+* No perturbation is applied to the simulation as long as `"perturbation_activation":[false]` in the instruction file. 
 
 ## Instruction file
-* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\getting_started\getting_started_model.json`.
+
+* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\baroreceptor\baroreceptor_model.json`.
 
 ````
 {
   "output_parameters": {
-    "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
-    "input_file": ["..\\temp\\getting_started\\getting_started.json"],
-    "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
-    "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
-    "baro_figure": ["..\\temp\\getting_started\\getting_started_baro.png"],
-    "flows_figure": ["..\\temp\\getting_started\\getting_started_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\getting_started\\getting_started_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\getting_started\\getting_started_multi_thread.png"]
+    "excel_file": ["..\\temp\\baroreceptor\\baroreceptor.xlsx"],
+    "input_file": ["..\\temp\\baroreceptor\\baroreceptor.json"],
+    "summary_figure": ["..\\temp\\baroreceptor\\baroreceptor_summary.png"],
+    "force_length": ["..\\temp\\baroreceptor\\baroreceptor_F_L.png"],
+    "pv_figure": ["..\\temp\\baroreceptor\\baroreceptor_pv.png"],
+    "baro_figure": ["..\\temp\\baroreceptor\\baroreceptor_baro.png"],
+    "flows_figure": ["..\\temp\\baroreceptor\\baroreceptor_flows.png"],
+    "hs_fluxes_figure": ["..\\temp\\baroreceptor\\baroreceptor_hs_fluxes.png"],
+    "multi_threading":["..\\temp\\baroreceptor\\baroreceptor_multi_thread.png"]
   },
   "baroreflex": {
-    "baro_scheme": ["fixed_heart_rate"],
+    "baro_scheme": ["simple_baroreceptor"],
     "fixed_heart_rate":{
       "simulation":{
-        "no_of_time_points": [10000],
+        "no_of_time_points": [160000],
         "time_step": [0.001],
-        "duty_ratio": [0.3],
+        "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
       }
     },
@@ -50,7 +61,7 @@ parent: Models
       "simulation":{
         "start_index":[2000],
         "memory":[2,"s"],
-        "no_of_time_points": [150000],
+        "no_of_time_points": [80000],
         "time_step": [0.001],
         "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
@@ -218,15 +229,15 @@ parent: Models
 
     "myofilaments":{
       "kinetic_scheme": ["3state_with_SRX"],
-      "k_1": [1.75,"s^-1"],
+      "k_1": [2,"s^-1"],
       "k_force": [1e-3, "(N^-1)(m^2)"],
       "k_2": [200, "s^-1"],
-      "k_3": [100, "(nm^-1)(s^-1)"],
+      "k_3": [110, "(nm^-1)(s^-1)"],
       "k_4_0": [200, "s^-1"],
-      "k_4_1": [0.5, "nm^-4"],
+      "k_4_1": [0.3, "nm^-4"],
       "k_cb": [0.001, "N*m^-1"],
       "x_ps": [5, "nm"],
-      "k_on": [1e8, "(M^-1)(s^-1)"],
+      "k_on": [6e8, "(M^-1)(s^-1)"],
       "k_off": [200, "s^-1"],
       "k_coop": [5],
       "bin_min": [-10, "nm"],
@@ -243,7 +254,7 @@ parent: Models
       "passive_l_slack": [900, "nm"]
     },
     "membranes": {
-      "kinetic_scheme": ["simple_2_compartment"],
+      "kinetic_scheme": ["Ten_Tusscher_2004"],
       "simple_2_compartment":{
         "Ca_content": [1e-3],
         "k_leak": [2e-3],
@@ -263,16 +274,16 @@ parent: Models
 },
   "growth": {
     "growth_activation": [false],
-    "start_index": [200000],
+    "start_index": [50000],
     "moving_average_window": [5000],
     "driven_signal": ["stress"],
     "concenrtric":{
       "G_stress_driven":[1e-6],
-      "G_ATPase_driven":[-2]
+      "G_ATPase_driven":[1]
     },
     "eccentric":{
       "G_number_of_hs":[-3e-6],
-      "G_ATPase_driven":[0]
+      "G_ATPase_driven":[-2]
     }
   },
   "profiling":{
@@ -281,42 +292,58 @@ parent: Models
   "saving_to_spreadsheet":{
     "saving_data_activation":[false],
     "start_index":[0],
-    "stop_index":[5000]
+    "stop_index":[1000]
   },
   "multi_threads" :{
     "multithreading_activation":[false],
     "parameters_in":{
-      "G_wall_thickness": {
-        "values":[25,50,100,200,300],
-        "param_out":["ventricle_wall_thickness"],
-        "section": ["growth"]
+      "G_T": {
+        "values":[25,50,100,150,175],
+        "param_out":["heart_rate"],
+        "section": ["baroreflex"]
       },
-      "G_number_of_hs": {
-        "values":[25,50,100,200,300],
-        "param_out":["number_of_hs"],
-        "section": ["growth"]
+      "G_k1": {
+        "values":[25,50,100,150,175],
+        "param_out":["k_1"],
+        "section": ["baroreflex"]
+      },
+      "G_k3": {
+        "values":[25,50,100,150,175],
+        "param_out":["k_3"],
+        "section": ["baroreflex"]
+      },
+      "G_up": {
+        "values":[25,50,100,150,175],
+        "param_out":["Ca_Vmax_up_factor"],
+        "section": ["baroreflex"]
+      },
+      "G_gcal": {
+        "values":[25,50,100,150,175],
+        "param_out":["g_CaL_factor"],
+        "section": ["baroreflex"]
       }
     },
-    "output_main_folder": ["..\\temp\\getting_started\\demo_i_j\\demo_i_j.json"]
+    "output_main_folder": ["..\\temp\\baroreceptor\\demo_i_j\\demo_i_j.json"]
   }
 }
+
 ````
-
 ## Outputs
-
 * Simmulation summary output
 
-![summary](getting_started_summary.png)
+![summary](baroreceptor_summary.png)
 
+* Baroreceptor output
 
-* PV loop output
+![baro](baroreceptor_baro.png)
 
-![PV](getting_started_pv.png)
+* P_V loop output
+
+![PV](baroreceptor_pv.png)
 
 * Fluxes output 
-![Fluxes](getting_started_hs_fluxes.png)
+![Fluxes](baroreceptor_hs_fluxes.png)
 
 * Blood flows output 
 
-![Flows](getting_started_flows.png)
-
+![Flows](baroreceptor_flows.png)

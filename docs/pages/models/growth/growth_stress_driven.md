@@ -1,8 +1,9 @@
 ---
 Title: Growth - Stress Driven
-nav_order: 3
+nav_order: 1
 has_children: False
-parent: Models
+parent: Growth
+grand_parent : Models
 ---
 ## Growth - Stress Driven
 {:.no_toc}

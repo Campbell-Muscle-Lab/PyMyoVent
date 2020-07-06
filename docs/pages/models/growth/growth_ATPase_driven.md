@@ -1,8 +1,9 @@
 ---
 Title: Growth - ATPase Driven
-nav_order: 4
+nav_order: 2
 has_children: False
-parent: Models
+parent: Growth
+grand_parent : Models
 ---
 ## Growth - ATPase Driven
 {:.no_toc}
