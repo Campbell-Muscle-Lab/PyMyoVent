@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import cProfile
+import timeit
 from openpyxl import Workbook
 from lxml import etree
 from scipy import signal
@@ -187,8 +188,14 @@ class single_circulation():
             #self.growth_switch = True
 
         # Baro
-        self.syscon=syscon.system_control(self.baro_params,hs_params,circ_params,
-                                    self.output_buffer_size)
+        self.syscon=syscon.system_control(self.baro_params,hs_params,self.hs,
+                        circ_params,self.output_buffer_size)
+        self.baro_activation_array = np.full(self.output_buffer_size+1,False)
+        if self.baro_scheme == "simple_baroreceptor":
+            start_index = \
+                int(self.baro_params[self.baro_scheme]["simulation"]["start_index"][0])
+            self.baro_activation_array[start_index:]=True
+        self.baro_activation = self.baro_activation_array[0]
 
         print("hsl: %f" % self.hs.hs_length)
         print("slack hsl: %f" % self.slack_hsl)
@@ -306,7 +313,7 @@ class single_circulation():
         # Run the simulation
         from .implement import implement_time_step, update_data_holders,analyze_data
         from .display import display_simulation, display_flows, display_pv_loop,display_N_overlap
-        from .display import display_Ca,display_pres,display_simulation_publish,display_active_force
+        from .display import display_Ca,display_pres,display_simulation_publish,display_active_force,display_r4
 
         # Set up some values for the simulation
         no_of_time_points = \
@@ -364,11 +371,13 @@ class single_circulation():
                             self.hs.membr.g_CaL_factor + self.g_cal_perturbation[i]
             # Apply growth activation
             self.growth_activation = self.growth_activation_array[i]
+            # Apply baro activation
+            self.baro_activation = self.baro_activation_array[i]
             # Apply heart rate activation
             activation_level=self.syscon.return_activation()
 
             # Display
-            if ( (i % 200) == 0):
+            if ( (i % 2000) == 0):
                 print("Blood volume: %.3g, %.0f %% complete" %
                       (np.sum(self.v), (100*i/np.size(t))))
 
@@ -393,31 +402,35 @@ class single_circulation():
             pr.print_stats()
         # Make plots
         # Circulation
-        display_simulation(self.data,
-                           self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
+        #display_simulation(self.data,
+        #                   self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
 
-        #display_simulation_publish(self.data,
-        #                   self.output_parameters["summary_figure"][0],[8.4,9.4])
-        display_N_overlap(self.data,self.output_parameters["N_overlap"][0] )
-        display_active_force(self.data,
-                            self.output_parameters["active"][0])#,[75,120])
+        display_simulation_publish(self.data,
+                           self.output_parameters["summary_figure"][0])
+        #display_N_overlap(self.data,self.output_parameters["N_overlap"][0] )
+        #display_r4(self.hs.myof.x,self.hs.myof.r4,self.output_parameters["r4"][0])
+#        display_active_force(self.data,
+#                            self.output_parameters["active"][0])#,[75,120])
         display_flows(self.data,
                       self.output_parameters["flows_figure"][0])
         display_pv_loop(self.data,
-                        self.output_parameters["pv_figure"][0])
-        display_pres(self.data,
-                    self.output_parameters["pres"][0],[38.4,39.4])
+                        self.output_parameters["pv_figure"][0],[[78.5,79.8],[142.8,143.8]])
+        #display_pv_loop(self.data,
+        #                self.output_parameters["pv_figure"][0],[[1.2,2.2],[4.8,5.8]])
+#        display_pres(self.data,
+#                    self.output_parameters["pres"][0],[38.4,39.4])
         syscon.system_control.display_arterial_pressure(self.data,
-                        self.output_parameters["arterial"][0])
+                        self.output_parameters["circulatory"][0])
 
-        if self.baro_scheme !="fixed_heart_rate":
+        #if self.baro_scheme !="fixed_heart_rate":
+        if self.baro_activation:
             syscon.system_control.display_baro_results(self.data,
                             self.output_parameters["baro_figure"][0])
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
                                self.output_parameters["hs_fluxes_figure"][0])#,[30,60])
-        display_Ca(self.data,self.output_parameters["Ca"][0])#,[75,120])
+#        display_Ca(self.data,self.output_parameters["Ca"][0])#,[75,120])
 
         #Growth
         if self.growth_activation:
@@ -447,9 +460,18 @@ class single_circulation():
 
             data_to_be_saved = \
                 self.data.loc[self.save_data_start_index:self.save_data_stop_index,:]
+            start_csv = timeit.default_timer()
+            data_to_be_saved.to_csv(self.output_parameters['csv_file'][0])
+            stop_csv = timeit.default_timer()
+            csv_time = stop_csv-start_csv
+            print('csv_time was',csv_time)
 
+            """start_excel = timeit.default_timer()
             append_df_to_excel(self.output_parameters['excel_file'][0],data_to_be_saved,
                            sheet_name='Data',startrow=0)
+            stop_excel = timeit.default_timer()
+            excel_time = stop_excel-start_excel
+            print('excel_time was',excel_time)"""
 
 def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
                        truncate_sheet=False,

@@ -11,44 +11,9 @@ def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate)
          ((self.bc_min+self.bc_max*exp((arterial_pressure-self.P_n)/self.slope))\
             /(1+exp((arterial_pressure-self.P_n)/self.slope))))
 
-    if (self.baro_scheme=="Ursino_1998"):
-
-        def P_tilda_deriv(y,t):
-            dy=np.zeros(1)
-            dy[0]=1/self.tau_p*(arterial_pressure\
-                    +self.tau_z*arterial_pressure_rate-self.P_tilda)
-            return dy
-
-        sol=solve_ivp(P_tilda_deriv,[0,time_step],self.P_tilda)
-        self.P_tilda=sol.y[:,-1]
-
-        #determine the frequency of spikes in the affetent pathway
-        self.f_cs=(self.f_min+self.f_max*exp((self.P_tilda-self.P_n)/self.k_a))\
-            /(1+exp((self.P_tilda-self.P_n)/self.k_a))
-
-        #determine the frequency of spikes in the efferent sympathetic pathway
-        self.f_es=np.append(self.f_es,\
-                (self.f_es_inf+(self.f_es_0-self.f_es_inf)*exp(-self.k_es*self.f_cs)))
-        self.f_es_min=(self.f_es_inf+(self.f_es_0-self.f_es_inf)*exp(-self.k_es*self.f_max))
-
-        #determine the frequency of spikes in the efferent vagal pathway
-        self.f_ev=np.append(self.f_ev,\
-        (self.f_ev_0+self.f_ev_inf*exp((self.f_cs-self.f_cs_0)/self.k_ev))\
-            /(1+exp((self.f_cs-self.f_cs_0)/self.k_ev)))
-        #return self.P_tilda,self.f_cs,self.f_es,self.f_es_min,self.f_ev
 def return_heart_period(self,time_step,i):
 
     if (self.baro_scheme == "simple_baroreceptor"):
-        return_heart_period_control(self,time_step,i)
-        self.T_counter -= 1
-        if (self.T_counter <= -self.counter_systole):
-
-            self.T=self.T_prime
-            self.T_diastole = self.T-self.T_systole
-            self.counter_diastole = int(self.T_diastole/self.dt)
-            self.T_counter = self.counter_diastole
-
-    if (self.baro_scheme == "Ursino_1998"):
         return_heart_period_control(self,time_step,i)
         self.T_counter -= 1
         if (self.T_counter <= -self.counter_systole):
@@ -62,139 +27,77 @@ def return_heart_period(self,time_step,i):
 def return_heart_period_control(self,time_step,i):
 
     if (self.baro_scheme == "simple_baroreceptor"):
-        #time delay
-        if i < self.D_T:
-            delay_T = int(0)
-        else:
-            delay_T = self.D_T
+
         T_prime_0 = self.T_prime
-        dTdt=self.G_T*(self.bc[i-delay_T]-self.bc_mid)*self.T0
+        self.T_rate_array = np.roll(self.T_rate_array,-1)
+        dTdt_0 = self.G_T*(self.bc[i]-self.bc_mid)*self.T0
+        self.T_rate_array[-1] = dTdt_0
+        dTdt = np.mean(self.T_rate_array)
         T_prime=dTdt*time_step+T_prime_0
         self.T_prime = T_prime
+
         #implement minimum range of heart period for human
-        if self.T_prime <= 0.4:
-            self.T_prime = 0.4
+        if self.T_prime <= 0.33:
+            self.T_prime = 0.33
         if self.T_prime >= 1.5:
             self.T_prime = 1.5
-    if (self.baro_scheme=="Ursino_1998"):
-        #determine the outputs of static characteristics (steady-state changes)
-        # apply time delay
-        if i < self.D_Ts:
-            delay_Ts=int(0)
-        else:
-            delay_Ts=self.D_Ts
-        #sympathetic
-        if self.f_es[i] >= self.f_es_min:
-            sigma_Ts=self.G_Ts*log(self.f_es[i-delay_Ts]-self.f_es_min+1)
-        else:
-            sigma_Ts=0.0
-
-        # apply time delay
-        if i < self.D_Tv:
-            delay_Tv=int(0)
-        else:
-            delay_Tv=self.D_Tv
-        #vagal
-        sigma_Tv=self.G_Tv*self.f_ev[i-delay_Tv]
-
-        #determine the heart rate change due to sympathetic and vagal activities
-        def delta_T_derivs(y,t):
-
-            delta_T=np.zeros(2)
-            #delta_Ts_deriv
-            delta_T[0]=1/self.tau_Ts*(sigma_Ts-self.delta_Ts)
-            #delta_Tv_deriv
-            delta_T[1]=1/self.tau_Tv*(sigma_Tv-self.delta_Tv)
-            return delta_T
-        initial_condition = [self.delta_Ts,self.delta_Tv]
-        sol=solve_ivp(delta_T_derivs,[0,time_step],initial_condition)
-        self.y=sol.y[:,-1]
-        #print(self.y)
-        self.delta_Ts=self.y[0]
-        self.delta_Tv=self.y[1]
-
-        self.T_prime=self.delta_Ts+self.delta_Tv+self.T0
-
-        #return self.T, self.P_tilda,self.f_cs,self.f_es[-1],self.f_es_min,self.f_ev[-1],self.delta_Ts,self.delta_Tv
 
 def return_contractility(self,time_step,i):
 
     if (self.baro_scheme == "simple_baroreceptor"):
         #time delay
-        if i < self.D_k1:
-            delay_k1 = int(0)
-        else:
-            delay_k1 = self.D_k1
-
-        if i < self.D_k3:
-            delay_k3 = int(0)
-        else:
-            delay_k3 = self.D_k3
-
-        if i < self.D_ca_uptake:
-            delay_ca_uptake = int(0)
-        else:
-            delay_ca_uptake = self.D_ca_uptake
-
-        if i < self.D_gcal:
-            delay_gcal = int(0)
-        else:
-            delay_gcal = self.D_gcal
 
         k1_0 = self.k1
-        dk1dt = self.G_k1*(self.bc[i-delay_k1]-self.bc_mid)*self.k1_0
+        self.k1_rate_array = np.roll(self.k1_rate_array,-1)
+        dk1dt_0 = self.G_k1*(self.bc[i]-self.bc_mid)*self.k1_0
+        self.k1_rate_array[-1] = dk1dt_0
+        dk1dt = np.mean(self.k1_rate_array)
         k1 = dk1dt*time_step+k1_0
         self.k1 = k1
 
+        if self.k1<0.5*self.k1_0:
+            self.k1 = 0.5*self.k1_0
+        if self.k1>1.3*self.k1_0:
+            self.k1 = 1.5*self.k1_0
+
         k3_0 = self.k3
-        dk3dt = self.G_k3*(self.bc[i-delay_k3]-self.bc_mid)*self.k3_0
-        k3 = dk3dt*time_step + k3_0
+        self.k3_rate_array = np.roll(self.k3_rate_array,-1)
+        dk3dt_0 = self.G_k3*(self.bc[i]-self.bc_mid)*self.k3_0
+        self.k3_rate_array[-1] = dk3dt_0
+        dk3dt = np.mean(self.k3_rate_array)
+        k3 = dk3dt*time_step+k3_0
         self.k3 = k3
 
+        if self.k3<0.5*self.k3_0:
+            self.k3 = 0.5*self.k3_0
+        if self.k3>1.3*self.k3_0:
+            self.k3 = 1.5*self.k3_0
+
         ca_up_0 = self.ca_uptake
-        dupdt = self.G_up*(self.bc[i-delay_ca_uptake]-self.bc_mid)*self.ca_uptake_0
+        self.ca_uptake_rate_array = np.roll(self.ca_uptake_rate_array,-1)
+        dupdt_0 = self.G_up*(self.bc[i]-self.bc_mid)*self.ca_uptake_0
+        self.ca_uptake_rate_array[-1] = dupdt_0
+        dupdt = np.mean(self.ca_uptake_rate_array)
         ca_uptake = dupdt*time_step+ca_up_0
         self.ca_uptake = ca_uptake
 
+        if self.ca_uptake<0.5*self.ca_uptake_0:
+            self.ca_uptake = 0.5*self.ca_uptake_0
+        if self.ca_uptake>1.2*self.ca_uptake_0:
+            self.ca_uptake = 1.2*self.ca_uptake_0
+
         gcal_0 = self.g_cal
-        dgcaldt = self.G_gcal*(self.bc[i-delay_gcal]-self.bc_mid)*self.g_cal_0
+        self.g_cal_rate_array = np.roll(self.g_cal_rate_array,-1)
+        dgcaldt_0 = self.G_gcal*(self.bc[i]-self.bc_mid)*self.g_cal_0
+        self.g_cal_rate_array[-1] = dgcaldt_0
+        dgcaldt = np.mean(self.g_cal_rate_array)
         g_cal = dgcaldt*time_step+gcal_0
         self.g_cal = g_cal
 
-
-
-    if (self.baro_scheme=="Ursino_1998"):
-        #determine the outputs of static characteristics (steady-state changes)
-        if i<self.D_k1:
-            delay_k1=int(0)
-        else:
-            delay_k1=self.D_k1
-
-        if i<self.D_k3:
-            delay_k3=int(0)
-        else:
-            delay_k3=self.D_k3
-
-        if self.f_es[i] >= self.f_es_min:
-            sigma_k1=self.G_k1*log(self.f_es[i-delay_k1]-self.f_es_min+1)
-            sigma_k3=self.G_k3*log(self.f_es[i-delay_k3]-self.f_es_min+1)
-        else:
-            sigma_k1=0
-            sigma_k3=0
-        #determine the elastance rate change due to sympathetic
-        def derivs(y,t):
-            delta=np.zeros(2)
-            delta[0]=1/self.tau_k1*(sigma_k1-self.delta_k1)
-            delta[1]=1/self.tau_k3*(sigma_k3-self.delta_k3)
-            return delta
-        initial_condition=[self.delta_k1,self.delta_k3]
-        sol=solve_ivp(derivs,[0,time_step], initial_condition)
-        y=sol.y[:,-1]
-        self.delta_k1=y[0]
-        self.delta_k3=y[1]
-
-        self.k1 = self.delta_k1 + self.k1_0
-        self.k3 = self.delta_k3 + self.k3_0
+        if self.g_cal<0.5*self.g_cal_0:
+            self.g_cal = 0.5*self.g_cal_0
+        if self.g_cal>1.2*self.g_cal_0:
+            self.g_cal = 1.2*self.g_cal_0
 
     return self.k1,self.k3, self.ca_uptake,self.g_cal  #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
 
@@ -240,14 +143,11 @@ def update_data_holder(self,time_step):
     if (self.baro_scheme !="fixed_heart_rate"):
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
         self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
-        self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = self.ca_uptake
-        self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = self.g_cal
+        self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = self.hs.membr.constants[39]
+        self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = self.hs.membr.constants[18]#self.g_cal
 
         if (self.baro_scheme == "simple_baroreceptor"):
             self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']\
              = self.bc[-1]
-            self.sys_data.at[self.data_buffer_index, 'venous_resistance']=\
-                self.Rv
-        if (self.baro_scheme == "Ursino_1998"):
-            self.sys_data.at[self.data_buffer_index, 'P_tilda'] = self.P_tilda
-            self.sys_data.at[self.data_buffer_index, 'f_cs'] = self.f_cs
+#            self.sys_data.at[self.data_buffer_index, 'venous_resistance']=\
+#                self.Rv

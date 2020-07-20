@@ -2,7 +2,7 @@
 Title: Baroreceptor
 nav_order: 2
 has_children: True
-parent: Models
+parent: Demos
 ---
 ## Baroreceptor
 {:.no_toc}

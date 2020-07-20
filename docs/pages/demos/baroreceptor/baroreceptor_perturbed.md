@@ -1,14 +1,16 @@
 ---
-Title: Getting Started
-nav_order: 1
+Title: Baroreceptor Perturbed System
+nav_order: 2
 has_children: False
-parent: Models
+parent: Baroreceptor
+grand_parent: Demos
 ---
-## Getting Started
+## Baroreceptor Perturbed System
 {:.no_toc}
 
 * TOC
 {:toc}
+
 ## Instruction
 
 * Lunch [Anaconda](http://anaconda.org) prompt. 
@@ -16,33 +18,50 @@ parent: Models
 * Navigate to **Python_code** folder in PyMyoVent's repository directory:
     * `$ cd path_to_PyMyoVent_repo\Python_code`
 
-* Use the following command to run the `Getting_started` demo.
-    * `$ python PyMyoVent.py run_default_model`
-    * After a few seconds you should see this:
-    ![prompt_line](getting_started_prompt.png) 
+* Use the following command to run the `Baroreceptor` demo with having the `perturbation` module activated.
+    * `$ python PyMyoVent.py run_defined_model ..\demo_files\baro_pert\baro_pert_model.json`
+    * After a few minutes the simulation would be finished. 
+
+## Note 
+
+* In this model, the baroreceptor module is activated by putting `"baro_scheme": ["simple_baroreceptor"]` in the instruction file. 
+* The baroreceptor module starts to regulate the arterial pressure after `"start_index":[2000]`, which can be modified by user.
+* The baroreceptor module tries to maintain the mean arterial pressure at `90 mm Hg` by continously regulation of heart rate, myofilaments contractility, and calcium handling.
+* This model uses an electrophys model proposed by [Ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
+* Perturbation module is activated by putting `"perturbation_activation":[true]` in the instruction file. 
+* To apply a blood volume perturbation representing the loosing of 10% of total blood volume through the veins during 5 seconds starting from the time of 85 seconds to 90 seconds you should have the following change in the `"perturbation"` section of the instruction file:
+
+````
+"volume":{
+      "start_index": [85000],
+      "stop_index": [90000],
+      "increment": [-1e-4]
+````
 
 ## Instruction file
-* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\getting_started\getting_started_model.json`.
+
+* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\baro_pert\baro_pert_model.json`.
 
 ````
 {
   "output_parameters": {
-    "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
-    "input_file": ["..\\temp\\getting_started\\getting_started.json"],
-    "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
-    "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
-    "baro_figure": ["..\\temp\\getting_started\\getting_started_baro.png"],
-    "flows_figure": ["..\\temp\\getting_started\\getting_started_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\getting_started\\getting_started_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\getting_started\\getting_started_multi_thread.png"]
+    "excel_file": ["..\\temp\\baro_pert\\baro_pert.xlsx"],
+    "input_file": ["..\\temp\\baro_pert\\baro_pert.json"],
+    "summary_figure": ["..\\temp\\baro_pert\\baro_pert_summary.png"],
+    "force_length": ["..\\temp\\baro_pert\\baro_pert_F_L.png"],
+    "pv_figure": ["..\\temp\\baro_pert\\baro_pert_pv.png"],
+    "baro_figure": ["..\\temp\\baro_pert\\baro_pert_baro.png"],
+    "flows_figure": ["..\\temp\\baro_pert\\baro_pert_flows.png"],
+    "hs_fluxes_figure": ["..\\temp\\baro_pert\\baro_pert_hs_fluxes.png"],
+    "multi_threading":["..\\temp\\baro_pert\\baro_pert_multi_thread.png"]
   },
   "baroreflex": {
-    "baro_scheme": ["fixed_heart_rate"],
+    "baro_scheme": ["simple_baroreceptor"],
     "fixed_heart_rate":{
       "simulation":{
-        "no_of_time_points": [10000],
+        "no_of_time_points": [160000],
         "time_step": [0.001],
-        "duty_ratio": [0.3],
+        "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
       }
     },
@@ -56,9 +75,9 @@ parent: Models
         "basal_heart_period": [1,"s"]
       },
       "afferent": {
-        "bc_max": [2],
-        "bc_min": [0],
-        "slope": [15,"mmHg"],
+        "br_max": [2],
+        "br_min": [0],
+        "S": [15,"mmHg"],
         "P_n": [90,"mmHg"]
       },
       "regulation":{
@@ -81,22 +100,22 @@ parent: Models
     }
   },
   "perturbations": {
-    "perturbation_activation":[false],
+    "perturbation_activation":[true],
     "volume":{
       "start_index": [85000],
       "stop_index": [90000],
-      "increment": [0]
+      "increment": [-1e-4]
     },
     "valve":{
       "aortic":{
         "start_index": [0],
         "stop_index": [505000],
-        "increment": [0.0]
+        "increment": [0]
       },
       "mitral":{
         "start_index": [400000],
         "stop_index": [1000000],
-        "increment": [0.0]
+        "increment": [0]
       }
     },
     "compliance": {
@@ -120,7 +139,7 @@ parent: Models
       "aorta":{
         "start_index": [400000],
         "stop_index": [410000],
-        "increment": [0.0]
+        "increment": [0]
       },
       "capillaries": {
         "start_index": [500000],
@@ -130,7 +149,7 @@ parent: Models
       "venous":{
         "start_index": [85000],
         "stop_index": [90000],
-        "increment": [-3e-2]
+        "increment": [0]
       },
       "ventricle":{
         "start_index": [500000],
@@ -218,15 +237,15 @@ parent: Models
 
     "myofilaments":{
       "kinetic_scheme": ["3state_with_SRX"],
-      "k_1": [1.75,"s^-1"],
+      "k_1": [2,"s^-1"],
       "k_force": [1e-3, "(N^-1)(m^2)"],
       "k_2": [200, "s^-1"],
-      "k_3": [100, "(nm^-1)(s^-1)"],
+      "k_3": [110, "(nm^-1)(s^-1)"],
       "k_4_0": [200, "s^-1"],
-      "k_4_1": [0.5, "nm^-4"],
+      "k_4_1": [0.3, "nm^-4"],
       "k_cb": [0.001, "N*m^-1"],
       "x_ps": [5, "nm"],
-      "k_on": [1e8, "(M^-1)(s^-1)"],
+      "k_on": [6e8, "(M^-1)(s^-1)"],
       "k_off": [200, "s^-1"],
       "k_coop": [5],
       "bin_min": [-10, "nm"],
@@ -243,7 +262,7 @@ parent: Models
       "passive_l_slack": [900, "nm"]
     },
     "membranes": {
-      "kinetic_scheme": ["simple_2_compartment"],
+      "kinetic_scheme": ["Ten_Tusscher_2004"],
       "simple_2_compartment":{
         "Ca_content": [1e-3],
         "k_leak": [2e-3],
@@ -263,16 +282,16 @@ parent: Models
 },
   "growth": {
     "growth_activation": [false],
-    "start_index": [200000],
+    "start_index": [50000],
     "moving_average_window": [5000],
     "driven_signal": ["stress"],
     "concenrtric":{
       "G_stress_driven":[1e-6],
-      "G_ATPase_driven":[-2]
+      "G_ATPase_driven":[1]
     },
     "eccentric":{
       "G_number_of_hs":[-3e-6],
-      "G_ATPase_driven":[0]
+      "G_ATPase_driven":[-2]
     }
   },
   "profiling":{
@@ -281,42 +300,75 @@ parent: Models
   "saving_to_spreadsheet":{
     "saving_data_activation":[false],
     "start_index":[0],
-    "stop_index":[5000]
+    "stop_index":[1000]
   },
   "multi_threads" :{
     "multithreading_activation":[false],
     "parameters_in":{
-      "G_wall_thickness": {
-        "values":[25,50,100,200,300],
-        "param_out":["ventricle_wall_thickness"],
-        "section": ["growth"]
+      "G_T": {
+        "values":[25,50,100,150,175],
+        "param_out":["heart_rate"],
+        "section": ["baroreflex"]
       },
-      "G_number_of_hs": {
-        "values":[25,50,100,200,300],
-        "param_out":["number_of_hs"],
-        "section": ["growth"]
+      "G_k1": {
+        "values":[25,50,100,150,175],
+        "param_out":["k_1"],
+        "section": ["baroreflex"]
+      },
+      "G_k3": {
+        "values":[25,50,100,150,175],
+        "param_out":["k_3"],
+        "section": ["baroreflex"]
+      },
+      "G_up": {
+        "values":[25,50,100,150,175],
+        "param_out":["Ca_Vmax_up_factor"],
+        "section": ["baroreflex"]
+      },
+      "G_gcal": {
+        "values":[25,50,100,150,175],
+        "param_out":["g_CaL_factor"],
+        "section": ["baroreflex"]
       }
     },
-    "output_main_folder": ["..\\temp\\getting_started\\demo_i_j\\demo_i_j.json"]
+    "output_main_folder": ["..\\temp\\baro_pert\\demo_i_j\\demo_i_j.json"]
   }
 }
-````
 
+````
 ## Outputs
 
 * Simmulation summary output
 
-![summary](getting_started_summary.png)
+![summary](baro_pert_summary.png)
 
+* Baroreceptor output
 
-* PV loop output
+![baro](baro_pert_baro.png)
 
-![PV](getting_started_pv.png)
+* P_V loop output
+
+![PV](baro_pert_pv.png)
 
 * Fluxes output 
-![Fluxes](getting_started_hs_fluxes.png)
+![Fluxes](baro_pert_hs_fluxes.png)
 
 * Blood flows output 
 
-![Flows](getting_started_flows.png)
+![Flows](baro_pert_flows.png)
 
+## New User Defined Perturbation
+* The user can apply any sort of possible perturbation to the simulation by defining the `"start_index"`, `"stop_index"`, and `"increment"` for the desired type of perturbation in the `"perturbation"` section of the instruction file.
+    * For example, if you want to increase the *Aortic resistance* by 200% to represent the aortic stenosis you should do:
+        1. Determine the starting and stopping times points for the perturbation in seconds.
+        2. Then convert them into the time step's unit of the simulation by:
+            * `"start_index" = starting time in seconds/"time_step"`
+            * `"stop_index" = stopping time in seconds/"time_step"`
+        3. Assign the `"start_index"` and `"stop_index"` in the instruction file. 
+        4. Calculate the perturbation `"increment"` for each given time step as follows:
+            * Calculate the amount of change you need tp apply: 
+            
+            `Total_change = Final_value - Initial_value` 
+            * Calculate the amount of incremental change by: 
+
+            `"increment" = Total_change/("stop_index" - "start_index")`

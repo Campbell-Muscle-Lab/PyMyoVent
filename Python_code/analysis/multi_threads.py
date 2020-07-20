@@ -11,6 +11,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from modules.SingleVentricle.SingleVentricle import single_circulation as sc
 from modules.SingleVentricle.SingleVentricle import append_df_to_excel
 from modules.MyoSim.half_sarcomere import half_sarcomere as hs
+from modules.SystemControl import system_control as syscon
 
 def run_multi_processing(main_inputs):
     p=Pool()
@@ -46,20 +47,24 @@ def run_multi_processing(main_inputs):
     sc.display_pv_loop(final_output_data,output_temp["pv_figure"][0])
 
     if(hasattr(final_output_data,'heart_period')):
-        sc.display_baro_results(final_output_data,output_temp["baro_figure"][0])
+        syscon.system_control.display_baro_results(final_output_data,output_temp["baro_figure"][0])
 
     hs.half_sarcomere.display_fluxes(final_output_data,
                                     output_temp["hs_fluxes_figure"][0])
     if sim.growth_activation:
-        sc.display_growth(final_output_data,output_temp["growth_figure"][0],
+        gr.growth.display_growth(final_output_data,output_temp["growth_figure"][0],
                         sc.driven_signal)
-        sc.display_ventricular_dimensions(final_output_data,output_temp["ventricular"][0])
+        gr.growth.display_ventricular_dimensions(final_output_data,output_temp["ventricular"][0])
 
-    sc.display_systolic_function(final_output_data,output_temp["sys_fig"][0])
+        gr.growth.display_systolic_function(final_output_data,output_temp["sys_fig"][0])
 
     #append data to an excel sheet
-    append_df_to_excel(output_temp['excel_file'][0],final_output_data,
-                       sheet_name='Data',startrow=0)
+    if sim.saving_data_activation:
+        print("Data is saving to an excel spread sheet!")
+        data_to_be_saved = \
+            final_output_data.loc[sim.save_data_start_index:sim.save_data_stop_index,:]
+        append_df_to_excel(output_temp['excel_file'][0],data_to_be_saved,
+                           sheet_name='Data',startrow=0)
 
 def process_data(main_inputs,output_data):
     organized_dataframe = pd.DataFrame({})
@@ -161,19 +166,82 @@ def dump_data_to_dict (data,key,value):
     data[key]=value
 
 def display_multithreading(data,output_file_string="",t_limits=[],
-                            dpi=None):
+                            dpi=300):
 
-    num_of_rows = 2
+    num_of_rows = 5
     num_of_cols = 1
 
-    plot_width = 8
-    plot_height = 2.5 * num_of_rows
+    plot_width = 7
+    plot_height = 1.75 * num_of_rows
     f = plt.figure(constrained_layout=True)
 
     f.set_size_inches([plot_width,plot_height])
     spec = gridspec.GridSpec(nrows=num_of_rows, ncols=num_of_cols,figure=f)
 
+    """ax0 = f.add_subplot(spec[0,0])
+    ax0.plot('time','baroreceptor_output_%25G',data=data,label='$0.25S$')
+    ax0.plot('time','baroreceptor_output_%50G',data=data,label='$0.50S$')
+    ax0.plot('time','baroreceptor_output',data=data,label='$S$')
+    ax0.plot('time','baroreceptor_output_%150G',data=data,label='$1.50S$')
+    ax0.plot('time','baroreceptor_output_%175G',data=data,label='$1.75S$')
+    ax0.set_ylabel('$br$ (baroreceptor output)',fontsize=7)
+    ax0.legend(bbox_to_anchor=(1.05, 1),fontsize = 7)
+    ax0.tick_params(labelsize=7)
+    ax0.set_xlabel('time (s)',fontsize=7)"""
+
     ax0 = f.add_subplot(spec[0,0])
+    ax0.plot('time','heart_rate_%25G',data=data,label='$0.25G_T$')
+    ax0.plot('time','heart_rate_%50G',data=data,label='$0.50G_T$')
+    ax0.plot('time','heart_rate',data=data,label='$G_T$')
+    ax0.plot('time','heart_rate_%150G',data=data,label='$1.50G_T$')
+    ax0.plot('time','heart_rate_%175G',data=data,label='$1.75G_T$')
+    ax0.set_ylabel('HR (BPM)',fontsize=10)
+    ax0.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
+    ax0.tick_params(labelsize=10)
+
+    ax1 = f.add_subplot(spec[1,0])
+    ax1.plot('time','k_1_%25G',data=data,label='$0.25G_{k_1}$')
+    ax1.plot('time','k_1_%50G',data=data,label='$0.50G_{k_1}$')
+    ax1.plot('time','k_1',data=data,label='$G_{k_1}$')
+    ax1.plot('time','k_1_%150G',data=data,label='$1.50G_{k_1}$')
+    ax1.plot('time','k_1_%175G',data=data,label='$1.75G_{k_1}$')
+    ax1.set_ylabel('$k_1$',fontsize=10)
+    ax1.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
+    ax1.tick_params(labelsize=10)
+
+    ax2 = f.add_subplot(spec[2,0])
+    ax2.plot('time','k_3_%25G',data=data,label='$0.25G_{k_3}$')
+    ax2.plot('time','k_3_%50G',data=data,label='$0.50G_{k_3}$')
+    ax2.plot('time','k_3',data=data,label='$G_{k_3}$')
+    ax2.plot('time','k_3_%150G',data=data,label='$1.50G_{k_3}$')
+    ax2.plot('time','k_3_%175G',data=data,label='$1.75G_{k_3}$')
+    ax2.set_ylabel('$k_3$',fontsize=10)
+    ax2.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
+    ax2.tick_params(labelsize=10)
+
+
+    ax3 = f.add_subplot(spec[3,0])
+    ax3.plot('time','Ca_Vmax_up_factor_%25G',data=data,label='$0.25G_{V_{max,up}}$')
+    ax3.plot('time','Ca_Vmax_up_factor_%50G',data=data,label='$0.50G_{V_{max,up}}$')
+    ax3.plot('time','Ca_Vmax_up_factor',data=data,label='$G_{V_{max,up}}$')
+    ax3.plot('time','Ca_Vmax_up_factor_%150G',data=data,label='$1.50G_{V_{max,up}}$')
+    ax3.plot('time','Ca_Vmax_up_factor_%175G',data=data,label='$1.75G_{V_{max,up}}$')
+    ax3.set_ylabel('$V_{max,up}$\n multiplier factor',fontsize=10)
+    ax3.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
+    ax3.tick_params(labelsize=10)
+
+    ax4 = f.add_subplot(spec[4,0])
+    ax4.plot('time','g_CaL_factor_%25G',data=data,label='$0.25G_{G_{CaL}}$')
+    ax4.plot('time','g_CaL_factor_%50G',data=data,label='$0.50G_{G_{CaL}}$')
+    ax4.plot('time','g_CaL_factor',data=data,label='$G_{G_{CaL}}$')
+    ax4.plot('time','g_CaL_factor_%150G',data=data,label='$1.50G_{G_{CaL}}$')
+    ax4.plot('time','g_CaL_factor_%175G',data=data,label='$1.75G_{G_{CaL}}$')
+    ax4.set_ylabel('$G_{CaL}$',fontsize=10)
+    ax4.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
+    ax4.tick_params(labelsize=10)
+    ax4.set_xlabel('time (s)')
+
+    """ax0 = f.add_subplot(spec[0,0])
     ax0.plot('time','ventricle_wall_thickness',data=data,label='G')
     ax0.plot('time','ventricle_wall_thickness_%25G',data=data,label='0.25G')
     ax0.plot('time','ventricle_wall_thickness_%50G',data=data,label='0.5G')
@@ -193,7 +261,7 @@ def display_multithreading(data,output_file_string="",t_limits=[],
     ax1.set_xlabel('time (s)')
     ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax1.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
-    ax1.tick_params(labelsize=10)
+    ax1.tick_params(labelsize=10)"""
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

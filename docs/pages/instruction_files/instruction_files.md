@@ -403,6 +403,81 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
 
 ## half_sarcomere
 
+````
+"half_sarcomere":{
+    "max_rate": [5000,"s^-1"],
+    "temperature": [288, "Kelvin"],
+    "cb_number_density": [6.9e16, "number of cb's/m^2"],
+    "initial_hs_length": [900, "nm"],
+    "ATPase_activation":[false],
+    "delta_energy":[70,"kJ/mol"],
+    "avagadro_number":[6.02e23,"mol^-1"],
+    "reference_hs_length":[1100,"nm"],
+````
+- `"half_sarcomere":` MyoSim parameters block.
+    - `"max_rate":` The maximum constant rate for the MyoSim fluxes. 
+    - `"temperature":` The tempreture.
+    - `"cb_number_density":` The density of myosin heads (Number of myosin heads in a unit cross-section area of half-sarcomeres). 
+    - `"initial_hs_length":` Initial length for the half-sarcomeres.
+    - `"ATPase_activation":` Switch control for ATPase calculation.
+    - `"delta_energy":` The amount of energy become released during myosin ATPase.
+    - `"avagadro_number":` Avagadro number.
+    - `"reference_hs_length":` The reference length for calculating of ATPase.
+
+````
+"myofilaments":{
+      "kinetic_scheme": ["3state_with_SRX"],
+      "k_1": [1.75,"s^-1"],
+      "k_force": [1e-3, "(N^-1)(m^2)"],
+      "k_2": [200, "s^-1"],
+      "k_3": [100, "(nm^-1)(s^-1)"],
+      "k_4_0": [200, "s^-1"],
+      "k_4_1": [0.5, "nm^-4"],
+      "k_cb": [0.001, "N*m^-1"],
+      "x_ps": [5, "nm"],
+      "k_on": [1e8, "(M^-1)(s^-1)"],
+      "k_off": [200, "s^-1"],
+      "k_coop": [5],
+      "bin_min": [-10, "nm"],
+      "bin_max": [10, "nm"],
+      "bin_width": [1, "nm"],
+      "filament_compliance_factor": [0.5],
+      "thick_filament_length": [815, "nm"],
+      "thin_filament_length": [1120, "nm"],
+      "bare_zone_length": [80, "nm"],
+      "k_falloff": [0.0024],
+      "passive_mode": ["exponential"],
+      "passive_exp_sigma": [500],
+      "passive_exp_L": [80],
+      "passive_l_slack": [900, "nm"]
+    },
+````
+- `"myofilaments":` The myofilament parameters block. 
+    - `"kinetic_scheme":` The switch control for the kinetic's type of half-sarcomeres. 
+    - `"k_1":` The avtivation constant rate of myosin heads from OFF state to ON state. 
+    - `"k_force":` The force dependency constant factor of myosin heads during activation.
+    - `"k_2":` The deactivation constant rate myosin heads from ON state to OFF state.
+    - `"k_3":` The attachment constant rate of myosin heads to the activated binding sites.
+    - `"k_4_0":` The detachment constant rate of myosin heads from the activated binding sites.
+    - `"k_4_1":` The strain dependency constant factor of myosin heads during detachment.
+    - `"k_cb":` The cross-bridge stiffness factor.
+    - `"x_ps":` The power stroke of an attached cross-bridge.
+    - `"k_on":` The activation constant rate of binding sites.
+    - `"k_off":` The deactivation constant rate of binding sites. 
+    - `"k_coop":` The cooperativity factor of thin filaments. 
+    - `"bin_min":` The minimum range of length in which a myosin head can be placed with respect to its resting position. 
+    - `"bin_max":` The maximum range of length in which a myosin head can be placed with respect to its resting position. 
+    - `"bin_width":` The resolution of myosin head's position range. 
+    - `"filament_compliance_factor":` The compliance factor of myofilaments. 
+    - `"thick_filament_length":` 
+    - `"thin_filament_length":` 
+    - `"bare_zone_length":` 
+    - `"k_falloff":` 
+    - `"passive_mode":` 
+    - `"passive_exp_sigma":` 
+    - `"passive_exp_L":` 
+    - `"passive_l_slack":` 
+    
 ## growth
 
 ## profiling

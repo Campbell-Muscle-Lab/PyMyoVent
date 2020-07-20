@@ -13,7 +13,7 @@ import numpy as np
 #from modules.SingleVentricle.driver import return_sim_struct_from_xml_file, \
 #    run_simulation_from_xml_file, run_simulation_from_json_file
 from modules.SingleVentricle.SingleVentricle import single_circulation as sc
-#from analysis.multi_threads import run_multi_processing
+from analysis.multi_threads import run_multi_processing
 if __name__ == "__main__":
 
     # Get the number of arguments
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         if (sys.argv[1] == 'run_default_model'):
             print('Running default model')
 
-            json_file_strings = '..\demo_files\demo_1\demo_1_model.json'
+            json_file_strings = '..\demo_files\getting_started\getting_started_model.json'
 
             with open(json_file_strings,'r') as f:
                 json_input_data = json.load(f)

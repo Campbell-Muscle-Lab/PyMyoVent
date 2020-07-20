@@ -1,11 +1,11 @@
 ---
-Title: Baroreceptor Perturbed System
-nav_order: 2
+Title: Baroreceptor Steady State
+nav_order: 1
 has_children: False
 parent: Baroreceptor
-grand_parent: Models
+grand_parent: Demos
 ---
-## Baroreceptor Perturbed System
+## Baroreceptor Steady State
 {:.no_toc}
 
 * TOC
@@ -18,42 +18,34 @@ grand_parent: Models
 * Navigate to **Python_code** folder in PyMyoVent's repository directory:
     * `$ cd path_to_PyMyoVent_repo\Python_code`
 
-* Use the following command to run the `Baroreceptor` demo with having the `perturbation` module activated.
-    * `$ python PyMyoVent.py run_defined_model ..\demo_files\baro_pert\baro_pert_model.json`
+* Use the following command to run the `Baroreceptor` demo with no perturbation applied to the system.
+    * `$ python PyMyoVent.py run_defined_model ..\demo_files\baroreceptor\baroreceptor_model.json`
     * After a few minutes the simulation would be finished. 
 
 ## Note 
 
-* In this model, the baroreceptor module is activated by putting `"baro_scheme": ["simple_baroreceptor"]` in the instruction file. 
-* The baroreceptor module starts to regulate the arterial pressure after `"start_index":[2000]`, which can be modified by user.
+* In this model, the baroreceptor module is activated by putting `"baro_scheme": ["simple_baroreceptor"]` in the instruction file.  
+* The baroreceptor module starts to regulate the arterial pressure after `"start_index":[2000]`, which can be modified by user.  
 * The baroreceptor module tries to maintain the mean arterial pressure at `90 mm Hg` by continously regulation of heart rate, myofilaments contractility, and calcium handling.
 * This model uses an electrophys model proposed by [Ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
-* Perturbation module is activated by putting `"perturbation_activation":[true]` in the instruction file. 
-* To apply a blood volume perturbation representing the loosing of 10% of total blood volume through the veins during 5 seconds starting from the time of 85 seconds to 90 seconds you should have the following change in the `"perturbation"` section of the instruction file:
-
-````
-"volume":{
-      "start_index": [85000],
-      "stop_index": [90000],
-      "increment": [-1e-4]
-````
+* No perturbation is applied to the simulation as long as `"perturbation_activation":[false]` in the instruction file. 
 
 ## Instruction file
 
-* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\baro_pert\baro_pert_model.json`.
+* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\baroreceptor\baroreceptor_model.json`.
 
 ````
 {
   "output_parameters": {
-    "excel_file": ["..\\temp\\baro_pert\\baro_pert.xlsx"],
-    "input_file": ["..\\temp\\baro_pert\\baro_pert.json"],
-    "summary_figure": ["..\\temp\\baro_pert\\baro_pert_summary.png"],
-    "force_length": ["..\\temp\\baro_pert\\baro_pert_F_L.png"],
-    "pv_figure": ["..\\temp\\baro_pert\\baro_pert_pv.png"],
-    "baro_figure": ["..\\temp\\baro_pert\\baro_pert_baro.png"],
-    "flows_figure": ["..\\temp\\baro_pert\\baro_pert_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\baro_pert\\baro_pert_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\baro_pert\\baro_pert_multi_thread.png"]
+    "excel_file": ["..\\temp\\baroreceptor\\baroreceptor.xlsx"],
+    "input_file": ["..\\temp\\baroreceptor\\baroreceptor.json"],
+    "summary_figure": ["..\\temp\\baroreceptor\\baroreceptor_summary.png"],
+    "force_length": ["..\\temp\\baroreceptor\\baroreceptor_F_L.png"],
+    "pv_figure": ["..\\temp\\baroreceptor\\baroreceptor_pv.png"],
+    "baro_figure": ["..\\temp\\baroreceptor\\baroreceptor_baro.png"],
+    "flows_figure": ["..\\temp\\baroreceptor\\baroreceptor_flows.png"],
+    "hs_fluxes_figure": ["..\\temp\\baroreceptor\\baroreceptor_hs_fluxes.png"],
+    "multi_threading":["..\\temp\\baroreceptor\\baroreceptor_multi_thread.png"]
   },
   "baroreflex": {
     "baro_scheme": ["simple_baroreceptor"],
@@ -69,15 +61,15 @@ grand_parent: Models
       "simulation":{
         "start_index":[2000],
         "memory":[2,"s"],
-        "no_of_time_points": [150000],
+        "no_of_time_points": [80000],
         "time_step": [0.001],
         "duty_ratio": [0.003],
         "basal_heart_period": [1,"s"]
       },
       "afferent": {
-        "bc_max": [2],
-        "bc_min": [0],
-        "slope": [15,"mmHg"],
+        "br_max": [2],
+        "br_min": [0],
+        "S": [15,"mmHg"],
         "P_n": [90,"mmHg"]
       },
       "regulation":{
@@ -100,22 +92,22 @@ grand_parent: Models
     }
   },
   "perturbations": {
-    "perturbation_activation":[true],
+    "perturbation_activation":[false],
     "volume":{
       "start_index": [85000],
       "stop_index": [90000],
-      "increment": [-1e-4]
+      "increment": [0]
     },
     "valve":{
       "aortic":{
         "start_index": [0],
         "stop_index": [505000],
-        "increment": [0]
+        "increment": [0.0]
       },
       "mitral":{
         "start_index": [400000],
         "stop_index": [1000000],
-        "increment": [0]
+        "increment": [0.0]
       }
     },
     "compliance": {
@@ -139,7 +131,7 @@ grand_parent: Models
       "aorta":{
         "start_index": [400000],
         "stop_index": [410000],
-        "increment": [0]
+        "increment": [0.0]
       },
       "capillaries": {
         "start_index": [500000],
@@ -149,7 +141,7 @@ grand_parent: Models
       "venous":{
         "start_index": [85000],
         "stop_index": [90000],
-        "increment": [0]
+        "increment": [-3e-2]
       },
       "ventricle":{
         "start_index": [500000],
@@ -331,44 +323,27 @@ grand_parent: Models
         "section": ["baroreflex"]
       }
     },
-    "output_main_folder": ["..\\temp\\baro_pert\\demo_i_j\\demo_i_j.json"]
+    "output_main_folder": ["..\\temp\\baroreceptor\\demo_i_j\\demo_i_j.json"]
   }
 }
 
 ````
 ## Outputs
-
 * Simmulation summary output
 
-![summary](baro_pert_summary.png)
+![summary](baroreceptor_summary.png)
 
 * Baroreceptor output
 
-![baro](baro_pert_baro.png)
+![baro](baroreceptor_baro.png)
 
 * P_V loop output
 
-![PV](baro_pert_pv.png)
+![PV](baroreceptor_pv.png)
 
 * Fluxes output 
-![Fluxes](baro_pert_hs_fluxes.png)
+![Fluxes](baroreceptor_hs_fluxes.png)
 
 * Blood flows output 
 
-![Flows](baro_pert_flows.png)
-
-## New User Defined Perturbation
-* The user can apply any sort of possible perturbation to the simulation by defining the `"start_index"`, `"stop_index"`, and `"increment"` for the desired type of perturbation in the `"perturbation"` section of the instruction file.
-    * For example, if you want to increase the *Aortic resistance* by 200% to represent the aortic stenosis you should do:
-        1. Determine the starting and stopping times points for the perturbation in seconds.
-        2. Then convert them into the time step's unit of the simulation by:
-            * `"start_index" = starting time in seconds/"time_step"`
-            * `"stop_index" = stopping time in seconds/"time_step"`
-        3. Assign the `"start_index"` and `"stop_index"` in the instruction file. 
-        4. Calculate the perturbation `"increment"` for each given time step as follows:
-            * Calculate the amount of change you need tp apply: 
-            
-            `Total_change = Final_value - Initial_value` 
-            * Calculate the amount of incremental change by: 
-
-            `"increment" = Total_change/("stop_index" - "start_index")`
+![Flows](baroreceptor_flows.png)

@@ -51,7 +51,7 @@ def implement_time_step(self, time_step, activation,i):
     if self.pert_activation:
         self.vl=return_regurgitation_volume(self,time_step,self.v)
     "New section added by HS"
-    if (self.baro_scheme !="fixed_heart_rate"):
+    if self.baro_activation:
         # Update the heart period
         arterial_pressure=self.p[1]
         #dv=derivs(self,self.v)
@@ -126,8 +126,8 @@ def update_data_holders(self, time_step, activation):
     # Now update data structure for half_sarcomere
     self.hs.update_data_holder(time_step, activation)
 
-
-    self.syscon.update_data_holder(time_step)
+    if self.baro_activation:
+        self.syscon.update_data_holder(time_step)
 
     if self.growth_activation:
         self.gr.update_data_holder(time_step)

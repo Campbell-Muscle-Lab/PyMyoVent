@@ -60,9 +60,12 @@ def update_data_holder(self, dt, activation):
         self.hs_data.at[self.data_buffer_index, 'J4'] = np.sum(fluxes['J4'])
         self.hs_data.at[self.data_buffer_index, 'Jon'] = fluxes['Jon']
         self.hs_data.at[self.data_buffer_index, 'Joff'] = fluxes['Joff']
+
         self.hs_data.at[self.data_buffer_index, 'N_overlap'] = self.myof.n_overlap
 
-        if self.ATPase_activation:    
+
+
+        if self.ATPase_activation:
             self.hs_data.at[self.data_buffer_index, 'ATPase'] = self.ATPase
 
     if (self.membr.kinetic_scheme == "Ten_Tusscher_2004"):

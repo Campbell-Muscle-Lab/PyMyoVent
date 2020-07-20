@@ -37,7 +37,6 @@ def return_fluxes(self, y, Ca_conc):
         r4 = self.k_4_0 + (self.k_4_1 * np.power(self.x, 4))
         r4[r4 > self.parent_hs.max_rate] = self.parent_hs.max_rate
         J4 = r4 * M_bound
-
         if (self.n_overlap > 0.0):
             Jon = (self.k_on * Ca_conc * (self.n_overlap - n_on) *
                 (1.0 + self.k_coop * (n_on / self.n_overlap)))

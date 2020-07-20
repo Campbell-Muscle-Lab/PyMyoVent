@@ -5,84 +5,68 @@ import numpy as np
 
 
 
-def display_baro_results (data_structure, output_file_string="",dpi=None):
-    no_of_rows = 8
+def display_baro_results (data_structure, output_file_string="",dpi=300):
+    no_of_rows = 7
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
-    f.set_size_inches([10, 10])
+    f.set_size_inches([7, 10])
     spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
                               figure=f)
 
     ax1 = f.add_subplot(spec2[0, 0])
     ax1.plot('time','pressure_arteries',data=data_structure)
     #ax1.set_xlabel('time (s)', fontsize = 15)
-    ax1.set_ylabel('$P_a (mmHg)$', fontsize = 15)
-    ax1.tick_params(labelsize = 15)
+    ax1.set_ylabel('$P_a (mmHg)$', fontsize = 10)
+    ax1.tick_params(labelsize = 10)
 
     if(hasattr(data_structure,'baroreceptor_output')):
         ax2 = f.add_subplot(spec2[1, 0])
         ax2.plot('time','baroreceptor_output',data=data_structure)
         #ax2.set_xlabel('time (s)', fontsize = 15)
-        ax2.set_ylabel('$br$', fontsize = 15)
-        ax2.tick_params(labelsize = 15)
+        ax2.set_ylabel('$br$', fontsize = 10)
+        ax2.tick_params(labelsize = 10)
 
-    if(hasattr(data_structure,'P_tilda')):
-        ax3 = f.add_subplot(spec2[2, 0])
-        ax3.plot('time','P_tilda',data=data_structure)
-        ax3.set_xlabel('time (s)', fontsize = 15)
-        ax3.set_ylabel('P_tilda (mmHg)', fontsize = 15)
-
-        ax4 = f.add_subplot(spec2[3, 0])
-        ax4.plot('time','f_cs',data=data_structure)
-        ax4.set_xlabel('time (s)', fontsize = 15)
-        ax4.set_ylabel('f_cs', fontsize = 15)
-
-
-
-    ax3 = f.add_subplot(spec2[2, 0])
+    """ax3 = f.add_subplot(spec2[2, 0])
     ax3.plot('time','heart_period',data=data_structure)
     #ax3.set_xlabel('time (s)', fontsize = 15)
-    ax3.set_ylabel('T (s)', fontsize = 15)
-    ax3.tick_params(labelsize = 15)
+    ax3.set_ylabel('Heart period\n$T (s)$', fontsize = 10)
+    ax3.tick_params(labelsize = 10)"""
 
-    ax4 = f.add_subplot(spec2[3, 0])
+    ax4 = f.add_subplot(spec2[2, 0])
     ax4.plot('time','heart_rate',data=data_structure)
     #ax4.set_xlabel('time (s)', fontsize = 15)
-    ax4.set_ylabel('HR (BPM)', fontsize = 15)
-    ax4.tick_params(labelsize = 15)
+    ax4.set_ylabel('Heart Beat (BPM)', fontsize = 10)
+    ax4.tick_params(labelsize = 10)
 
-    ax5=f.add_subplot(spec2[4,0])
+    ax5=f.add_subplot(spec2[3,0])
     ax5.plot('time','k_1',data=data_structure)
     #ax5.set_xlabel('time (s)', fontsize = 15)
-    ax5.set_ylabel('$k_1$', fontsize = 15)
-    ax5.tick_params(labelsize = 15)
+    ax5.set_ylabel('$k_1$ ($s^{-1}$)', fontsize = 10)
+    ax5.tick_params(labelsize = 10)
 
-    ax6=f.add_subplot(spec2[5,0])
+    ax6=f.add_subplot(spec2[4,0])
     ax6.plot('time','k_3',data=data_structure)
     #ax6.set_xlabel('time (s)', fontsize = 15)
-    ax6.set_ylabel('$k_3$', fontsize = 15)
-    ax6.tick_params(labelsize = 15)
+    ax6.set_ylabel('$k_3$ ($s^{-1}$)', fontsize = 10)
+    ax6.tick_params(labelsize = 10)
     #ax6.set_xlabel('time (s)', fontsize = 15)
 
-    ax7=f.add_subplot(spec2[6,0])
+    ax7=f.add_subplot(spec2[5,0])
     ax7.plot('time','Ca_Vmax_up_factor',data=data_structure)
     #ax6.set_xlabel('time (s)', fontsize = 15)
-    ax7.set_ylabel('SERCA up', fontsize = 15)
-    ax7.tick_params(labelsize = 15)
+    ax7.set_ylabel('$V_{max,up}$\n ($mM/ms$)', fontsize = 10)
+    ax7.tick_params(labelsize = 10)
+    ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     #ax7.set_xlabel('time (s)', fontsize = 15)
 
-    ax8=f.add_subplot(spec2[7,0])
+    ax8=f.add_subplot(spec2[6,0])
     ax8.plot('time','g_CaL_factor',data=data_structure)
     #ax6.set_xlabel('time (s)', fontsize = 15)
-    ax8.set_ylabel('g_cal', fontsize = 15)
-    ax8.tick_params(labelsize = 15)
-    ax8.set_xlabel('time (s)', fontsize = 15)
-
-#    ax7=f.add_subplot(spec2[6,0])
-#    ax7.set_xlabel('time (s)', fontsize = 15)
-#    ax7.set_ylabel('$Rv$', fontsize = 15)
-#    ax7.tick_params(labelsize = 15)
+    ax8.set_ylabel('$G_{CaL}$\n ($cm^3$.\u03BC$F^{-1}$.$s^{-1}$)', fontsize = 10)
+    ax8.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax8.tick_params(labelsize = 10)
+    ax8.set_xlabel('time (s)', fontsize = 10)
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

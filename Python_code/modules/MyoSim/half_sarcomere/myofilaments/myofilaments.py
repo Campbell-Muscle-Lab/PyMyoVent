@@ -56,7 +56,7 @@ class myofilaments():
             # Start with all myosins in M1 and all binding sites off
             self.y[0] = 1.0
             self.y[-2] = 1.0
-
+            self.r4 = self.k_4_0 + (self.k_4_1 * np.power(self.x, 4))
         # Set up passive forces
         self.passive_mode = \
             myofil_params["passive_mode"][0]

@@ -2,7 +2,7 @@
 Title: Growth
 nav_order: 3
 has_children: True
-parent: Models
+parent: Demos
 ---
 ## Growth
 {:.no_toc}
