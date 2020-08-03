@@ -59,11 +59,11 @@ class system_control():
             self.activation_level = 0.0
 
             # afferent pathway (baroreceptor control)
-            self.bc = np.zeros(self.start_index)
-            self.bc_max = float(temp["afferent"]["br_max"][0])
-            self.bc_min =  float(temp["afferent"]["br_min"][0])
-            self.bc_mid = float((self.bc_max+self.bc_min)/2)
-            self.slope = float(temp["afferent"]["S"][0])
+            self.b = np.zeros(self.start_index)
+            self.b_max = float(temp["afferent"]["b_max"][0])
+            self.b_min =  float(temp["afferent"]["b_min"][0])
+            self.b_mid = float((self.b_max+self.b_min)/2)
+            self.S = float(temp["afferent"]["S"][0])
             self.P_n = float(temp["afferent"]["P_n"][0])
 
             #efferent pathway (regulation)
@@ -83,6 +83,11 @@ class system_control():
             self.k3_0 = self.k3
             self.G_k3 = float(temp["regulation"]["k_3"]["G_k3"][0])
             self.k3_rate_array = np.zeros(memory)
+                    #k_on
+            self.k_on = float(hs_params["myofilaments"]["k_on"][0])#float(temp["regulation"]["k_3"]["k3"][0])
+            self.k_on_0 = self.k_on
+            self.G_k_on = float(temp["regulation"]["k_on"]["G_k_on"][0])
+            self.k_on_rate_array = np.zeros(memory)
                     #ca_uptake
             self.ca_uptake = float(hs_params["membranes"]["Ten_Tusscher_2004"]["Ca_Vmax_up_factor"][0])
             self.ca_uptake_0 = self.ca_uptake
@@ -110,6 +115,7 @@ class system_control():
 
             self.sys_data['k_1'] = pd.Series(np.full(self.data_buffer_size,self.k1))
             self.sys_data['k_3'] = pd.Series(np.full(self.data_buffer_size,self.k3))
+            self.sys_data['k_on'] = pd.Series(np.full(self.data_buffer_size,self.k_on))
             self.sys_data['Ca_Vmax_up_factor'] = \
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[39]))
             self.sys_data['g_CaL_factor'] = \

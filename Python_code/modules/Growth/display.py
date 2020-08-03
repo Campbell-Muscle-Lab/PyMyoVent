@@ -190,8 +190,8 @@ def display_growth_summary(data_structure, output_file_string="",signal="",
 
     ax10 = f.add_subplot(spec2[9, 0])
     ax10.plot('time','volume_ventricle',data=data_structure)
-    ax10.plot('time','LVEDV',data=data_structure)
-    ax10.plot('time','LVESV',data=data_structure)
+#    ax10.plot('time','LVEDV',data=data_structure)
+#    ax10.plot('time','LVESV',data=data_structure)
     if t_limits:
         ax10.set_xlim(t_limits)
     ax10.set_xlabel('time (s)', fontsize = 20)
@@ -368,7 +368,7 @@ def display_ATPase(data_structure, output_file_string="", t_limits=[],
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)
-                     
+
 def save_figure_to_file(f, im_file_string, dpi=None, verbose=1):
     # Writes an image to file
 

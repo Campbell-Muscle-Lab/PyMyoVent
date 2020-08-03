@@ -33,7 +33,8 @@ class growth():
 
         self.wall_volume = ventricle_wall_volume
         self.wv_array = np.full(self.start_index,self.wall_volume)
-        self.wv_rate = np.zeros(self.start_index)
+        #self.wv_rate = np.zeros(self.start_index)
+        self.wv_rate = np.zeros(self.ma_window)
 
         #Eccentric growth (number of hs in sereis)
         self.n_of_hs = initial_numbers_of_hs
@@ -57,7 +58,7 @@ class growth():
         self.gr_data = pd.DataFrame({
 #                                    'ventricle_wall_thickness':
 #                                            np.full(self.data_buffer_size,1000*self.tw),
-                                    'wall_volume':
+                                    'ventricle_wall_volume':
                                             np.full(self.data_buffer_size,self.wall_volume),
                                     'number_of_hs':
                                             np.full(self.data_buffer_size,self.n_of_hs)})

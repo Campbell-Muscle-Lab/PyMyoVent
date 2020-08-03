@@ -225,6 +225,8 @@ class single_circulation():
         self.saving_data_activation =  \
             single_circulation_simulation["saving_to_spreadsheet"]["saving_data_activation"][0]
         if self.saving_data_activation:
+            self.output_data_format = \
+                single_circulation_simulation["saving_to_spreadsheet"]["output_data_format"][0]
             self.save_data_start_index = \
                 single_circulation_simulation["saving_to_spreadsheet"]["start_index"][0]
             self.save_data_stop_index= \
@@ -275,10 +277,12 @@ class single_circulation():
                                       np.zeros(self.output_buffer_size),
                                   'volume_perturbation':
                                       np.zeros(self.output_buffer_size),
+                                  'ventricle_wall_thickness':
+                                      np.full(self.output_buffer_size, self.wall_thickness),
 #                                  'ATPase':
 #                                     np.zeros(self.output_buffer_size),
-                                  'ventricle_wall_volume':
-                                    np.full(self.output_buffer_size,1000*self.ventricle_wall_volume),
+#                                  'ventricle_wall_volume':
+#                                    np.full(self.output_buffer_size,self.ventricle_wall_volume),
                                     'ventricle_wall_mass':
                                     np.full(self.output_buffer_size,self.lv_mass),
                                     'ventricle_wall_mass_i':
@@ -414,7 +418,7 @@ class single_circulation():
         display_flows(self.data,
                       self.output_parameters["flows_figure"][0])
         display_pv_loop(self.data,
-                        self.output_parameters["pv_figure"][0],[[78.5,79.8],[142.8,143.8]])
+                        self.output_parameters["pv_figure"][0])#,[[78.5,79.8],[142.8,143.8]]
         #display_pv_loop(self.data,
         #                self.output_parameters["pv_figure"][0],[[1.2,2.2],[4.8,5.8]])
 #        display_pres(self.data,
@@ -435,8 +439,6 @@ class single_circulation():
         #Growth
         if self.growth_activation:
 
-            self.data = analyze_data(self,self.data)
-
             gr.growth.display_growth(self.data,
             self.output_parameters["growth_figure"][0],self.driven_signal)
 
@@ -444,34 +446,30 @@ class single_circulation():
             self.output_parameters["growth_summary"][0],self.driven_signal)
 
 
-
-            gr.growth.display_ventricular_dimensions(self.data,
-            self.output_parameters["ventricular"][0])
-
-            gr.growth.display_systolic_function(self.data,
-                    self.output_parameters["sys_fig"][0])
-
         if self.hs.ATPase_activation:
             gr.growth.display_ATPase(self.data,self.output_parameters["ATPase"][0])
 #        display_regurgitation(self.data,
 #                self.output_parameters["regurg_fig"][0])
         if self.saving_data_activation:
-            print("Data is saving to an excel spread sheet!")
+
+            print("Data is saving to %s format!"%self.output_data_format)
 
             data_to_be_saved = \
                 self.data.loc[self.save_data_start_index:self.save_data_stop_index,:]
-            start_csv = timeit.default_timer()
-            data_to_be_saved.to_csv(self.output_parameters['csv_file'][0])
-            stop_csv = timeit.default_timer()
-            csv_time = stop_csv-start_csv
-            print('csv_time was',csv_time)
+            if self.output_data_format == "csv":
+                start_csv = timeit.default_timer()
+                data_to_be_saved.to_csv(self.output_parameters['csv_file'][0])
+                stop_csv = timeit.default_timer()
+                csv_time = stop_csv-start_csv
+                print('dumping data to .csv format took %f seconds'%csv_time)
 
-            """start_excel = timeit.default_timer()
-            append_df_to_excel(self.output_parameters['excel_file'][0],data_to_be_saved,
-                           sheet_name='Data',startrow=0)
-            stop_excel = timeit.default_timer()
-            excel_time = stop_excel-start_excel
-            print('excel_time was',excel_time)"""
+            elif self.output_data_format == "excel":
+                start_excel = timeit.default_timer()
+                append_df_to_excel(self.output_parameters['excel_file'][0],data_to_be_saved,
+                            sheet_name='Data',startrow=0)
+                stop_excel = timeit.default_timer()
+                excel_time = stop_excel-start_excel
+                print('dumping data to .excel format took %f seconds'%excel_time)
 
 def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
                        truncate_sheet=False,
