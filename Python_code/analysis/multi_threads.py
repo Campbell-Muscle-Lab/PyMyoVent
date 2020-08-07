@@ -7,6 +7,7 @@ import nested_lookup as nl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from pathos.multiprocessing import ProcessingPool as Pool
+import timeit
 
 from modules.SingleVentricle.SingleVentricle import single_circulation as sc
 from modules.SingleVentricle.SingleVentricle import append_df_to_excel
@@ -40,7 +41,7 @@ def run_multi_processing(main_inputs):
 
     # normal post processing of data
     sim=sc(main_inputs)
-    final_output_data = sim.analyze_data(final_output_data)
+    #final_output_data = sim.analyze_data(final_output_data)
     output_temp = main_inputs["output_parameters"]
     sc.display_simulation(final_output_data,output_temp["summary_figure"][0])
     sc.display_flows(final_output_data,output_temp["flows_figure"][0])
@@ -54,17 +55,35 @@ def run_multi_processing(main_inputs):
     if sim.growth_activation:
         gr.growth.display_growth(final_output_data,output_temp["growth_figure"][0],
                         sc.driven_signal)
-        gr.growth.display_ventricular_dimensions(final_output_data,output_temp["ventricular"][0])
+        #gr.growth.display_ventricular_dimensions(final_output_data,output_temp["ventricular"][0])
 
-        gr.growth.display_systolic_function(final_output_data,output_temp["sys_fig"][0])
+        #gr.growth.display_systolic_function(final_output_data,output_temp["sys_fig"][0])
 
     #append data to an excel sheet
     if sim.saving_data_activation:
-        print("Data is saving to an excel spread sheet!")
+        print("Data is saving to %s format!"%sim.output_data_format)
+
+        data_to_be_saved = \
+            final_output_data.loc[sim.save_data_start_index:sim.save_data_stop_index,:]
+        if sim.output_data_format == "csv":
+            start_csv = timeit.default_timer()
+            data_to_be_saved.to_csv(output_temp['csv_file'][0])
+            stop_csv = timeit.default_timer()
+            csv_time = stop_csv-start_csv
+            print('dumping data to .csv format took %f seconds'%csv_time)
+
+        elif sim.output_data_format == "excel":
+            start_excel = timeit.default_timer()
+            append_df_to_excel(output_temp['excel_file'][0],data_to_be_saved,
+                        sheet_name='Data',startrow=0)
+            stop_excel = timeit.default_timer()
+            excel_time = stop_excel-start_excel
+            print('dumping data to .excel format took %f seconds'%excel_time)
+        """print("Data is saving to an excel spread sheet!")
         data_to_be_saved = \
             final_output_data.loc[sim.save_data_start_index:sim.save_data_stop_index,:]
         append_df_to_excel(output_temp['excel_file'][0],data_to_be_saved,
-                           sheet_name='Data',startrow=0)
+                           sheet_name='Data',startrow=0)"""
 
 def process_data(main_inputs,output_data):
     organized_dataframe = pd.DataFrame({})
@@ -152,7 +171,7 @@ def return_input_data(main_input):
 
 def create_param_data_name (affected_param,affecting_param_value):
 
-        added_part = "_%%%dG" %(affecting_param_value)
+        added_part = "_%%%d" %(affecting_param_value)
         new_name = "%s" %(affected_param)+added_part
 
         return new_name
@@ -178,18 +197,19 @@ def display_multithreading(data,output_file_string="",t_limits=[],
     f.set_size_inches([plot_width,plot_height])
     spec = gridspec.GridSpec(nrows=num_of_rows, ncols=num_of_cols,figure=f)
 
-    """ax0 = f.add_subplot(spec[0,0])
-    ax0.plot('time','baroreceptor_output_%25G',data=data,label='$0.25S$')
-    ax0.plot('time','baroreceptor_output_%50G',data=data,label='$0.50S$')
+    ax0 = f.add_subplot(spec[0,0])
+    ax0.plot('time','baroreceptor_output_%25',data=data,label='$0.25S$')
+    ax0.plot('time','baroreceptor_output_%50',data=data,label='$0.50S$')
     ax0.plot('time','baroreceptor_output',data=data,label='$S$')
-    ax0.plot('time','baroreceptor_output_%150G',data=data,label='$1.50S$')
-    ax0.plot('time','baroreceptor_output_%175G',data=data,label='$1.75S$')
+    ax0.plot('time','baroreceptor_output_%150',data=data,label='$1.50S$')
+    ax0.plot('time','baroreceptor_output_%200',data=data,label='$2S$')
+    ax0.plot('time','baroreceptor_output_%1000',data=data,label='$10S$')
     ax0.set_ylabel('$br$ (baroreceptor output)',fontsize=7)
     ax0.legend(bbox_to_anchor=(1.05, 1),fontsize = 7)
     ax0.tick_params(labelsize=7)
-    ax0.set_xlabel('time (s)',fontsize=7)"""
+    ax0.set_xlabel('time (s)',fontsize=7)
 
-    ax0 = f.add_subplot(spec[0,0])
+    """ax0 = f.add_subplot(spec[0,0])
     ax0.plot('time','heart_rate_%25G',data=data,label='$0.25G_T$')
     ax0.plot('time','heart_rate_%50G',data=data,label='$0.50G_T$')
     ax0.plot('time','heart_rate',data=data,label='$G_T$')
@@ -210,12 +230,12 @@ def display_multithreading(data,output_file_string="",t_limits=[],
     ax1.tick_params(labelsize=10)
 
     ax2 = f.add_subplot(spec[2,0])
-    ax2.plot('time','k_3_%25G',data=data,label='$0.25G_{k_3}$')
-    ax2.plot('time','k_3_%50G',data=data,label='$0.50G_{k_3}$')
-    ax2.plot('time','k_3',data=data,label='$G_{k_3}$')
-    ax2.plot('time','k_3_%150G',data=data,label='$1.50G_{k_3}$')
-    ax2.plot('time','k_3_%175G',data=data,label='$1.75G_{k_3}$')
-    ax2.set_ylabel('$k_3$',fontsize=10)
+    ax2.plot('time','k_on_%25G',data=data,label='$0.25G_{k_on}$')
+    ax2.plot('time','k_on_%50G',data=data,label='$0.50G_{k_on}$')
+    ax2.plot('time','k_on',data=data,label='$G_{k_on}$')
+    ax2.plot('time','k_on_%150G',data=data,label='$1.50G_{k_on}$')
+    ax2.plot('time','k_on_%175G',data=data,label='$1.75G_{k_on}$')
+    ax2.set_ylabel('$k_{on}$',fontsize=10)
     ax2.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
     ax2.tick_params(labelsize=10)
 
@@ -226,7 +246,7 @@ def display_multithreading(data,output_file_string="",t_limits=[],
     ax3.plot('time','Ca_Vmax_up_factor',data=data,label='$G_{V_{max,up}}$')
     ax3.plot('time','Ca_Vmax_up_factor_%150G',data=data,label='$1.50G_{V_{max,up}}$')
     ax3.plot('time','Ca_Vmax_up_factor_%175G',data=data,label='$1.75G_{V_{max,up}}$')
-    ax3.set_ylabel('$V_{max,up}$\n multiplier factor',fontsize=10)
+    ax3.set_ylabel('$V_{max,up}$',fontsize=10)
     ax3.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
     ax3.tick_params(labelsize=10)
 
@@ -239,7 +259,7 @@ def display_multithreading(data,output_file_string="",t_limits=[],
     ax4.set_ylabel('$G_{CaL}$',fontsize=10)
     ax4.legend(bbox_to_anchor=(1.05, 1),fontsize = 10)
     ax4.tick_params(labelsize=10)
-    ax4.set_xlabel('time (s)')
+    ax4.set_xlabel('time (s)')"""
 
     """ax0 = f.add_subplot(spec[0,0])
     ax0.plot('time','ventricle_wall_thickness',data=data,label='G')

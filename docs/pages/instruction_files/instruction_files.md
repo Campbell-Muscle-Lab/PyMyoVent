@@ -1,9 +1,9 @@
 ---
 Title: Instruction File
-nav_order: 3
+nav_order: 4
 has_children: False
 ---
-## Instruction File
+# Instruction File
 {:.no_toc}
 
 * TOC
@@ -15,33 +15,34 @@ PyMyoVent's instruction files are placed at:
 `path_to_PyMyoVent_repo\demo_files`
 
 
-Here we explain the instruction file for [Getting Started](../pages/models/getting_started/getting_started.html) model.
+Here we explain the instruction file for [Getting Started](../demos/getting_started/getting_started.html) model.
 
 
 ## output_parameters
 
 ````
 "output_parameters": {
-    "excel_file": ["..\\temp\\baroreceptor\\baroreceptor.xlsx"],
-    "input_file": ["..\\temp\\baroreceptor\\baroreceptor.json"],
-    "summary_figure": ["..\\temp\\baroreceptor\\baroreceptor_summary.png"],
-    "force_length": ["..\\temp\\baroreceptor\\baroreceptor_F_L.png"],
-    "pv_figure": ["..\\temp\\baroreceptor\\baroreceptor_pv.png"],
-    "baro_figure": ["..\\temp\\baroreceptor\\baroreceptor_baro.png"],
-    "flows_figure": ["..\\temp\\baroreceptor\\baroreceptor_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\baroreceptor\\baroreceptor_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\baroreceptor\\baroreceptor_multi_thread.png"]
+    "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
+    "csv_file": ["..\\temp\\getting_started\\getting_started.csv"],
+    "input_file": ["..\\temp\\getting_started\\getting_started.json"],
+    "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
+    "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
+    "baro_figure": ["..\\temp\\getting_started\\getting_started_baro.png"],
+    "flows_figure": ["..\\temp\\getting_started\\getting_started_flows.png"],
+    "hs_fluxes_figure": ["..\\temp\\getting_started\\getting_started_hs_fluxes.png"],
+    "multi_threading":["..\\temp\\getting_started\\getting_started_multi_thread.png"]
   },
 ````
 - `"output_parameters":` This block contains the output directory path for output figures.
-    - `"excel_file":` Output directory path for the spread sheet including all data.
-    - `"input_file":` Output directory path for making a copy of input instruction file.
-    - `"summary_figure":` Output directory path for the simulation summary figure.
-    - `"pv_figure":` Output directory path for the pressure-volume loop figure.
-    - `"baro_figure":` Output directory path for the baroreceptor module's results figure.
-    - `"flows_figure":` Output directory path for the blood flow circulation figure.
-    - `"hs_fluxes_figure":` Output directory path for MyoSim fluxes figure.
-    - `"multi_threading":` Output directory path for multi threading simulation output figure.
+    - `"excel_file":` Directory path for the output data spread sheet in .xlsx format.
+    - `"csv_file":`  Directory path for the output data spread sheet in .csv format.
+    - `"input_file":` Directory path for making a copy of input instruction file.
+    - `"summary_figure":` Directory path for the simulation summary figure.
+    - `"pv_figure":` Directory path for the pressure-volume loop figure.
+    - `"baro_figure":` Directory path for the baroreceptor module's results figure.
+    - `"flows_figure":` Directory path for the blood flow circulation figure.
+    - `"hs_fluxes_figure":` Directory path for MyoSim fluxes figure.
+    - `"multi_threading":` Directory path for multi threading simulation output figure.
 
 ## baroreflex
 
@@ -84,9 +85,9 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
         "basal_heart_period": [1,"s"]
       },
       "afferent": {
-        "br_max": [2],
-        "br_min": [0],
-        "S": [15,"mmHg"],
+        "b_max": [2],
+        "b_min": [0],
+        "S": [0.067,"mmHg"],
         "P_n": [90,"mmHg"]
       },
       "regulation":{
@@ -94,15 +95,15 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
           "G_T": [0.03]
         },
         "k_1":{
-          "G_k1": [-0.03]
+          "G_k1": [-0.05]
         },
-        "k_3":{
-          "G_k3": [-0.03]
+        "k_on":{
+          "G_k_on":[0.02]
         },
         "ca_uptake":{
           "G_up": [-0.02]
         },
-        "G_cal":{
+        "g_cal":{
           "G_gcal": [-0.03]
         }
       }
@@ -117,17 +118,17 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
         - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated. 
         - `"basal_heart_period":` The basal value for the period of the beating heart.
     - `"afferent":` This block contains the parameters for the afferent pathway of the baroreceptor module.
-        - `"br_max":` The maximum baroreceptor output signal
-        - `"br_min":` The minimum baroreceptor output signal
+        - `"b_max":` The maximum threshold baroreceptor output signal
+        - `"b_min":` The minimum threshold baroreceptor output signal
         - `"S":` The sensitivity constant factor of the baroreceptor output signal in response to any change in the arterial pressure from the mean arterial pressure. 
-        - `"P_n":` The targeted mean arterial pressure.
+        - `"P_n":` The targeted mean arterial pressure (i.e. set-point level).
     - `"regulation":` This block contains the parameters for the regulation of controlled parameteres.
         - `"heart_period":` The heart period block.
             - `"G_T":` The gain factor for the heart period.
         - `"k_1":` The *k_1* constant factor block.
             - `"G_k1":` The gain factor for the *k_1* factor of MyoSim module.
-        - `"k_3":` The *k_3* constant factor block.
-            - `"G_k3":` The gain factor for the *k_3* factor of MyoSim module.
+        - `"k_on":` The *k_on* constant factor block.
+            - `"G_k_on":` The gain factor for the *k_on* factor of MyoSim module.
         - `"ca_uptake":` The maximal *SERCA_uptake* current block.
             - `"G_up":` The gain factor for the maximal *SERCA_uptake* current.
         - `"G_cal":` The maximal *Ca_current* through the L-type channel.
@@ -415,7 +416,7 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
     "reference_hs_length":[1100,"nm"],
 ````
 - `"half_sarcomere":` MyoSim parameters block.
-    - `"max_rate":` The maximum constant rate for the MyoSim fluxes. 
+    - `"max_rate":` A float defining the maximum rate considered in the simulations. Rate values above this will be limited to max_rate.
     - `"temperature":` The tempreture.
     - `"cb_number_density":` The density of myosin heads (Number of myosin heads in a unit cross-section area of half-sarcomeres). 
     - `"initial_hs_length":` Initial length for the half-sarcomeres.
@@ -465,23 +466,115 @@ Here we explain the instruction file for [Getting Started](../pages/models/getti
     - `"k_on":` The activation constant rate of binding sites.
     - `"k_off":` The deactivation constant rate of binding sites. 
     - `"k_coop":` The cooperativity factor of thin filaments. 
-    - `"bin_min":` The minimum range of length in which a myosin head can be placed with respect to its resting position. 
-    - `"bin_max":` The maximum range of length in which a myosin head can be placed with respect to its resting position. 
-    - `"bin_width":` The resolution of myosin head's position range. 
+    - `"bin_min":` The minimum possible value of x in nm for the cross-bridge distribution 
+    - `"bin_max":` The maximum possible value of x in nm for the cross-bridge distribution 
+    - `"bin_width":` The width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate
     - `"filament_compliance_factor":` The compliance factor of myofilaments. 
-    - `"thick_filament_length":` 
-    - `"thin_filament_length":` 
-    - `"bare_zone_length":` 
-    - `"k_falloff":` 
-    - `"passive_mode":` 
-    - `"passive_exp_sigma":` 
-    - `"passive_exp_L":` 
-    - `"passive_l_slack":` 
-    
+
+    The following parameters are used to calculate the overlap of the thick and thin filaments, and thus the number of myosin heads that are able to interact with actin 
+    - `"thick_filament_length":` The length of thick myofilament in nm.
+    - `"thin_filament_length":` The length of thin myofilament in nm.
+    - `"bare_zone_length":` The length of bare zone in 
+    - `"k_falloff":` A constant factor.
+    - `"passive_mode":` The mode type for calculating the passive force in half-sarcomeres. 
+
+    The following parameters are used for `passive_mode` of `exponential`
+    - `"passive_exp_sigma":` The sigma constant factor.
+    - `"passive_exp_L":` The constant factor that sets the curvature of the relationship.
+    - `"passive_l_slack":` Slack length of half-sarcomere.
+
+````
+"membranes": {
+      "kinetic_scheme": ["simple_2_compartment"],
+  }
+````
+- `"membranes":` This block governs the parameters for an implemented electrophysiology model.
+    - `"kinetic_scheme":` The modle's name for the electrophysiology model that play's a "switch control" role in the "membrane" class.
+      ````
+      "simple_2_compartment":{
+        "Ca_content": [1e-3],
+        "k_leak": [2e-3],
+        "k_act": [5e-2],
+        "k_serca": [10.0]
+      },
+      ````
+      - `"simple_2_compartment":` The parameters block for the "simple two compartment" electrophysiology model.
+        - `"Ca_content":` Amount of calcium content in the sarcoplasmic reticulum (SR).
+        - `"k_leak":` Rate constant factor for calcium leak current from SR.
+        - `"k_act":` Rate constant factor for active calcium current from SR during stimulation.
+        - `"k_serca":` Rate constant factor SERCA uptake current.
+      ````
+      "Ten_Tusscher_2004":{
+        "g_to_factor": [1],
+        "g_Kr_factor": [1],
+        "g_Ks_factor": [1],
+        "Ca_a_rel_factor": [1],
+        "Ca_V_leak_factor": [1],
+        "Ca_Vmax_up_factor": [1],
+        "g_CaL_factor": [1]
+      }
+      ````
+      - `"Ten_Tusscher_2004":` The parameters' multiplier block for the "ten Tusscher" electrophysiology model.
+        - The [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view) electrophysiology model is a sophisticated model that include a large number of constant factors and state conditions. In this block, only some parameter multiplier can be modifed in order to do something like a sensitivity test on the included parameters. 
+      
 ## growth
+
+````
+"growth": {
+    "growth_activation": [false],
+    "start_index": [200000],
+    "moving_average_window": [5000],
+    "driven_signal": ["stress"],
+  },
+````
+- `"growth":` This block belngs to the "ventricular growth" class parameters.
+  - `"growth_activation":` The activation control parameter for the "growth" module.
+  - `"start_index":` The start index for activating the growth module.
+  - `"moving_average_window":` The The number of time steps that the growth rates needs to be averaged over.
+  - `"driven_signal":` A switch control based on the driving signal for the "growth" module.
+
+  ````
+  "concenrtric":{
+      "G_stress_driven":[1e-6],
+      "G_ATPase_driven":[-2]
+    },
+  ````
+  - `"concenrtric":` The parameters block for "concentric" growth pattern.
+    - `"G_stress_driven":` The gain factor for stress driven "concentric" growth pattern.
+    - `"G_ATPase_driven":` The gain factor for ATPase driven "concentric" growth pattern.
+  
+  ````
+  "eccentric":{
+      "G_number_of_hs":[-3e-6],
+      "G_ATPase_driven":[0]
+    }
+  ````
+  - `"eccenrtric":` The parameters block for "eccentric" growth pattern.
+    - `"G_stress_driven":` The gain factor for stress driven "eccentric" growth pattern.
+    - `"G_ATPase_driven":` The gain factor for ATPase driven "eccentric" growth pattern.
 
 ## profiling
 
+````
+"profiling":{
+    "profiling_activation":[false]
+````
+- `"profiling":` The profiling block.
+  - `"profiling_activation":` The activation control parameter for profiling the simulation. 
+
 ## saving_to_spreadsheet
 
-## multi_threads
+````
+"saving_to_spreadsheet":{
+    "saving_data_activation":[false],
+    "output_data_format":["csv"],
+    "start_index":[0],
+    "stop_index":[15000]
+  },
+````
+- `"saving_to_spreadsheet":` This block controls dumping output data.
+  - `"saving_data_activation":` The activation control parameter for dumping output data.
+  - `"output_data_format":` The output dumped data format. This can varies between "csv" and "xlsx" formats.
+  - `"start_index":` The start index for dumping data to the output spread sheet.
+  - `"stop_index":` The stop index for dumping data to the output spread sheet.
+

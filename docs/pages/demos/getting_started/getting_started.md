@@ -4,7 +4,7 @@ nav_order: 1
 has_children: False
 parent: Demos
 ---
-## Getting Started
+# Getting Started
 {:.no_toc}
 
 * TOC
@@ -28,6 +28,7 @@ parent: Demos
 {
   "output_parameters": {
     "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
+    "csv_file": ["..\\temp\\getting_started\\getting_started.csv"],
     "input_file": ["..\\temp\\getting_started\\getting_started.json"],
     "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
     "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
@@ -56,9 +57,9 @@ parent: Demos
         "basal_heart_period": [1,"s"]
       },
       "afferent": {
-        "br_max": [2],
-        "br_min": [0],
-        "S": [15,"mmHg"],
+        "b_max": [2],
+        "b_min": [0],
+        "S": [0.067,"mmHg"],
         "P_n": [90,"mmHg"]
       },
       "regulation":{
@@ -66,10 +67,10 @@ parent: Demos
           "G_T": [0.03]
         },
         "k_1":{
-          "G_k1": [-0.03]
+          "G_k1": [-0.05]
         },
-        "k_3":{
-          "G_k3": [-0.03]
+        "k_on":{
+          "G_k_on":[0.02]
         },
         "ca_uptake":{
           "G_up": [-0.02]
@@ -83,92 +84,92 @@ parent: Demos
   "perturbations": {
     "perturbation_activation":[false],
     "volume":{
-      "start_index": [85000],
-      "stop_index": [90000],
+      "start_index": [],
+      "stop_index": [],
       "increment": [0]
     },
     "valve":{
       "aortic":{
-        "start_index": [0],
-        "stop_index": [505000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "mitral":{
-        "start_index": [400000],
-        "stop_index": [1000000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       }
     },
     "compliance": {
       "aorta":{
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "resistance": {
       "aorta":{
-        "start_index": [400000],
-        "stop_index": [410000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "capillaries": {
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [85000],
-        "stop_index": [90000],
-        "increment": [-3e-2]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "ventricle":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "myosim":{
       "k_1":{
-        "start_index": [25000],
-        "stop_index": [25001],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "k_2":{
-        "start_index": [25000],
-        "stop_index": [35000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "k_4_0":{
-        "start_index": [200000],
-        "stop_index": [210000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "ca_handling":{
       "ca_uptake":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "ca_leak":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "g_cal":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     }
@@ -214,7 +215,7 @@ parent: Demos
     "ATPase_activation":[false],
     "delta_energy":[70,"kJ/mol"],
     "avagadro_number":[6.02e23,"mol^-1"],
-    "referench_hs_length":[1100,"nm"],
+    "reference_hs_length":[1100,"nm"],
 
     "myofilaments":{
       "kinetic_scheme": ["3state_with_SRX"],
@@ -280,8 +281,9 @@ parent: Demos
   },
   "saving_to_spreadsheet":{
     "saving_data_activation":[false],
+    "output_data_format":["csv"],
     "start_index":[0],
-    "stop_index":[5000]
+    "stop_index":[15000]
   },
   "multi_threads" :{
     "multithreading_activation":[false],
@@ -300,9 +302,13 @@ parent: Demos
     "output_main_folder": ["..\\temp\\getting_started\\demo_i_j\\demo_i_j.json"]
   }
 }
+
+
 ````
 
 ## Outputs
+
+When the simulation is funished up, this set of output figures will be shown up in `path_to_PyMyoVent_repo\temp\getting_started` directory.
 
 * Simmulation summary output
 

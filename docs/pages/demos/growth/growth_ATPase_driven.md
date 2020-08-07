@@ -5,7 +5,7 @@ has_children: False
 parent: Growth
 grand_parent : Demos
 ---
-## Growth - ATPase Driven
+# Growth - ATPase Driven
 {:.no_toc}
 
 * TOC

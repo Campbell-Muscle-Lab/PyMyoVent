@@ -5,7 +5,7 @@ has_children: False
 parent: Baroreceptor
 grand_parent: Demos
 ---
-## Baroreceptor Perturbed System
+# Baroreceptor Perturbed System
 {:.no_toc}
 
 * TOC
@@ -27,15 +27,16 @@ grand_parent: Demos
 * In this model, the baroreceptor module is activated by putting `"baro_scheme": ["simple_baroreceptor"]` in the instruction file. 
 * The baroreceptor module starts to regulate the arterial pressure after `"start_index":[2000]`, which can be modified by user.
 * The baroreceptor module tries to maintain the mean arterial pressure at `90 mm Hg` by continously regulation of heart rate, myofilaments contractility, and calcium handling.
-* This model uses an electrophys model proposed by [Ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
+* This model uses an electrophysiology model proposed by [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
 * Perturbation module is activated by putting `"perturbation_activation":[true]` in the instruction file. 
-* To apply a blood volume perturbation representing the loosing of 10% of total blood volume through the veins during 5 seconds starting from the time of 85 seconds to 90 seconds you should have the following change in the `"perturbation"` section of the instruction file:
+* In this simulation, a blood volume perturbation representing a hemorrahge condition by loosing of 10% of total blood volume through the veins is applied. The perturbatiom starts from time index of `85000` to `90000`. This perturbation condition is defined in the `"perturbation"` section of the instruction file:
 
 ````
 "volume":{
       "start_index": [85000],
       "stop_index": [90000],
       "increment": [-1e-4]
+}
 ````
 
 ## Instruction file
@@ -46,9 +47,9 @@ grand_parent: Demos
 {
   "output_parameters": {
     "excel_file": ["..\\temp\\baro_pert\\baro_pert.xlsx"],
+    "csv_file": ["..\\temp\\baro_pert\\baro_pert.csv"],
     "input_file": ["..\\temp\\baro_pert\\baro_pert.json"],
     "summary_figure": ["..\\temp\\baro_pert\\baro_pert_summary.png"],
-    "force_length": ["..\\temp\\baro_pert\\baro_pert_F_L.png"],
     "pv_figure": ["..\\temp\\baro_pert\\baro_pert_pv.png"],
     "baro_figure": ["..\\temp\\baro_pert\\baro_pert_baro.png"],
     "flows_figure": ["..\\temp\\baro_pert\\baro_pert_flows.png"],
@@ -75,9 +76,9 @@ grand_parent: Demos
         "basal_heart_period": [1,"s"]
       },
       "afferent": {
-        "br_max": [2],
-        "br_min": [0],
-        "S": [15,"mmHg"],
+        "b_max": [2],
+        "b_min": [0],
+        "S": [0.067,"mmHg"],
         "P_n": [90,"mmHg"]
       },
       "regulation":{
@@ -85,10 +86,10 @@ grand_parent: Demos
           "G_T": [0.03]
         },
         "k_1":{
-          "G_k1": [-0.03]
+          "G_k1": [-0.05]
         },
-        "k_3":{
-          "G_k3": [-0.03]
+        "k_on":{
+          "G_k_on":[0.02]
         },
         "ca_uptake":{
           "G_up": [-0.02]
@@ -108,86 +109,86 @@ grand_parent: Demos
     },
     "valve":{
       "aortic":{
-        "start_index": [0],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "mitral":{
-        "start_index": [400000],
-        "stop_index": [1000000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "compliance": {
       "aorta":{
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "resistance": {
       "aorta":{
-        "start_index": [400000],
-        "stop_index": [410000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [85000],
-        "stop_index": [90000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "ventricle":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "myosim":{
       "k_1":{
-        "start_index": [25000],
-        "stop_index": [25001],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "k_2":{
-        "start_index": [25000],
-        "stop_index": [35000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "k_4_0":{
-        "start_index": [200000],
-        "stop_index": [210000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "ca_handling":{
       "ca_uptake":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "ca_leak":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "g_cal":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     }
@@ -233,7 +234,7 @@ grand_parent: Demos
     "ATPase_activation":[false],
     "delta_energy":[70,"kJ/mol"],
     "avagadro_number":[6.02e23,"mol^-1"],
-    "referench_hs_length":[1100,"nm"],
+    "reference_hs_length":[1100,"nm"],
 
     "myofilaments":{
       "kinetic_scheme": ["3state_with_SRX"],
@@ -299,8 +300,9 @@ grand_parent: Demos
   },
   "saving_to_spreadsheet":{
     "saving_data_activation":[false],
+    "output_data_format":["csv"],
     "start_index":[0],
-    "stop_index":[1000]
+    "stop_index":[15000]
   },
   "multi_threads" :{
     "multithreading_activation":[false],
@@ -338,6 +340,8 @@ grand_parent: Demos
 ````
 ## Outputs
 
+When the simulation is funished up, this set of output figures will be shown up in `path_to_PyMyoVent_repo\temp\baro_pert` directory.
+
 * Simmulation summary output
 
 ![summary](baro_pert_summary.png)
@@ -360,7 +364,7 @@ grand_parent: Demos
 ## New User Defined Perturbation
 * The user can apply any sort of possible perturbation to the simulation by defining the `"start_index"`, `"stop_index"`, and `"increment"` for the desired type of perturbation in the `"perturbation"` section of the instruction file.
     * For example, if you want to increase the *Aortic resistance* by 200% to represent the aortic stenosis you should do:
-        1. Determine the starting and stopping times points for the perturbation in seconds.
+        1. Determine the starting and stopping time points for the perturbation in seconds.
         2. Then convert them into the time step's unit of the simulation by:
             * `"start_index" = starting time in seconds/"time_step"`
             * `"stop_index" = stopping time in seconds/"time_step"`

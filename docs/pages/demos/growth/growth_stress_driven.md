@@ -5,7 +5,7 @@ has_children: False
 parent: Growth
 grand_parent : Demos
 ---
-## Growth - Stress Driven
+# Growth - Stress Driven
 {:.no_toc}
 
 * TOC

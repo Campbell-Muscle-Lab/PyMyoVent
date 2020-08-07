@@ -4,7 +4,7 @@ nav_order: 3
 has_children: True
 parent: Demos
 ---
-## Growth
+# Growth
 {:.no_toc}
 
 * TOC
