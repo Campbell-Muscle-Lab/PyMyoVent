@@ -1,1 +1,2 @@
-/temp/*
+# Compiled files
+__pycache__/
