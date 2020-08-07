@@ -9,15 +9,17 @@ has_children: False
 
 ## Overview 
 
-This is the homepage for **PyMyoVent**, a software written in Python language for simulating a single ventricle pumping blood through a closed circulation.
+This is the homepage for **PyMyoVent**, software written in Python that simulates a single ventricle pumping blood through a closed circulation.
 
-**PyMyoVent** is built on various sub-modules and trying to simulate a multi-scale modeling method for the left ventricle. 
+PyMyoVent is a multiscaled model that bridges from molecular to organ-level function. More information about the different components is provided at [Modules](pages/modules/modules.html). 
 
-**PyMyoVent** is originally developed by [Kenneth S. Campbell et al.](http://www.frontiersin.org/articles/10.3389/fphys.2020.01043/abstract) and still is getting updated while other projects are utilizing it.
+Key contributors to the project are listed on the [Team page](pages/team/team.html).
 
-Here is shown a simulated single heart beat results via **PyMyoVent** published in [Kenneth S. Campbell et al.](http://www.frontiersin.org/articles/10.3389/fphys.2020.01043/abstract) work.
+## Example simulation
 
 ![Single beat](single_beat.png)
+
+## Getting started
 
 To get started:
 * 1- Get familiar with how to setup the required [environment](../pages/environment/environment.html).
