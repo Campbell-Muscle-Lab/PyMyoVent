@@ -110,35 +110,6 @@ class half_sarcomere():
                 self.ATPase = 0
                 self.hs_data['ATPase'] = pd.Series(np.zeros(self.data_buffer_size))
 
-        if (self.myof.kinetic_scheme == '4state_with_SRX'):
-            # Initialise
-            self.hs_data['M_OFF'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['M_ON'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['M_bound'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['n_off'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['n_on'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['n_bound'] = pd.Series(np.zeros(self.data_buffer_size))
-
-            # Set first values
-            self.hs_data.at[self.data_buffer_index, 'M_OFF'] = 1.0
-            self.hs_data.at[self.data_buffer_index, 'M_ON'] = 0.0
-            self.hs_data.at[self.data_buffer_index, 'M_bound'] = 0.0
-            self.hs_data.at[self.data_buffer_index, 'n_off'] = 1.0
-            self.hs_data.at[self.data_buffer_index, 'n_on'] = 0.0
-            self.hs_data.at[self.data_buffer_index, 'n_bound'] = 0.0
-
-            # Fluxes
-            self.hs_data['J1'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J2'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J3'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J4'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J5'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J6'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J7'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['J8'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['Jon'] = pd.Series(np.zeros(self.data_buffer_size))
-            self.hs_data['Joff'] = pd.Series(np.zeros(self.data_buffer_size))
-
         if (self.membr.kinetic_scheme == "Ten_Tusscher_2004"):
             self.hs_data['membrane_voltage'] = pd.Series(np.zeros(self.data_buffer_size))
 
