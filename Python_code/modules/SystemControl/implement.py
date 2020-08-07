@@ -60,7 +60,7 @@ def return_contractility(self,time_step,i):
         if self.k1>2*self.k1_0:
             self.k1 = 2*self.k1_0
 
-        k3_0 = self.k3
+        """k3_0 = self.k3
         self.k3_rate_array = np.roll(self.k3_rate_array,-1)
         dk3dt_0 = self.G_k3*(self.b[i]-self.b_mid)*self.k3_0
         self.k3_rate_array[-1] = dk3dt_0
@@ -71,7 +71,7 @@ def return_contractility(self,time_step,i):
         if self.k3<0.3*self.k3_0:
             self.k3 = 0.3*self.k3_0
         if self.k3>2*self.k3_0:
-            self.k3 = 2*self.k3_0
+            self.k3 = 2*self.k3_0"""
 
         k_on_0 = self.k_on
         self.k_on_rate_array = np.roll(self.k_on_rate_array,-1)
@@ -113,7 +113,7 @@ def return_contractility(self,time_step,i):
         if self.g_cal>2*self.g_cal_0:
             self.g_cal = 2*self.g_cal_0
 
-    return self.k1,self.k3, self.k_on,self.ca_uptake,self.g_cal  #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
+    return self.k1,self.k_on,self.ca_uptake,self.g_cal  #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
 
 def return_activation(self):
     if (self.baro_scheme == "fixed_heart_rate"):
@@ -156,7 +156,7 @@ def update_data_holder(self,time_step):
 
     if (self.baro_scheme !="fixed_heart_rate"):
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
-        self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
+        #self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
         self.sys_data.at[self.data_buffer_index, 'k_on'] = self.k_on
         self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = self.hs.membr.constants[39]
         self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = self.hs.membr.constants[18]#self.g_cal

@@ -17,14 +17,14 @@ def display_baro_results (data_structure, output_file_string="",dpi=300):
     ax0 = f.add_subplot(spec2[0, 0])
     ax0.plot('time','pressure_arteries',data=data_structure)
     #ax1.set_xlabel('time (s)', fontsize = 15)
-    ax0.set_ylabel('$P_a (mmHg)$', fontsize = 10)
+    ax0.set_ylabel('$P_a$ $(mm$ $Hg)$', fontsize = 10)
     ax0.tick_params(labelsize = 10)
 
     if(hasattr(data_structure,'baroreceptor_output')):
         ax1 = f.add_subplot(spec2[1, 0])
         ax1.plot('time','baroreceptor_output',data=data_structure)
         #ax2.set_xlabel('time (s)', fontsize = 15)
-        ax1.set_ylabel('$br$', fontsize = 10)
+        ax1.set_ylabel('$b$', fontsize = 10)
         ax1.tick_params(labelsize = 10)
 
     """ax3 = f.add_subplot(spec2[2, 0])
@@ -55,13 +55,13 @@ def display_baro_results (data_structure, output_file_string="",dpi=300):
     ax5=f.add_subplot(spec2[4,0])
     ax5.plot('time','k_on',data=data_structure)
     #ax6.set_xlabel('time (s)', fontsize = 15)
-    ax5.set_ylabel('$k_{on}$ ($s^{-1}$)', fontsize = 10)
+    ax5.set_ylabel('$k_{on}$ ($M^{-1}s^{-1}$)', fontsize = 10)
     ax5.tick_params(labelsize = 10)
 
     ax6=f.add_subplot(spec2[5,0])
     ax6.plot('time','Ca_Vmax_up_factor',data=data_structure)
     #ax6.set_xlabel('time (s)', fontsize = 15)
-    ax6.set_ylabel('$V_{max,up}$\n ($mM/ms$)', fontsize = 10)
+    ax6.set_ylabel('$V_{max,up}$\n ($mM.ms^{-1}$)', fontsize = 10)
     ax6.tick_params(labelsize = 10)
     ax6.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     #ax7.set_xlabel('time (s)', fontsize = 15)
@@ -72,7 +72,7 @@ def display_baro_results (data_structure, output_file_string="",dpi=300):
     ax7.set_ylabel('$G_{CaL}$\n ($cm^3$.\u03BC$F^{-1}$.$s^{-1}$)', fontsize = 10)
     ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax7.tick_params(labelsize = 10)
-    ax7.set_xlabel('time (s)', fontsize = 10)
+    ax7.set_xlabel('Time (s)', fontsize = 10)
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

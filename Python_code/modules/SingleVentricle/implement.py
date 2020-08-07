@@ -66,7 +66,7 @@ def implement_time_step(self, time_step, activation,i):
         self.syscon.return_heart_period(time_step,i)
 
 
-        self.hs.myof.k_1, self.hs.myof.k_3,self.hs.myof.k_on, self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor =\
+        self.hs.myof.k_1,self.hs.myof.k_on, self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor =\
         self.syscon.return_contractility(time_step,i)
 
         #self.resistance[-2] = self.syscon.return_venous_resistance(time_step,i)

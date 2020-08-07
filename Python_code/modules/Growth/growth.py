@@ -6,7 +6,6 @@ class growth():
     from .implement import return_lv_wall_thickness
     from .implement import return_number_of_hs,update_data_holder
     from .implement import update_growth
-    from .lowpass_filter import lowpass_filter
     from .setpoint import growth_driver
     from .display import display_growth, display_growth_summary, display_ventricular_dimensions
     from .display import display_systolic_function, display_ATPase

@@ -500,6 +500,7 @@ def display_Ca(data_structure, output_file_string="", t_limits=[],
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)
+
 def display_N_overlap(data_structure, output_file_string="", t_limits=[],
                        dpi=None):
     no_of_rows = 1
@@ -544,6 +545,32 @@ def display_r4(x,y, output_file_string="", t_limits=[],
     ax0.tick_params(labelsize = 10)
     ax0.legend(bbox_to_anchor=(1.05, 1),fontsize = 10,ncol=4)
 
+    if (output_file_string):
+        save_figure_to_file(f, output_file_string, dpi)
+
+def display_activation_pulse(data_structure, output_file_string="", t_limits=[],
+                       dpi=150):
+    no_of_rows = 1
+    no_of_cols = 1
+
+    f = plt.figure(constrained_layout=True)
+    f.set_size_inches([5, 2])
+    spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
+                              figure=f)
+    ax0 = f.add_subplot(spec2[0, 0])
+    ax0.plot('time','activation',data=data_structure)
+    if t_limits:
+        ax0.set_xlim(t_limits)
+    ax0.spines['top'].set_visible(False)
+    ax0.spines['right'].set_visible(False)
+    ax0.set_ylim([0,1])
+    ax0.set_yticks([0,1])
+    ax0.set_ylabel('Activation', fontsize = 10,rotation=0)
+    ax0.yaxis.set_label_coords(-0.1,0.5)
+    ax0.set_xlim([-0.1,5])
+    ax0.set_xticks([0,5])
+    ax0.set_xlabel('Time (s)')
+    ax0.tick_params(labelsize = 10)
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)
 

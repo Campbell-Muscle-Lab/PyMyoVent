@@ -1,6 +1,7 @@
 {
   "output_parameters": {
     "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
+    "csv_file": ["..\\temp\\getting_started\\getting_started.csv"],
     "input_file": ["..\\temp\\getting_started\\getting_started.json"],
     "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
     "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
@@ -41,9 +42,6 @@
         "k_1":{
           "G_k1": [-0.05]
         },
-        "k_3":{
-          "G_k3": [-0.0]
-        },
         "k_on":{
           "G_k_on":[0.02]
         },
@@ -59,92 +57,92 @@
   "perturbations": {
     "perturbation_activation":[false],
     "volume":{
-      "start_index": [80000],
-      "stop_index": [85000],
-      "increment": [-2.5e-4]
+      "start_index": [],
+      "stop_index": [],
+      "increment": [0]
     },
     "valve":{
       "aortic":{
-        "start_index": [0],
-        "stop_index": [505000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "mitral":{
-        "start_index": [400000],
-        "stop_index": [1000000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       }
     },
     "compliance": {
       "aorta":{
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [200000],
-        "stop_index": [205000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "resistance": {
       "aorta":{
-        "start_index": [80000],
-        "stop_index": [85000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "capillaries": {
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "venous":{
-        "start_index": [80000],
-        "stop_index": [85000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "ventricle":{
-        "start_index": [500000],
-        "stop_index": [505000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "myosim":{
       "k_1":{
-        "start_index": [25000],
-        "stop_index": [25001],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "k_2":{
-        "start_index": [25000],
-        "stop_index": [35000],
-        "increment": [0.0]
+        "start_index": [],
+        "stop_index": [],
+        "increment": [0]
       },
       "k_4_0":{
-        "start_index": [200000],
-        "stop_index": [210000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     },
     "ca_handling":{
       "ca_uptake":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "ca_leak":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       },
       "g_cal":{
-        "start_index": [40000],
-        "stop_index": [41000],
+        "start_index": [],
+        "stop_index": [],
         "increment": [0]
       }
     }
@@ -255,7 +253,7 @@
     "profiling_activation":[false]
   },
   "saving_to_spreadsheet":{
-    "saving_data_activation":[true],
+    "saving_data_activation":[false],
     "output_data_format":["csv"],
     "start_index":[0],
     "stop_index":[15000]

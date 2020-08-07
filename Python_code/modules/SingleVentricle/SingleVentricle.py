@@ -317,7 +317,7 @@ class single_circulation():
         # Run the simulation
         from .implement import implement_time_step, update_data_holders,analyze_data
         from .display import display_simulation, display_flows, display_pv_loop,display_N_overlap
-        from .display import display_Ca,display_pres,display_simulation_publish,display_active_force,display_r4
+        from .display import display_Ca,display_pres,display_simulation_publish,display_active_force,display_activation_pulse
 
         # Set up some values for the simulation
         no_of_time_points = \
@@ -423,10 +423,12 @@ class single_circulation():
         #                self.output_parameters["pv_figure"][0],[[1.2,2.2],[4.8,5.8]])
 #        display_pres(self.data,
 #                    self.output_parameters["pres"][0],[38.4,39.4])
-        syscon.system_control.display_arterial_pressure(self.data,
-                        self.output_parameters["circulatory"][0])
+        #syscon.system_control.display_arterial_pressure(self.data,
+        #                self.output_parameters["circulatory"][0])
 
         #if self.baro_scheme !="fixed_heart_rate":
+        display_activation_pulse(self.data,self.output_parameters["activation"][0])
+        
         if self.baro_activation:
             syscon.system_control.display_baro_results(self.data,
                             self.output_parameters["baro_figure"][0])

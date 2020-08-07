@@ -79,10 +79,10 @@ class system_control():
             self.G_k1 = float(temp["regulation"]["k_1"]["G_k1"][0])
             self.k1_rate_array = np.zeros(memory)
                     #k_3
-            self.k3 = float(hs_params["myofilaments"]["k_3"][0])#float(temp["regulation"]["k_3"]["k3"][0])
+            """self.k3 = float(hs_params["myofilaments"]["k_3"][0])#float(temp["regulation"]["k_3"]["k3"][0])
             self.k3_0 = self.k3
             self.G_k3 = float(temp["regulation"]["k_3"]["G_k3"][0])
-            self.k3_rate_array = np.zeros(memory)
+            self.k3_rate_array = np.zeros(memory)"""
                     #k_on
             self.k_on = float(hs_params["myofilaments"]["k_on"][0])#float(temp["regulation"]["k_3"]["k3"][0])
             self.k_on_0 = self.k_on
@@ -114,7 +114,7 @@ class system_control():
         if (self.baro_scheme !="fixed_heart_rate"):
 
             self.sys_data['k_1'] = pd.Series(np.full(self.data_buffer_size,self.k1))
-            self.sys_data['k_3'] = pd.Series(np.full(self.data_buffer_size,self.k3))
+            #self.sys_data['k_3'] = pd.Series(np.full(self.data_buffer_size,self.k3))
             self.sys_data['k_on'] = pd.Series(np.full(self.data_buffer_size,self.k_on))
             self.sys_data['Ca_Vmax_up_factor'] = \
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[39]))
