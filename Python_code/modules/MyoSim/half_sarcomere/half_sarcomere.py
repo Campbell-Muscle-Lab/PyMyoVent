@@ -9,27 +9,33 @@ class half_sarcomere():
 
     from .implement import update_simulation, update_data_holder
     from .display import display_fluxes
+    #from .update_contractility import update_contractility
 
     def __init__(self, hs_params, data_buffer_size):
 
-        self.hs_length = float(hs_params.initial_hs_length.cdata)
+        self.hs_length = float(hs_params["initial_hs_length"][0])
         self.Ca_conc = 1.0e-9
         self.activation = 0.0
 
         # Pull of class parameters
-        self.max_rate = float(hs_params.max_rate.cdata)
-        self.temperature = float(hs_params.temperature.cdata)
-        self.cb_number_density = float(hs_params.cb_number_density.cdata)
+        self.max_rate = float(hs_params["max_rate"][0])
+        self.temperature = float(hs_params["temperature"][0])
+        self.cb_number_density = float(hs_params["cb_number_density"][0])
+
+        self.ATPase_activation = hs_params["ATPase_activation"][0]
+        self.delta_G = float(hs_params["delta_energy"][0])
+        self.N_A = float(hs_params["avagadro_number"][0])
+        self.L0 = float(hs_params["reference_hs_length"][0])
 
         # Pull of membrane parameters
-        membr_params = hs_params.membranes
+        membr_params = hs_params["membranes"]
         self.membr = membranes.membranes(membr_params, self)
 
         # Initialise hs_force, required for myofilament kinetics
         self.hs_force = 0
 
         # Pull off the mofilament_params
-        myofil_params = hs_params.myofilaments
+        myofil_params = hs_params["myofilaments"]
         self.myof = myofilaments.myofilaments(myofil_params, self)
 
         print(self.myof.cb_force)
@@ -43,6 +49,7 @@ class half_sarcomere():
         self.hs_time = 0.0
         self.data_buffer_index = int(0)
         self.hs_data = pd.DataFrame({'hs_time' : np.zeros(self.data_buffer_size),
+                                     'activation': np.zeros(self.data_buffer_size),
                                      'hs_length' : self.hs_length * np.ones(self.data_buffer_size),
                                      'hs_force' : np.zeros(self.data_buffer_size),
                                      'cb_force' : np.zeros(self.data_buffer_size),
@@ -74,6 +81,34 @@ class half_sarcomere():
             self.hs_data['J4'] = pd.Series(np.zeros(self.data_buffer_size))
             self.hs_data['Jon'] = pd.Series(np.zeros(self.data_buffer_size))
             self.hs_data['Joff'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['N_overlap'] = pd.Series(np.full(self.data_buffer_size,self.myof.n_overlap))
+
+            self.hs_data['r4_N10'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N9'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N8'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N7'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N6'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N5'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N4'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N3'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N2'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_N1'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_0'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P1'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P2'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P3'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P4'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P5'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P6'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P7'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P8'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P9'] = pd.Series(np.zeros(self.data_buffer_size))
+            self.hs_data['r4_P10'] = pd.Series(np.zeros(self.data_buffer_size))
+
+            #ATPase
+            if self.ATPase_activation:
+                self.ATPase = 0
+                self.hs_data['ATPase'] = pd.Series(np.zeros(self.data_buffer_size))
 
         if (self.myof.kinetic_scheme == '4state_with_SRX'):
             # Initialise

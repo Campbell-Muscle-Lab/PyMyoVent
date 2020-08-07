@@ -1,29 +1,26 @@
-## PyMyoVent
+---
+Title: Home Page
+nav_order: 1
+permalink: /
+has_children: False
+---
+# PyMyoVent
+{:.no_toc}
 
-PyMyoVent simulates a single ventricle pumping blood around a closed circulation.
+## Overview 
 
-+ Getting started
-  + [Set up your Python environment](pages/getting_started/environment.html)
-  + [Run the default model](pages/getting_started/demo_1/demo_1.html)
-  + [Run a user-defined model](pages/getting_started/demo_2/demo_2.html)
+This is the homepage for **PyMyoVent**, a software written in Python language for simulating a single ventricle pumping blood through a closed circulation.
 
-+ Structure
-  + Modules
-    + Single_circulation
-    + MyoSim
-      + [Background](pages/modules/MyoSim/background.html)
-      + half_sarcomere
-        + myofilaments
-        + membranes
-    + xml
-    + untangle
+**PyMyoVent** is built on various sub-modules and trying to simulate a multi-scale modeling method for the left ventricle. 
 
-+ Model files
-  + [Structure](pages/model_files/model_files.html)
+**PyMyoVent** is originally developed by [Kenneth S. Campbell et al.](http://www.frontiersin.org/articles/10.3389/fphys.2020.01043/abstract) and still is getting updated while other projects are utilizing it.
 
-+ How to get help
-  + [Things you should check first](pages/help_and_resources/things-you-should-check-first.html)
-  + [How to create an issue](pages/help_and_resources/how-to-create-an-issue.html)
+Here is shown a simulated single heart beat results via **PyMyoVent** published in [Kenneth S. Campbell et al.](http://www.frontiersin.org/articles/10.3389/fphys.2020.01043/abstract) work.
 
+![Single beat](single_beat.png)
+
+To get started:
+* 1- Get familiar with how to setup the required [environment](../pages/environment/environment.html).
+* 2- Then try [Getting Started](../pages/demos/getting_started/getting_started.html).
 
 
