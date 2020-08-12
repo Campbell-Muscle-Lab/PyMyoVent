@@ -24,6 +24,6 @@ Key contributors to the PyMyoVent project include:
   + wrote the first prototype of the modeling software as an undergraduate student with Stuart Campbell.
 
 + [Sharrif Hossein](https://www.linkedin.com/in/hossein-sharifi-98a805bb)
-  + lead developer at the University of Kenyucky
+  + lead developer at the University of Kentucky
   + developed the baroreceptor and growth modules
 
