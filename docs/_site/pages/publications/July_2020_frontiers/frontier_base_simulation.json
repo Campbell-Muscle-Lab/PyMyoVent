@@ -7,8 +7,7 @@
     "pv_figure": ["..\\temp\\frontier_base_simulation\\frontier_base_simulation_pv.png"],
     "baro_figure": ["..\\temp\\frontier_base_simulation\\frontier_base_simulation_baro.png"],
     "flows_figure": ["..\\temp\\frontier_base_simulation\\frontier_base_simulation_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\frontier_base_simulation\\frontier_base_simulation_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\frontier_base_simulation\\frontier_base_simulation_multi_thread.png"]
+    "hs_fluxes_figure": ["..\\temp\\frontier_base_simulation\\frontier_base_simulation_hs_fluxes.png"]
   },
   "baroreflex": {
     "baro_scheme": ["fixed_heart_rate"],
@@ -63,86 +62,86 @@
     },
     "valve":{
       "aortic":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "mitral":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       }
     },
     "compliance": {
       "aorta":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "venous":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       }
     },
     "resistance": {
       "aorta":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "capillaries": {
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "venous":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "ventricle":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       }
     },
     "myosim":{
       "k_1":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "k_2":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "k_4_0":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       }
     },
     "ca_handling":{
       "ca_uptake":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "ca_leak":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       },
       "g_cal":{
-        "start_index": [],
-        "stop_index": [],
+        "start_index": [0],
+        "stop_index": [0],
         "increment": [0]
       }
     }
