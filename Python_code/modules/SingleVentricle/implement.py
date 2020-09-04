@@ -52,24 +52,26 @@ def implement_time_step(self, time_step, activation,i):
     #if self.mitral_valve_perturbation[-1] != 0 or self.aortic_valve_perturbation[-1] != 0:
     if self.pert_activation:
         self.vl=return_regurgitation_volume(self,time_step,self.v)
+
     "New section added by HS"
-    if self.baro_activation:
-        # Update the heart period
+
+    if self.baro_activation_array[-1]:
+
         arterial_pressure=self.p[1]
-        #dv=derivs(self,self.v)
-        flows=return_flows(self,self.v)
-        arterial_pressure_rate=\
-        (flows['aorta_to_arteries'] - flows['arteries_to_arterioles'])/self.compliance[1]
+        self.syscon.update_baroreceptor(time_step,arterial_pressure)
+        self.syscon.update_MAP(arterial_pressure)
+        if self.baro_activation:
+            # Update the heart period
 
-        self.syscon.update_baroreceptor(time_step,arterial_pressure, arterial_pressure_rate)
+            self.syscon.return_heart_period(time_step,arterial_pressure)
 
-        self.syscon.return_heart_period(time_step,i)
+            self.hs.myof.k_1,self.hs.myof.k_on = \
+            self.syscon.return_contractility(time_step)
 
+            self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor= \
+            self.syscon.update_ca_transient(time_step)
 
-        self.hs.myof.k_1,self.hs.myof.k_on, self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor =\
-        self.syscon.return_contractility(time_step,i)
-
-        #self.resistance[-2] = self.syscon.return_venous_resistance(time_step,i)
+            #self.resistance[-2] = self.syscon.return_venous_resistance(time_step,i)
 
 def update_data_holders(self, time_step, activation):
 
@@ -89,6 +91,19 @@ def update_data_holders(self, time_step, activation):
     self.data.at[self.data_buffer_index, 'volume_capillaries'] = self.v[3]
     self.data.at[self.data_buffer_index, 'volume_veins'] = self.v[4]
     self.data.at[self.data_buffer_index, 'volume_ventricle'] = self.v[-1]
+
+    self.data.at[self.data_buffer_index, 'aorta_resistance'] = self.resistance[0]
+    self.data.at[self.data_buffer_index, 'arteries_resistance'] = self.resistance[1]
+    self.data.at[self.data_buffer_index, 'arterioles_resistance'] = self.resistance[2]
+    self.data.at[self.data_buffer_index, 'capillaries_resistance'] = self.resistance[3]
+    self.data.at[self.data_buffer_index, 'veins_resistance'] = self.resistance[4]
+    self.data.at[self.data_buffer_index, 'ventricle_resistance'] = self.resistance[5]
+
+    self.data.at[self.data_buffer_index, 'aorta_compliance'] = self.compliance[0]
+    self.data.at[self.data_buffer_index, 'arteries_compliance'] = self.compliance[1]
+    self.data.at[self.data_buffer_index, 'arterioles_compliance'] = self.compliance[2]
+    self.data.at[self.data_buffer_index, 'capillaries_compliance'] = self.compliance[3]
+    self.data.at[self.data_buffer_index, 'veins_compliance'] = self.compliance[4]
 
     #self.vl=return_regurgitation_volume(self,self.v)
 
@@ -129,8 +144,8 @@ def update_data_holders(self, time_step, activation):
 
     # Now update data structure for half_sarcomere
     self.hs.update_data_holder(time_step, activation)
-
-    if self.baro_activation:
+    #if self.baro_scheme == "simple_baroreceptor":
+    if self.baro_activation_array[-1]:
         self.syscon.update_data_holder(time_step)
 
     if self.growth_activation:

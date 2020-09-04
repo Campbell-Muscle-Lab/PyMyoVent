@@ -6,7 +6,7 @@ import numpy as np
 
 
 def display_baro_results (data_structure, output_file_string="",dpi=300):
-    no_of_rows = 7
+    no_of_rows = 8
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
@@ -73,6 +73,10 @@ def display_baro_results (data_structure, output_file_string="",dpi=300):
     ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax7.tick_params(labelsize = 10)
     ax7.set_xlabel('Time (s)', fontsize = 10)
+
+    ax7=f.add_subplot(spec2[7,0])
+    ax7.plot('time','MAP',data=data_structure)
+    ax7.axhline(y=90,color="red", linestyle="--")
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

@@ -5,8 +5,8 @@ from scipy import signal
 class system_control():
     """Class for baro_params"""
 
-    from .implement import update_baroreceptor,return_heart_period,return_contractility
-    from .implement import return_activation, update_data_holder, return_venous_resistance
+    from .implement import update_baroreceptor,update_MAP,return_heart_period,return_contractility
+    from .implement import update_ca_transient,return_activation, update_data_holder
     from .display import display_baro_results, display_arterial_pressure
     from modules.SingleVentricle import SingleVentricle as sv
     def __init__(self,baro_params,hs_params,hs_class,circ_params,data_buffer_size):#,growth_activation): #baro_params
@@ -45,8 +45,7 @@ class system_control():
             self.dt = float(temp["simulation"]["time_step"][0])
             self.start_index = int(temp["simulation"]["start_index"][0])
             print(self.start_index)
-            memory_in_seconds = int(temp["simulation"]["memory"][0])
-            memory = int(memory_in_seconds/self.dt)
+            memory = int(temp["simulation"]["N_t"][0])
             #Activation function
             self.T_systole = self.activation_duty_ratio * self.T
             self.T_diastole = self.T-self.T_systole
@@ -54,17 +53,20 @@ class system_control():
             self.counter_systole = int(self.T_systole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
             self.T_counter = self.counter_diastole
-            self.contractility_counter = self.counter_diastole
             self.cardiac_cycle_counter = 0
             self.activation_level = 0.0
-
+            # MAP
+            self.MAP_memory = int(self.T/self.dt)
+            self.pressure_arteries_array = np.zeros(self.MAP_memory)
+            self.MAP_counter = self.T_counter
+            self.MAP = 0
             # afferent pathway (baroreceptor control)
             self.b = np.zeros(self.start_index)
             self.b_max = float(temp["afferent"]["b_max"][0])
             self.b_min =  float(temp["afferent"]["b_min"][0])
             self.b_mid = float((self.b_max+self.b_min)/2)
             self.S = float(temp["afferent"]["S"][0])
-            self.P_n = float(temp["afferent"]["P_n"][0])
+            self.P_set = float(temp["afferent"]["P_set"][0])
 
             #efferent pathway (regulation)
                 #heart period
@@ -78,11 +80,6 @@ class system_control():
             self.k1_0 = self.k1
             self.G_k1 = float(temp["regulation"]["k_1"]["G_k1"][0])
             self.k1_rate_array = np.zeros(memory)
-                    #k_3
-            """self.k3 = float(hs_params["myofilaments"]["k_3"][0])#float(temp["regulation"]["k_3"]["k3"][0])
-            self.k3_0 = self.k3
-            self.G_k3 = float(temp["regulation"]["k_3"]["G_k3"][0])
-            self.k3_rate_array = np.zeros(memory)"""
                     #k_on
             self.k_on = float(hs_params["myofilaments"]["k_on"][0])#float(temp["regulation"]["k_3"]["k3"][0])
             self.k_on_0 = self.k_on
@@ -103,34 +100,24 @@ class system_control():
             # data
         self.data_buffer_size = data_buffer_size
         self.sys_time = 0.0
-        self.data_buffer_index = self.start_index
+        self.data_buffer_index = 0#self.start_index
         self.sys_data = pd.DataFrame({'heart_period':
                                             np.full(self.data_buffer_size,self.T),
                                             'heart_rate':
-                                            np.full(self.data_buffer_size,60/self.T)})
-#        self.sys_data.at[0, 'heart_period'] = self.T
-#        self.sys_data.at[0, 'heart_rate'] = 60/self.T
+                                            np.full(self.data_buffer_size,60/self.T),
+                                            'MAP':
+                                            np.zeros(self.data_buffer_size)})
 
         if (self.baro_scheme !="fixed_heart_rate"):
 
             self.sys_data['k_1'] = pd.Series(np.full(self.data_buffer_size,self.k1))
-            #self.sys_data['k_3'] = pd.Series(np.full(self.data_buffer_size,self.k3))
             self.sys_data['k_on'] = pd.Series(np.full(self.data_buffer_size,self.k_on))
             self.sys_data['Ca_Vmax_up_factor'] = \
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[39]))
             self.sys_data['g_CaL_factor'] = \
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[18]))#self.g_cal))
 
-
-            """self.sys_data.at[0, 'k_1'] = self.k1
-            self.sys_data.at[0, 'k_3'] = self.k3
-            self.sys_data.at[0, 'Ca_Vmax_up_factor'] = self.ca_uptake
-            self.sys_data.at[0, 'g_CaL_factor'] = self.g_cal"""
         # Add in specific fields for each scheme
         if self.baro_scheme == "simple_baroreceptor":
 
             self.sys_data['baroreceptor_output'] = pd.Series(np.zeros(self.data_buffer_size))
-    #        self.sys_data['venous_resistance'] = pd.Series(np.zeros(self.data_buffer_size))
-            # initial values
-            self.sys_data.at[0, 'baroreceptor_output'] = 0
-    #        self.sys_data.at[0, 'venous_resistance'] = self.Rv

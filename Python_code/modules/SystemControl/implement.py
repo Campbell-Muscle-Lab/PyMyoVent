@@ -3,18 +3,18 @@ from math import *
 from scipy.integrate import solve_ivp
 from scipy import signal
 
-def update_baroreceptor(self,time_step,arterial_pressure,arterial_pressure_rate):
+def update_baroreceptor(self,time_step,arterial_pressure):
 
     if (self.baro_scheme == "simple_baroreceptor"):
         # baroreceptor control
-        self.b = np.append(self.b,\
-         ((self.b_min+self.b_max*exp((arterial_pressure-self.P_n)*self.S))\
-            /(1+exp((arterial_pressure-self.P_n)*self.S))))
+        self.b = ((self.b_min+self.b_max*exp((arterial_pressure-self.P_set)*self.S))\
+           /(1+exp((arterial_pressure-self.P_set)*self.S)))
 
-def return_heart_period(self,time_step,i):
+def return_heart_period(self,time_step,arterial_pressure):
 
     if (self.baro_scheme == "simple_baroreceptor"):
-        return_heart_period_control(self,time_step,i)
+        return_heart_period_control(self,time_step)
+        
         self.T_counter -= 1
         if (self.T_counter <= -self.counter_systole):
 
@@ -23,14 +23,28 @@ def return_heart_period(self,time_step,i):
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.T_counter = self.counter_diastole
 
+
     return self.T
-def return_heart_period_control(self,time_step,i):
+
+def update_MAP(self,arterial_pressure):
+    self.MAP_counter -= 1
+    if (self.MAP_counter <= -self.counter_systole):
+        self.MAP = np.mean(self.pressure_arteries_array)
+        self.pressure_arteries_array = np.zeros(int(self.T/self.dt))
+        self.MAP_counter = self.counter_diastole
+
+    self.pressure_arteries_array = np.roll(self.pressure_arteries_array,-1)
+    self.pressure_arteries_array[-1] = arterial_pressure
+
+
+def return_heart_period_control(self,time_step):
 
     if (self.baro_scheme == "simple_baroreceptor"):
 
         T_prime_0 = self.T_prime
         self.T_rate_array = np.roll(self.T_rate_array,-1)
-        dTdt_0 = self.G_T*(self.b[i]-self.b_mid)*self.T0
+        #dTdt_0 = self.G_T*(self.b[i]-self.b_mid)*self.T0
+        dTdt_0 = self.G_T*(self.b-self.b_mid)*self.T0
         self.T_rate_array[-1] = dTdt_0
         dTdt = np.mean(self.T_rate_array)
         T_prime=dTdt*time_step+T_prime_0
@@ -42,14 +56,15 @@ def return_heart_period_control(self,time_step,i):
         if self.T_prime >= 1.5:
             self.T_prime = 1.5
 
-def return_contractility(self,time_step,i):
+def return_contractility(self,time_step):
 
     if (self.baro_scheme == "simple_baroreceptor"):
         #time delay
 
         k1_0 = self.k1
         self.k1_rate_array = np.roll(self.k1_rate_array,-1)
-        dk1dt_0 = self.G_k1*(self.b[i]-self.b_mid)*self.k1_0
+#        dk1dt_0 = self.G_k1*(self.b[i]-self.b_mid)*self.k1_0
+        dk1dt_0 = self.G_k1*(self.b-self.b_mid)*self.k1_0
         self.k1_rate_array[-1] = dk1dt_0
         dk1dt = np.mean(self.k1_rate_array)
         k1 = dk1dt*time_step+k1_0
@@ -60,22 +75,10 @@ def return_contractility(self,time_step,i):
         if self.k1>2*self.k1_0:
             self.k1 = 2*self.k1_0
 
-        """k3_0 = self.k3
-        self.k3_rate_array = np.roll(self.k3_rate_array,-1)
-        dk3dt_0 = self.G_k3*(self.b[i]-self.b_mid)*self.k3_0
-        self.k3_rate_array[-1] = dk3dt_0
-        dk3dt = np.mean(self.k3_rate_array)
-        k3 = dk3dt*time_step+k3_0
-        self.k3 = k3
-
-        if self.k3<0.3*self.k3_0:
-            self.k3 = 0.3*self.k3_0
-        if self.k3>2*self.k3_0:
-            self.k3 = 2*self.k3_0"""
-
         k_on_0 = self.k_on
         self.k_on_rate_array = np.roll(self.k_on_rate_array,-1)
-        dk_ondt_0 = self.G_k_on*(self.b[i]-self.b_mid)*self.k_on_0
+#        dk_ondt_0 = self.G_k_on*(self.b[i]-self.b_mid)*self.k_on_0
+        dk_ondt_0 = self.G_k_on*(self.b-self.b_mid)*self.k_on_0
         self.k_on_rate_array[-1] = dk_ondt_0
         dk_ondt = np.mean(self.k_on_rate_array)
         k_on = dk_ondt*time_step+k_on_0
@@ -86,10 +89,16 @@ def return_contractility(self,time_step,i):
         if self.k_on>2*self.k_on_0:
             self.k_on = 2*self.k_on_0
 
+    return self.k1,self.k_on
+
+def update_ca_transient(self,time_step):
+
+    if (self.baro_scheme == "simple_baroreceptor"):
 
         ca_up_0 = self.ca_uptake
         self.ca_uptake_rate_array = np.roll(self.ca_uptake_rate_array,-1)
-        dupdt_0 = self.G_up*(self.b[i]-self.b_mid)*self.ca_uptake_0
+        #dupdt_0 = self.G_up*(self.b[i]-self.b_mid)*self.ca_uptake_0
+        dupdt_0 = self.G_up*(self.b-self.b_mid)*self.ca_uptake_0
         self.ca_uptake_rate_array[-1] = dupdt_0
         dupdt = np.mean(self.ca_uptake_rate_array)
         ca_uptake = dupdt*time_step+ca_up_0
@@ -102,7 +111,8 @@ def return_contractility(self,time_step,i):
 
         gcal_0 = self.g_cal
         self.g_cal_rate_array = np.roll(self.g_cal_rate_array,-1)
-        dgcaldt_0 = self.G_gcal*(self.b[i]-self.b_mid)*self.g_cal_0
+        #dgcaldt_0 = self.G_gcal*(self.b[i]-self.b_mid)*self.g_cal_0
+        dgcaldt_0 = self.G_gcal*(self.b-self.b_mid)*self.g_cal_0
         self.g_cal_rate_array[-1] = dgcaldt_0
         dgcaldt = np.mean(self.g_cal_rate_array)
         g_cal = dgcaldt*time_step+gcal_0
@@ -113,7 +123,7 @@ def return_contractility(self,time_step,i):
         if self.g_cal>2*self.g_cal_0:
             self.g_cal = 2*self.g_cal_0
 
-    return self.k1,self.k_on,self.ca_uptake,self.g_cal  #self.L_scale_factor, self.k_3_scale_factor, self.k_cb_scale_factor,self.k_force_scale_factor
+    return self.ca_uptake,self.g_cal
 
 def return_activation(self):
     if (self.baro_scheme == "fixed_heart_rate"):
@@ -134,18 +144,6 @@ def return_activation(self):
             self.baroreceptor_counter = self.counter_diastole
         return self.activation_level
 
-def return_venous_resistance(self,time_step,i):
-    if i < self.D_Rv:
-        delay_Rv = int(0)
-    else:
-        delay_Rv = self.D_Rv
-
-    Rv_0 = self.Rv
-    dRvdt = self.G_Rv*(self.b[i-delay_Rv]-self.b_mid)*self.Rv_0
-    Rv = dRvdt*time_step+Rv_0
-    self.Rv = Rv
-
-    return Rv
 def update_data_holder(self,time_step):
 
     # Update data struct for system-control
@@ -153,16 +151,17 @@ def update_data_holder(self,time_step):
     self.data_buffer_index += 1
     self.sys_data.at[self.data_buffer_index, 'heart_period']=self.T
     self.sys_data.at[self.data_buffer_index, 'heart_rate']=60/self.T
+    self.sys_data.at[self.data_buffer_index, 'MAP']=self.MAP
 
     if (self.baro_scheme !="fixed_heart_rate"):
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
-        #self.sys_data.at[self.data_buffer_index, 'k_3'] = self.k3
         self.sys_data.at[self.data_buffer_index, 'k_on'] = self.k_on
-        self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = self.hs.membr.constants[39]
-        self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = self.hs.membr.constants[18]#self.g_cal
+        self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = \
+                                                self.hs.membr.constants[39]
+        self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = \
+                                                self.hs.membr.constants[18]
 
         if (self.baro_scheme == "simple_baroreceptor"):
-            self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']\
-             = self.b[-1]
+            self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']= self.b
 #            self.sys_data.at[self.data_buffer_index, 'venous_resistance']=\
 #                self.Rv

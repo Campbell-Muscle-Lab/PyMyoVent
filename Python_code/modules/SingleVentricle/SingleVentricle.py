@@ -286,7 +286,30 @@ class single_circulation():
                                     'ventricle_wall_mass':
                                     np.full(self.output_buffer_size,self.lv_mass),
                                     'ventricle_wall_mass_i':
-                                    np.full(self.output_buffer_size,self.lv_mass_indexed)})
+                                    np.full(self.output_buffer_size,self.lv_mass_indexed),
+                                    'aorta_resistance':
+                                    np.full(self.output_buffer_size,self.aorta_resistance),
+                                    'arteries_resistance':
+                                    np.full(self.output_buffer_size,self.arteries_resistance),
+                                    'arterioles_resistance':
+                                    np.full(self.output_buffer_size,self.arterioles_resistance),
+                                    'capillaries_resistance':
+                                    np.full(self.output_buffer_size,self.capillaries_resistance),
+                                    'veins_resistance':
+                                    np.full(self.output_buffer_size,self.veins_resistance),
+                                    'ventricle_resistance':
+                                    np.full(self.output_buffer_size,self.ventricle_resistance),
+                                    'aorta_compliance':
+                                    np.full(self.output_buffer_size,self.aorta_compliance),
+                                    'arteries_compliance':
+                                    np.full(self.output_buffer_size,self.arteries_compliance),
+                                    'arterioles_compliance':
+                                    np.full(self.output_buffer_size,self.arterioles_compliance),
+                                    'capillaries_compliance':
+                                    np.full(self.output_buffer_size,self.capillaries_compliance),
+                                    'veins_compliance':
+                                    np.full(self.output_buffer_size,self.veins_compliance)})
+
 
         # Store the first values
         self.data.at[0, 'pressure_aorta'] = self.p[0]
@@ -406,11 +429,11 @@ class single_circulation():
             pr.print_stats()
         # Make plots
         # Circulation
-        #display_simulation(self.data,
-        #                   self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
+        display_simulation(self.data,
+                           self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
 
-        display_simulation_publish(self.data,
-                           self.output_parameters["summary_figure"][0])
+#        display_simulation_publish(self.data,
+#                           self.output_parameters["summary_figure"][0])
         #display_N_overlap(self.data,self.output_parameters["N_overlap"][0] )
         #display_r4(self.hs.myof.x,self.hs.myof.r4,self.output_parameters["r4"][0])
 #        display_active_force(self.data,
@@ -427,8 +450,8 @@ class single_circulation():
         #                self.output_parameters["circulatory"][0])
 
         #if self.baro_scheme !="fixed_heart_rate":
-        display_activation_pulse(self.data,self.output_parameters["activation"][0])
-        
+#        display_activation_pulse(self.data,self.output_parameters["activation"][0])
+
         if self.baro_activation:
             syscon.system_control.display_baro_results(self.data,
                             self.output_parameters["baro_figure"][0])
