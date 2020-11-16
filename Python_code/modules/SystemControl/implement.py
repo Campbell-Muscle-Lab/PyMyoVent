@@ -14,7 +14,7 @@ def return_heart_period(self,time_step,arterial_pressure):
 
     if (self.baro_scheme == "simple_baroreceptor"):
         return_heart_period_control(self,time_step)
-        
+
         self.T_counter -= 1
         if (self.T_counter <= -self.counter_systole):
 
@@ -70,10 +70,10 @@ def return_contractility(self,time_step):
         k1 = dk1dt*time_step+k1_0
         self.k1 = k1
 
-        if self.k1<0.3*self.k1_0:
+        """if self.k1<0.3*self.k1_0:
             self.k1 = 0.3*self.k1_0
         if self.k1>2*self.k1_0:
-            self.k1 = 2*self.k1_0
+            self.k1 = 2*self.k1_0"""
 
         k_on_0 = self.k_on
         self.k_on_rate_array = np.roll(self.k_on_rate_array,-1)
@@ -84,12 +84,49 @@ def return_contractility(self,time_step):
         k_on = dk_ondt*time_step+k_on_0
         self.k_on = k_on
 
-        if self.k_on<0.3*self.k_on_0:
+        """if self.k_on<0.3*self.k_on_0:
             self.k_on = 0.3*self.k_on_0
         if self.k_on>2*self.k_on_0:
-            self.k_on = 2*self.k_on_0
+            self.k_on = 2*self.k_on_0"""
 
     return self.k1,self.k_on
+def return_venous_compliance(self,time_step):
+    if (self.baro_scheme == "simple_baroreceptor"):
+        #time delay
+
+        cv_0 = self.c_venous
+        self.c_venous_rate_array = np.roll(self.c_venous_rate_array,-1)
+#        dk1dt_0 = self.G_k1*(self.b[i]-self.b_mid)*self.k1_0
+        dcvdt_0 = self.G_c_venous*(self.b-self.b_mid)*self.c_venous_0
+        self.c_venous_rate_array[-1] = dcvdt_0
+        dcvdt = np.mean(self.c_venous_rate_array)
+        cv = dcvdt*time_step+cv_0
+        self.c_venous = cv
+
+        """if self.c_venous<0.5*self.c_venous_0:
+            self.c_venous = 0.5*self.c_venous_0
+        if self.c_venous>2*self.c_venous_0:
+            self.c_venous = 2*self.c_venous_0"""
+    return self.c_venous
+
+def return_arteriolar_resistance(self,time_step):
+    if (self.baro_scheme == "simple_baroreceptor"):
+        #time delay
+
+        ra_0 = self.r_arteriolar
+        self.r_arteriolar_rate_array = np.roll(self.r_arteriolar_rate_array,-1)
+#        dk1dt_0 = self.G_k1*(self.b[i]-self.b_mid)*self.k1_0
+        dradt_0 = self.G_r_arteriolar*(self.b-self.b_mid)*self.r_arteriolar_0
+        self.r_arteriolar_rate_array[-1] = dradt_0
+        dradt = np.mean(self.r_arteriolar_rate_array)
+        ra = dradt*time_step+ra_0
+        self.r_arteriolar = ra
+
+        """if self.r_arteriolar<0.5*self.r_arteriolar_0:
+            self.r_arteriolar = 0.5*self.r_arteriolar_0
+        if self.r_arteriolar>2*self.r_arteriolar_0:
+            self.r_arteriolar = 2*self.r_arteriolar_0"""
+    return self.r_arteriolar
 
 def update_ca_transient(self,time_step):
 
@@ -104,10 +141,10 @@ def update_ca_transient(self,time_step):
         ca_uptake = dupdt*time_step+ca_up_0
         self.ca_uptake = ca_uptake
 
-        if self.ca_uptake<0.3*self.ca_uptake_0:
+        """if self.ca_uptake<0.3*self.ca_uptake_0:
             self.ca_uptake = 0.3*self.ca_uptake_0
         if self.ca_uptake>2*self.ca_uptake_0:
-            self.ca_uptake = 2*self.ca_uptake_0
+            self.ca_uptake = 2*self.ca_uptake_0"""
 
         gcal_0 = self.g_cal
         self.g_cal_rate_array = np.roll(self.g_cal_rate_array,-1)
@@ -118,10 +155,10 @@ def update_ca_transient(self,time_step):
         g_cal = dgcaldt*time_step+gcal_0
         self.g_cal = g_cal
 
-        if self.g_cal<0.3*self.g_cal_0:
+        """if self.g_cal<0.3*self.g_cal_0:
             self.g_cal = 0.3*self.g_cal_0
         if self.g_cal>2*self.g_cal_0:
-            self.g_cal = 2*self.g_cal_0
+            self.g_cal = 2*self.g_cal_0"""
 
     return self.ca_uptake,self.g_cal
 
@@ -160,6 +197,8 @@ def update_data_holder(self,time_step):
                                                 self.hs.membr.constants[39]
         self.sys_data.at[self.data_buffer_index, 'g_CaL_factor'] = \
                                                 self.hs.membr.constants[18]
+        self.sys_data.at[self.data_buffer_index, 'compliance_veins'] = self.c_venous
+        self.sys_data.at[self.data_buffer_index, 'resistance_arterioles'] = self.r_arteriolar
 
         if (self.baro_scheme == "simple_baroreceptor"):
             self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']= self.b

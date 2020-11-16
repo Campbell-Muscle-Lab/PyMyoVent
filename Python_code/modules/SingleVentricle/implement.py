@@ -20,13 +20,14 @@ def implement_time_step(self, time_step, activation,i):
             self.gr.growth_driver()
         self.gr.update_growth(time_step)
 
-        #self.wall_thickness = self.gr.wall_thickness
+#        self.wall_thickness = self.gr.wall_thickness
+#        self.ventricle_wall_volume = return_wall_volume(self,self.v[-1])
         self.ventricle_wall_volume = self.gr.wall_volume
 #        print(self.ventricle_wall_volume)
         self.n_hs = self.gr.number_of_hs
 
     if self.growth_activation_array[-1]:
-        #self.ventricle_wall_volume = return_wall_volume(self, self.v[-1])
+#        self.ventricle_wall_volume = return_wall_volume(self, self.v[-1])
         self.lv_mass , self.lv_mass_indexed = \
         return_lv_mass(self,self.ventricle_wall_volume)
     new_hs_length = 10e9*new_lv_circumference / self.n_hs
@@ -58,8 +59,9 @@ def implement_time_step(self, time_step, activation,i):
     if self.baro_activation_array[-1]:
 
         arterial_pressure=self.p[1]
-        self.syscon.update_baroreceptor(time_step,arterial_pressure)
+
         self.syscon.update_MAP(arterial_pressure)
+        self.syscon.update_baroreceptor(time_step,arterial_pressure)
         if self.baro_activation:
             # Update the heart period
 
@@ -71,6 +73,8 @@ def implement_time_step(self, time_step, activation,i):
             self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor= \
             self.syscon.update_ca_transient(time_step)
 
+            self.compliance[-2] = self.syscon.return_venous_compliance(time_step)
+            self.resistance [2] = self.syscon.return_arteriolar_resistance(time_step)
             #self.resistance[-2] = self.syscon.return_venous_resistance(time_step,i)
 
 def update_data_holders(self, time_step, activation):
@@ -257,9 +261,10 @@ def return_lv_pressure(self,lv_volume):
     internal_r = np.power((3.0 * 0.001 * lv_volume) /(2.0 * np.pi), (1.0 / 3.0))
     internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
     self.wall_thickness = 0.001 * self.ventricle_wall_volume / internal_area
-    #if self.growth_activation_array[-1]==False:
-    #    internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
-    #    self.wall_thickness = 0.001 * self.ventricle_wall_volume / internal_area
+#    if self.growth_activation_array[-1]==False:
+#        internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
+#        self.wall_thickness = 0.001 * self.ventricle_wall_volume / internal_area
+
     # Pressure from Laplace law
     P_in_pascals = 2.0 * total_force * self.wall_thickness / internal_r
     P_in_mmHg = P_in_pascals / mmHg_in_pascals

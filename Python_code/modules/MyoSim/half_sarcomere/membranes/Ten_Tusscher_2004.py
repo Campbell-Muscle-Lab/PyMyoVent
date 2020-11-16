@@ -182,8 +182,8 @@ def initConsts():
     constants[9] = 0.03
     constants[10] = 5.4
     constants[11] = 140
-    states[1] = 139.3#138.3
-    states[2] = 10.5#11.6
+    states[1] = 139.75#138.3
+    states[2] = 10.42#11.6
     constants[12] = 2
     states[3] = 0.0002
     constants[13] = 5.405
@@ -217,7 +217,7 @@ def initConsts():
     constants[30] = 0.825
     constants[31] = 0.0005
     constants[32] = 0.0146
-    states[15] = 0.5
+    states[15] = 0.55
     states[16] = 1
     constants[33] = 2
     constants[34] = 0.016464
@@ -250,14 +250,14 @@ def initConsts_with_adjustments(membrane_factors):
     constants[9] = 0.03
     constants[10] = 5.4
     constants[11] = 140
-    states[1] = 139.3#138.3
-    states[2] = 10.5#11.6
+    states[1] = 139.75#139.3
+    states[2] = 10.42#10.5
     constants[12] = 2
-    states[3] = 0.0002#0.0007
+    states[3] = 0.0007#0.0002
     constants[13] = 5.405
     constants[14] = membrane_factors['g_Kr'] * 0.096
     states[4] = 0
-    states[5] = 0.5#1
+    states[5] = 1#0.5
     constants[15] = membrane_factors['g_Ks'] * 0.062
     states[6] = 0
     constants[16] = 14.838
@@ -285,7 +285,7 @@ def initConsts_with_adjustments(membrane_factors):
     constants[30] = 0.825
     constants[31] = 0.0005
     constants[32] = 0.0146
-    states[15] = 0.5
+    states[15] = 0.6
     states[16] = 1
     constants[33] = 2
     constants[34] = membrane_factors['Ca_a_rel'] * 0.016464
@@ -698,7 +698,7 @@ def activation(n):
     import numpy as np
     activation_array=np.zeros(n)
     for i in range(n):
-        if i%1000==0:
+        if i%857==0:
             activation_array[i:i+3]=1
 
     return activation_array
@@ -1007,7 +1007,7 @@ def display_states(voi,states):
 
 
 if __name__ == "__main__":
-    no_of_time_points = 50000
+    no_of_time_points = 300000
     activation_array=activation(no_of_time_points)
     (voi, states, algebraic) = solve_model(no_of_time_points)
     #data = solve_model(no_of_time_points)

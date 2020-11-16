@@ -8,7 +8,7 @@ def growth_driver(self):
     self.pass_array = np.array(self.hs.hs_data["pas_force"][:i+1])
 
     self.passive_stress_null =\
-        1*((self.hs.hs_data["pas_force"][int(i/2):i+1]).mean())
+        0.95*((self.hs.hs_data["pas_force"].iloc[int(i/2):i+1]).mean())
     self.gr_data['pas_force_null'] =\
     pd.Series(np.full(self.data_buffer_size,self.passive_stress_null))
 
@@ -21,7 +21,7 @@ def growth_driver(self):
 #1.23
         self.cb_array = np.array(self.hs.hs_data["cb_force"][:i+1])
         self.cb_stress_null =\
-            1*((self.hs.hs_data["cb_force"][int(i/2):i+1]).mean())
+            1.1*self.hs.hs_data["cb_force"].iloc[int(i/2):i+1].mean()
         self.gr_data['cb_force_null'] = \
         pd.Series(np.full(self.data_buffer_size,self.cb_stress_null))
 

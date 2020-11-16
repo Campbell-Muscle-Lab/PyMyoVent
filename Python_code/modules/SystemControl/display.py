@@ -6,7 +6,7 @@ import numpy as np
 
 
 def display_baro_results (data_structure, output_file_string="",dpi=300):
-    no_of_rows = 8
+    no_of_rows = 10
     no_of_cols = 1
 
     f = plt.figure(constrained_layout=True)
@@ -72,11 +72,26 @@ def display_baro_results (data_structure, output_file_string="",dpi=300):
     ax7.set_ylabel('$G_{CaL}$\n ($cm^3$.\u03BC$F^{-1}$.$s^{-1}$)', fontsize = 10)
     ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax7.tick_params(labelsize = 10)
-    ax7.set_xlabel('Time (s)', fontsize = 10)
 
-    ax7=f.add_subplot(spec2[7,0])
-    ax7.plot('time','MAP',data=data_structure)
-    ax7.axhline(y=90,color="red", linestyle="--")
+
+    ax8=f.add_subplot(spec2[7,0])
+    ax8.plot('time','MAP',data=data_structure)
+    ax8.axhline(y=83.33,color="red", linestyle="--")
+
+    ax9=f.add_subplot(spec2[8,0])
+    ax9.plot('time','compliance_veins',data=data_structure)
+    #ax6.set_xlabel('time (s)', fontsize = 15)
+    ax9.set_ylabel('$C_{venous}$\n ($units$)', fontsize = 10)
+    ax9.tick_params(labelsize = 10)
+    ax9.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+
+    ax10=f.add_subplot(spec2[9,0])
+    ax10.plot('time','resistance_arterioles',data=data_structure)
+    #ax6.set_xlabel('time (s)', fontsize = 15)
+    ax10.set_ylabel('$R_{arteriolar}$\n ($units$)', fontsize = 10)
+    ax10.tick_params(labelsize = 10)
+    ax10.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax10.set_xlabel('Time (s)', fontsize = 10)
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)
@@ -99,6 +114,10 @@ def display_arterial_pressure(data_structure, output_file_string="", t_limits=[]
 
     ax2 = f.add_subplot(spec2[1, 0])
     ax2.plot('time','pressure_arteries',data=data_structure)
+    ax2.plot('time','MAP',color='purple',data=data_structure)
+    ax2.axhline(y=83.33,color="red", linestyle="--")
+    ax2.axhline(y=70,color='green', linestyle="--")
+    ax2.axhline(y=110,color='orange', linestyle="--")
     #ax1.set_xlabel('time (s)', fontsize = 15)
     ax2.set_ylabel('P_arteries (mmHg)', fontsize = 7)
     ax2.tick_params(labelsize = 10)

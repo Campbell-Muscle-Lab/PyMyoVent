@@ -455,6 +455,8 @@ class single_circulation():
         if self.baro_activation:
             syscon.system_control.display_baro_results(self.data,
                             self.output_parameters["baro_figure"][0])
+            syscon.system_control.display_arterial_pressure(self.data,
+                            self.output_parameters["circulatory"][0])
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,

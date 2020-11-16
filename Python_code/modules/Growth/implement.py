@@ -5,7 +5,7 @@ import pandas as pd
 
 def update_growth(self,time_step):
     self.wall_volume = return_lv_wall_volume(self,time_step)
-    #self.wall_thickness = return_lv_wall_thickness(self,time_step)
+#    self.wall_thickness = return_lv_wall_thickness(self,time_step)
     self.number_of_hs = return_number_of_hs(self,time_step)
 
 # stress driven growth
@@ -20,12 +20,13 @@ def return_lv_wall_thickness(self,time_step):
 #        f_null =np.mean(self.cb_array)
 #        self.cb_stress_null = f_null
 
-        window = self.ma_window
+#        window = self.ma_window
 
         tw_1 = self.tw
+        self.tw_rate = np.roll(self.tw_rate,-1)
         dwdt_0 = self.G_tw*(f-f_null)*self.tw
-        self.tw_rate = np.append(self.tw_rate,dwdt_0)
-        dwdt=np.mean(self.tw_rate[-window:])
+        self.tw_rate[-1] = dwdt_0
+        dwdt=np.mean(self.tw_rate)
         tw = dwdt*time_step+tw_1
         self.tw = tw
 
@@ -114,6 +115,6 @@ def update_data_holder(self,time_step):
     if self.growth["driven_signal"][0] == "ATPase":
         self.gr_data.at[self.data_buffer_index,'ATPase_null'] = self.ATPase_null
     # 1000 is to convert liter to mili liter
-#    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = 1000*self.wall_thickness
+#    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = self.wall_thickness
     self.gr_data.at[self.data_buffer_index, 'ventricle_wall_volume'] = self.wall_volume
     self.gr_data.at[self.data_buffer_index, 'number_of_hs'] = self.number_of_hs

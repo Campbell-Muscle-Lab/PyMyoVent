@@ -5,8 +5,8 @@ from scipy import signal
 class system_control():
     """Class for baro_params"""
 
-    from .implement import update_baroreceptor,update_MAP,return_heart_period,return_contractility
-    from .implement import update_ca_transient,return_activation, update_data_holder
+    from .implement import update_baroreceptor,update_MAP,return_heart_period,return_contractility,return_venous_compliance
+    from .implement import update_ca_transient,return_activation, update_data_holder,return_arteriolar_resistance
     from .display import display_baro_results, display_arterial_pressure
     from modules.SingleVentricle import SingleVentricle as sv
     def __init__(self,baro_params,hs_params,hs_class,circ_params,data_buffer_size):#,growth_activation): #baro_params
@@ -61,10 +61,11 @@ class system_control():
             self.MAP_counter = self.T_counter
             self.MAP = 0
             # afferent pathway (baroreceptor control)
-            self.b = np.zeros(self.start_index)
+            #self.b = np.zeros(self.start_index)
             self.b_max = float(temp["afferent"]["b_max"][0])
             self.b_min =  float(temp["afferent"]["b_min"][0])
             self.b_mid = float((self.b_max+self.b_min)/2)
+            self.b = self.b_mid
             self.S = float(temp["afferent"]["S"][0])
             self.P_set = float(temp["afferent"]["P_set"][0])
 
@@ -96,6 +97,16 @@ class system_control():
             self.G_gcal = float(temp["regulation"]["g_cal"]["G_gcal"][0])
             self.g_cal_rate_array = np.zeros(memory)
 
+                    #venous_compliance
+            self.c_venous = float(circ_params["veins"]["compliance"][0])
+            self.c_venous_0 = self.c_venous
+            self.G_c_venous = float(temp["regulation"]["c_venous"]["G_c_venous"][0])
+            self.c_venous_rate_array = np.zeros(memory)
+                    #arteriolar_resistance
+            self.r_arteriolar = float(circ_params["arterioles"]["resistance"][0])
+            self.r_arteriolar_0 = self.r_arteriolar
+            self.G_r_arteriolar = float(temp["regulation"]["r_arteriolar"]["G_r_arteriolar"][0])
+            self.r_arteriolar_rate_array = np.zeros(memory)
 
             # data
         self.data_buffer_size = data_buffer_size
@@ -116,6 +127,8 @@ class system_control():
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[39]))
             self.sys_data['g_CaL_factor'] = \
                 pd.Series(np.full(self.data_buffer_size,self.hs.membr.constants[18]))#self.g_cal))
+            self.sys_data['compliance_veins'] = pd.Series(np.full(self.data_buffer_size,self.c_venous))
+            self.sys_data['resistance_arterioles'] = pd.Series(np.full(self.data_buffer_size,self.r_arteriolar))
 
         # Add in specific fields for each scheme
         if self.baro_scheme == "simple_baroreceptor":

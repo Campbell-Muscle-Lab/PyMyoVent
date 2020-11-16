@@ -14,6 +14,7 @@ import numpy as np
 #    run_simulation_from_xml_file, run_simulation_from_json_file
 from modules.SingleVentricle.SingleVentricle import single_circulation as sc
 from analysis.multi_threads import run_multi_processing
+
 if __name__ == "__main__":
 
     # Get the number of arguments
@@ -84,3 +85,37 @@ if __name__ == "__main__":
             #run_multi_threads(json_input_data)
             #return_input_data(json_input_data)
             run_multi_processing(json_input_data)
+
+        if (sys.argv[1] == 'run_batch_file'):
+
+            print('Running model %s' % sys.argv[2])
+
+            batch_file_string = sys.argv[2]
+            with open(batch_file_string,'r') as f:
+                batch_input_data = json.load(f)
+
+            input_path_array = np.array(list(batch_input_data["input_path"].values()))
+            number_of_data_points = len(input_path_array)
+
+            for i in range(number_of_data_points):
+
+                json_file_path = input_path_array[i][0]
+                print(json_file_path)
+
+                with open(json_file_path,'r') as f:
+                    json_data = json.load(f)
+
+                output_temp =\
+                    json_data['output_parameters']['input_file'][0]
+
+                # Check directory exists and save image file
+                dir_path = os.path.dirname(output_temp)
+                if not os.path.isdir(dir_path):
+                    os.makedirs(dir_path)
+                    print('Saving inputs to to %s' % output_temp)
+
+                with open(json_file_path,'r') as f,open(output_temp,'w') as fo:
+                        fo.write(f.read())
+
+                sim_object = sc(json_data)
+                sim_object.run_simulation()
