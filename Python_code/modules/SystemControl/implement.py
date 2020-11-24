@@ -5,14 +5,14 @@ from scipy import signal
 
 def update_baroreceptor(self,time_step,arterial_pressure):
 
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
         # baroreceptor control
         self.b = ((self.b_min+self.b_max*exp((arterial_pressure-self.P_set)*self.S))\
            /(1+exp((arterial_pressure-self.P_set)*self.S)))
 
 def return_heart_period(self,time_step,arterial_pressure):
 
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
         return_heart_period_control(self,time_step)
 
         self.T_counter -= 1
@@ -39,7 +39,7 @@ def update_MAP(self,arterial_pressure):
 
 def return_heart_period_control(self,time_step):
 
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
 
         T_prime_0 = self.T_prime
         self.T_rate_array = np.roll(self.T_rate_array,-1)
@@ -58,7 +58,7 @@ def return_heart_period_control(self,time_step):
 
 def return_contractility(self,k_1,k_on,time_step):
 
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
         #time delay
 
         k1_0 = k_1#self.k1
@@ -85,7 +85,7 @@ def return_contractility(self,k_1,k_on,time_step):
 
 def update_ca_transient(self,ca_up,g_cal,time_step):
 
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
 
         ca_up_0 = ca_up#self.ca_uptake
         self.ca_uptake_rate_array = np.roll(self.ca_uptake_rate_array,-1)
@@ -110,7 +110,7 @@ def update_ca_transient(self,ca_up,g_cal,time_step):
     return self.ca_uptake,self.g_cal
 
 def return_venous_compliance(self,cv,time_step):
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
         #time delay
 
         cv_0 = self.c_venous
@@ -125,7 +125,7 @@ def return_venous_compliance(self,cv,time_step):
     return self.c_venous
 
 def return_arteriolar_resistance(self,ra,time_step):
-    if (self.baro_scheme == "simple_baroreceptor"):
+    if "baroreceptor" in self.sys_params:
         #time delay
 
         ra_0 = self.r_arteriolar
@@ -140,13 +140,9 @@ def return_arteriolar_resistance(self,ra,time_step):
     return self.r_arteriolar
 
 def return_activation(self):
-    if (self.baro_scheme == "fixed_heart_rate"):
 
-        self.activation_level = self.predefined_activation_level[self.activation_counter]
-        self.activation_counter += 1
-        return self.activation_level
 
-    else:
+    if "baroreceptor" in self.sys_params:
         self.baroreceptor_counter -= 1
         if (self.baroreceptor_counter <= 0):
             self.activation_level = 1.0
@@ -156,6 +152,10 @@ def return_activation(self):
             self.T_diastole = self.T-self.T_systole
             self.counter_diastole = int(self.T_diastole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
+        return self.activation_level
+    else:
+        self.activation_level = self.predefined_activation_level[self.activation_counter]
+        self.activation_counter += 1
         return self.activation_level
 
 def update_data_holder(self,time_step):
@@ -167,7 +167,7 @@ def update_data_holder(self,time_step):
     self.sys_data.at[self.data_buffer_index, 'heart_rate']=60/self.T
     self.sys_data.at[self.data_buffer_index, 'MAP']=self.MAP
 
-    if (self.baro_scheme !="fixed_heart_rate"):
+    if "baroreceptor" in self.sys_params:
         self.sys_data.at[self.data_buffer_index, 'k_1'] = self.k1
         self.sys_data.at[self.data_buffer_index, 'k_on'] = self.k_on
         self.sys_data.at[self.data_buffer_index, 'Ca_Vmax_up_factor'] = \
@@ -176,8 +176,4 @@ def update_data_holder(self,time_step):
                                                 self.hs.membr.constants[18]
         self.sys_data.at[self.data_buffer_index, 'compliance_veins'] = self.c_venous
         self.sys_data.at[self.data_buffer_index, 'resistance_arterioles'] = self.r_arteriolar
-
-        if (self.baro_scheme == "simple_baroreceptor"):
-            self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']= self.b
-#            self.sys_data.at[self.data_buffer_index, 'venous_resistance']=\
-#                self.Rv
+        self.sys_data.at[self.data_buffer_index, 'baroreceptor_output']= self.b
