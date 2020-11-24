@@ -68,13 +68,13 @@ def implement_time_step(self, time_step, activation,i):
             self.syscon.return_heart_period(time_step,arterial_pressure)
 
             self.hs.myof.k_1,self.hs.myof.k_on = \
-            self.syscon.return_contractility(time_step)
+            self.syscon.return_contractility(self.hs.myof.k_1,self.hs.myof.k_on,time_step)
 
             self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor= \
-            self.syscon.update_ca_transient(time_step)
+            self.syscon.update_ca_transient(self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor,time_step)
 
-            self.compliance[-2] = self.syscon.return_venous_compliance(time_step)
-            self.resistance [2] = self.syscon.return_arteriolar_resistance(time_step)
+            self.compliance[-2] = self.syscon.return_venous_compliance(self.compliance[-2],time_step)
+            self.resistance [2] = self.syscon.return_arteriolar_resistance(self.resistance [2],time_step)
             #self.resistance[-2] = self.syscon.return_venous_resistance(time_step,i)
 
 def update_data_holders(self, time_step, activation):
