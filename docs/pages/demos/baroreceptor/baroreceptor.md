@@ -1,6 +1,6 @@
 ---
 Title: Baroreceptor
-nav_order: 2
+nav_order: 3
 has_children: True
 parent: Demos
 ---
@@ -10,4 +10,4 @@ parent: Demos
 * TOC
 {:toc}
 
-Here you can see how to run two different cases of **PyMyoVent** simulation while the [baroreceptor module](../../modules/system_control/system_control.html) is activated.
+Here you can test how the [baroreceptor reflex module](../../modules/system_control/system_control.html) can regulate mean arterial pressure towards the user-defined setpoint level by regulating the model parameters from molecular to organ levels under either normal or altered ventricular loadings.

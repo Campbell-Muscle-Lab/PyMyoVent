@@ -427,22 +427,22 @@ class single_circulation():
         # Make plots
         # Circulation
         display_simulation(self.data,
-                           self.output_parameters["summary_figure"][0])#,[75,120])#,[81.6,82.6])
+                           self.output_parameters["summary_figure"][0],dpi=300)#,[75,120])#,[81.6,82.6])
 
         display_flows(self.data,
-                      self.output_parameters["flows_figure"][0])
+                      self.output_parameters["flows_figure"][0],dpi=300)
         display_pv_loop(self.data,
-                        self.output_parameters["pv_figure"][0])#,[[78.5,79.8],[142.8,143.8]]
+                        self.output_parameters["pv_figure"][0],dpi=300)#,[[78.5,79.8],[142.8,143.8]]
 
         if self.baro_activation:
             syscon.system_control.display_baro_results(self.data,
-                            self.output_parameters["baro_figure"][0])
+                            self.output_parameters["baro_figure"][0],dpi=300)
             syscon.system_control.display_arterial_pressure(self.data,
-                            self.output_parameters["circulatory"][0])
+                            self.output_parameters["circulatory"][0],dpi=300)
 
         # Half-sarcomere
         hs.half_sarcomere.display_fluxes(self.data,
-                               self.output_parameters["hs_fluxes_figure"][0])#,[30,60])
+                               self.output_parameters["hs_fluxes_figure"][0],dpi=300)#,[30,60])
 
         #Growth
         if self.growth_activation:

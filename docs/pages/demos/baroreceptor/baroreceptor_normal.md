@@ -1,3 +1,39 @@
+---
+Title: Baroreceptor (normal loading)
+nav_order: 1
+has_children: False
+parent: Baroreceptor
+grand_parent: Demos
+---
+# Baroreceptor (normal loading)
+{:.no_toc}
+
+* TOC
+{:toc}
+
+## Instruction
+
+* Lunch [Anaconda](http://anaconda.org) prompt.
+
+* Navigate to **Python_code** folder in PyMyoVent's repository directory:
+    * `$ cd path_to_PyMyoVent_repo\Python_code`
+
+* Use the following command to run the `Baroreceptor` demo with no perturbation applied to the system.
+    * `$ python PyMyoVent.py run_defined_model ..\demo_files\baroreceptor\baroreceptor_model.json`
+    * After a few minutes the simulation would be finished.
+
+## Note
+
+* The baroreceptor module starts to regulate the arterial pressure at `"start_index":[5000]`, which can be modified by the user.  
+* The baroreceptor module tries to maintain the mean arterial pressure at `87.7 mm Hg`, as a normal level for healthy human, by regulating heart rate, myofilaments contractility, intracellular Ca handling, and vascular tone.
+* This model uses an electrophysiology model proposed by [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
+* The ventricular loading is normal and no perturbation has applied.
+
+## Instruction file
+
+* The instruction file is written in [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) and is located at `path_to_PyMyoVent_repo\demo_files\baroreceptor\baroreceptor_model.json`.
+
+````
 {
   "output_parameters": {
     "input_file": ["..\\temp\\baroreceptor\\baroreceptor.json"],
@@ -160,3 +196,31 @@
     "output_main_folder": ["..\\temp\\baroreceptor\\baroreceptor_i_j\\baroreceptor_i_j.json"]
   }
 }
+
+
+````
+## Outputs
+
+When the simulation is funished up, this set of output figures will be shown up in `path_to_PyMyoVent_repo\temp\baroreceptor` directory.
+
+* Simmulation summary output
+
+![summary](baroreceptor_summary.png)
+
+* Baroreceptor output
+
+![baro](baroreceptor_baro.png)
+
+* Systemic circulation output
+![circ](baroreceptor_circulation.png)
+
+* P_V loop output
+
+![PV](baroreceptor_pv.png)
+
+* Fluxes output
+![Fluxes](baroreceptor_hs_fluxes.png)
+
+* Blood flows output
+
+![Flows](baroreceptor_flows.png)

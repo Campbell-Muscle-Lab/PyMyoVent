@@ -4,7 +4,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 def display_pv_loop(data_structure, output_file_string="", t_limits=[],
-                    dpi=200):
+                    dpi=None):
     no_of_rows = 1
     no_of_cols = 1
 
@@ -41,7 +41,7 @@ def display_pv_loop(data_structure, output_file_string="", t_limits=[],
         save_figure_to_file(f, output_file_string, dpi)
 
 def display_flows(data_structure, output_file_string="",
-                  t_limits=[],dpi=300):
+                  t_limits=[],dpi=None):
 
     no_of_rows = 1
     no_of_cols = 1
@@ -150,7 +150,7 @@ def display_simulation(data_structure, output_file_string="", t_limits=[],
         plot_width = 46
     else:
         plot_width=46
-    f.set_size_inches([10, 15])
+    f.set_size_inches([10, 12])
     spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
                               figure=f)
     ax1 = f.add_subplot(spec2[0, 0])
