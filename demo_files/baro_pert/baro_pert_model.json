@@ -239,5 +239,5 @@
     "output_data_format":["csv"],
     "start_index":[0],
     "stop_index":[0]
-  },
+  }
 }
