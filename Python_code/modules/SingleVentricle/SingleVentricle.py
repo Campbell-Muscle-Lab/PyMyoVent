@@ -26,8 +26,8 @@ class single_circulation():
         from .implement import return_lv_circumference,return_lv_pressure, return_ATPase
         # Pull off stuff
 
-        self.multithreading_activation = \
-            single_circulation_simulation["multi_threads"]["multithreading_activation"][0]
+        #self.multithreading_activation = \
+        #    single_circulation_simulation["multi_threads"]["multithreading_activation"][0]
 
         self.output_parameters = \
             single_circulation_simulation["output_parameters"]
@@ -415,8 +415,8 @@ class single_circulation():
             self.data =pd.concat([self.data,self.gr.gr_data],axis=1)
 
         # Get output for multithreading
-        if self.multithreading_activation:
-            return self.data
+        #if self.multithreading_activation:
+        #    return self.data
 
 
 
