@@ -13,7 +13,7 @@ import numpy as np
 #from modules.SingleVentricle.driver import return_sim_struct_from_xml_file, \
 #    run_simulation_from_xml_file, run_simulation_from_json_file
 from modules.SingleVentricle.SingleVentricle import single_circulation as sc
-from analysis.multi_threads import run_multi_processing
+#from analysis.multi_threads import run_multi_processing
 
 if __name__ == "__main__":
 
