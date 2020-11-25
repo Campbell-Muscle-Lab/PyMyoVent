@@ -18,7 +18,7 @@ grand_parent: Demos
 * Navigate to **Python_code** folder in PyMyoVent's repository directory:
     * `$ cd path_to_PyMyoVent_repo\Python_code`
 
-* Use the following command to run the `Baroreceptor` demo with having the `perturbation` module activated.
+* Use the following command to run the `Baroreceptor` demo under `perturbed ventricular loading` condition.
     * `$ python PyMyoVent.py run_defined_model ..\demo_files\baro_pert\baro_pert_model.json`
     * After a few minutes the simulation would be finished.
 
@@ -27,7 +27,7 @@ grand_parent: Demos
 * The baroreceptor module starts to regulate the arterial pressure at `"start_index":[5000]`, which can be modified by the user.  
 * The baroreceptor module tries to maintain the mean arterial pressure at `87.7 mm Hg`, as a normal level for healthy human, by regulating heart rate, myofilaments contractility, intracellular Ca handling, and vascular tone.
 * This model uses an electrophysiology model proposed by [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view).
-* Perturbation module is activated by adding `"perturbatio"` section in the instruction file.
+* Perturbation module is activated by adding `"perturbation"` section in the instruction file.
 * Perturbed loading was applied by simulating hemorrhage condition via loosing 10% of blood volume through venous compartment in the circulation module.
 * The perturbation starts from time-point index of `80000` to `90000`. This perturbation condition is defined in the `"volume"` section in the `"perturbation"`:
 
