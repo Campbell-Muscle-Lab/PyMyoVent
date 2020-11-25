@@ -10,8 +10,8 @@ tt_initConsts_with_adjustments
 from .Ten_Tusscher_2004 import compureRatesonly as tt_computeRatesonly
 from .Shannon_Bers_2004 import initConsts as sb_initConsts
 from .Shannon_Bers_2004 import computeRates as sb_computeRates
-from .Grandi_2009 import initConsts as g_initConsts
-from .Grandi_2009 import computeRates as g_coputeRates
+#from .Grandi_2009 import initConsts as g_initConsts
+#from .Grandi_2009 import computeRates as g_coputeRates
 
 class membranes():
     """ Class for membranes """
@@ -100,7 +100,7 @@ class membranes():
             membrane_factors['g_CaL'] = self.g_CaL_factor #const 18
             (initstates, self.constants) = \
                 tt_initConsts_with_adjustments(membrane_factors)
-            
+
             # Ten_Tusscher model assumes time step is in ms
             sol = solve_ivp(partial(tt_computeRates_with_activation,
                                     constants=self.constants,
