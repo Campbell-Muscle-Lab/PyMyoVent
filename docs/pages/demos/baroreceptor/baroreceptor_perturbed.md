@@ -285,17 +285,6 @@ grand_parent: Demos
     "output_data_format":["csv"],
     "start_index":[0],
     "stop_index":[0]
-  },
-  "multi_threads" :{
-    "multithreading_activation":[false],
-    "parameters_in":{
-      "S": {
-        "values":[25,50,100,150,200,1000],
-        "param_out":["baro_pert_output"],
-        "section": ["baroreflex"]
-      }
-    },
-    "output_main_folder": ["..\\temp\\baro_pert\\baro_pert_i_j\\baro_pert_i_j.json"]
   }
 }
 

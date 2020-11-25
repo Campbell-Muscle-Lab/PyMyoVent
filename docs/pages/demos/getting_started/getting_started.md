@@ -148,17 +148,6 @@ This demo :
     "output_data_format":["csv"],
     "start_index":[0],
     "stop_index":[10000]
-  },
-  "multi_threads" :{
-    "multithreading_activation":[false],
-    "parameters_in":{
-      "S": {
-        "values":[25,50,100,150,200,1000],
-        "param_out":["baroreceptor_output"],
-        "section": ["baroreflex"]
-      }
-    },
-    "output_main_folder": ["..\\temp\\getting_started\\getting_started_i_j\\getting_started_i_j.json"]
   }
 }
 

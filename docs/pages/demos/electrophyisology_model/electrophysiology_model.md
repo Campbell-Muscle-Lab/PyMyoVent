@@ -144,17 +144,6 @@ parent: Demos
     "output_data_format":["csv"],
     "start_index":[0],
     "stop_index":[30000]
-  },
-  "multi_threads" :{
-    "multithreading_activation":[false],
-    "parameters_in":{
-      "S": {
-        "values":[25,50,100,150,200,1000],
-        "param_out":["electrophysiology_output"],
-        "section": ["baroreflex"]
-      }
-    },
-    "output_main_folder": ["..\\temp\\electrophysiology\\electrophysiology_i_j\\electrophysiology_i_j.json"]
   }
 }
 
