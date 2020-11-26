@@ -25,7 +25,7 @@
   },"4": {
     "doc": "Baroreceptor",
     "title": "Baroreceptor",
-    "content": "Here you can test how the baroreceptor reflex module can regulate mean arterial pressure towards the user-defined setpoint level by regulating the model parameters from molecular to organ levels under either normal or altered ventricular loadings. ",
+    "content": "With this demo you can test how the baroreceptor reflex module can regulate mean arterial pressure towards the user-defined setpoint level by regulating the model parameters from molecular to organ levels under either normal or altered ventricular loadings. ",
     "url": "http://localhost:4000/pages/demos/baroreceptor/baroreceptor.html",
     "relUrl": "/pages/demos/baroreceptor/baroreceptor.html"
   },"5": {
@@ -301,190 +301,268 @@
   },"50": {
     "doc": "Growth",
     "title": "Growth",
-    "content": " ",
-    "url": "http://localhost:4000/pages/modules/growth/growth.html",
-    "relUrl": "/pages/modules/growth/growth.html"
+    "content": "With this demo you can test how the growth module can capture any change in ventricular shape in response to altered ventricular loading. ",
+    "url": "http://localhost:4000/pages/demos/growth/growth.html",
+    "relUrl": "/pages/demos/growth/growth.html"
   },"51": {
     "doc": "Growth",
     "title": "Growth",
     "content": " ",
-    "url": "http://localhost:4000/pages/demos/growth/growth.html",
-    "relUrl": "/pages/demos/growth/growth.html"
+    "url": "http://localhost:4000/pages/modules/growth/growth.html",
+    "relUrl": "/pages/modules/growth/growth.html"
   },"52": {
-    "doc": "Growth - ATPase Driven",
-    "title": "Growth - ATPase Driven",
-    "content": " ",
-    "url": "http://localhost:4000/pages/demos/growth/growth_ATPase_driven.html",
-    "relUrl": "/pages/demos/growth/growth_ATPase_driven.html"
+    "doc": "Growth Aortic Stenosis (pressure overload)",
+    "title": "Growth Aortic Stenosis (pressure overload)",
+    "content": ". | Instruction | Note | Instruction file | Outputs | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_AS.html",
+    "relUrl": "/pages/demos/growth/growth_AS.html"
   },"53": {
-    "doc": "Growth - Stress Driven",
-    "title": "Growth - Stress Driven",
-    "content": " ",
-    "url": "http://localhost:4000/pages/demos/growth/growth_stress_driven.html",
-    "relUrl": "/pages/demos/growth/growth_stress_driven.html"
+    "doc": "Growth Aortic Stenosis (pressure overload)",
+    "title": "Instruction",
+    "content": ". | Lunch Anaconda prompt. | Navigate to Python_code folder in PyMyoVent’s repository directory: . | $ cd path_to_PyMyoVent_repo\\Python_code | . | Use the following command to run the growth_AS demo with no perturbation in ventricular loading applied to the system. | $ python PyMyoVent.py run_defined_model ..\\demo_files\\growth_AS\\growth_AS_model.json | After around one and half an hour, the simulation would be finished. | . | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_AS.html#instruction",
+    "relUrl": "/pages/demos/growth/growth_AS.html#instruction"
   },"54": {
+    "doc": "Growth Aortic Stenosis (pressure overload)",
+    "title": "Note",
+    "content": ". | The baroreceptor module starts to regulate the arterial pressure at \"start_index\":[5000], which can be modified by the user. | The baroreceptor module tries to maintain the mean arterial pressure at 87.7 mm Hg, as a normal level for healthy human, by regulating heart rate, myofilaments contractility, intracellular Ca handling, and vascular tone. | This model uses an electrophysiology model proposed by ten Tusscher. | The ventricular loading is perturbed to simulate the aortic stenosis condition. | The growth module is set to be activated at \"start_index\": [150000], and is able to capture any sort of ventricular growth. But in response to pressure overload condition (aortic stenosis), the ventricular wall thickness increases more than chamber dilation and hence concentric growth happens. | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_AS.html#note",
+    "relUrl": "/pages/demos/growth/growth_AS.html#note"
+  },"55": {
+    "doc": "Growth Aortic Stenosis (pressure overload)",
+    "title": "Instruction file",
+    "content": "{ \"output_parameters\": { \"input_file\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS.json\"], \"csv_file\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS.csv\"], \"summary_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_summary.png\"], \"pv_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_pv.png\"], \"flows_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_flows.png\"], \"hs_fluxes_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_hs_fluxes.png\"], \"baro_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_baro.png\"], \"circulatory\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_arterial.png\"], \"growth_figure\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_growth.png\"], \"growth_summary\": [\"..\\\\temp\\\\growth_AS\\\\growth_AS_growth_sum.png\"] }, \"system_control\":{ \"simulation\":{ \"no_of_time_points\": [1500000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [0.857,\"s\"] }, \"baroreceptor\":{ \"start_index\":[50000], \"N_t\":[5000], \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_set\": [87.7,\"mmHg\"] }, \"efferent\":{ \"heart_period\":{ \"G_T\": [0.07] }, \"k_1\":{ \"G_k1\": [-0.1] }, \"k_on\":{ \"G_k_on\":[0.08] }, \"ca_uptake\":{ \"G_up\": [-0.05] }, \"g_cal\":{ \"G_gcal\": [-0.07] }, \"c_venous\":{ \"G_c_venous\": [0.1] }, \"r_arteriolar\":{ \"G_r_arteriolar\": [-0.1] } } } }, \"perturbations\": { \"perturbation_activation\":[true], \"volume\":{ \"start_index\": [150000], \"stop_index\": [160000], \"increment\": [0] }, \"valve\":{ \"aortic\":{ \"start_index\": [0], \"stop_index\": [505000], \"increment\": [0.0] }, \"mitral\":{ \"start_index\": [500000], \"stop_index\": [1000000], \"increment\": [0.0] } }, \"compliance\": { \"aorta\":{ \"start_index\": [200000], \"stop_index\": [205000], \"increment\": [0] }, \"capillaries\": { \"start_index\": [200000], \"stop_index\": [205000], \"increment\": [0] }, \"venous\":{ \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] } }, \"resistance\": { \"aorta\":{ \"start_index\": [450000], \"stop_index\": [460000], \"increment\": [0.012] }, \"capillaries\": { \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] }, \"venous\":{ \"start_index\": [80000], \"stop_index\": [85000], \"increment\": [0.0] }, \"ventricle\":{ \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] } }, \"myosim\":{ \"k_1\":{ \"start_index\": [25000], \"stop_index\": [25001], \"increment\": [0] }, \"k_2\":{ \"start_index\": [25000], \"stop_index\": [35000], \"increment\": [0.0] }, \"k_4_0\":{ \"start_index\": [200000], \"stop_index\": [210000], \"increment\": [0] } }, \"ca_handling\":{ \"ca_uptake\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"ca_leak\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"g_cal\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] } } }, \"circulation\":{ \"no_of_compartments\": [6], \"blood\":{ \"volume\":[5,\"liters\"] }, \"aorta\":{ \"resistance\": [40,\"s\"], \"compliance\": [0.0004,\"liter_per_mmHg\"] }, \"arteries\":{ \"resistance\": [80,\"s\"], \"compliance\": [0.0009,\"liter_per_mmHg\"] }, \"arterioles\":{ \"resistance\": [400,\"s\"], \"compliance\": [0.005,\"liter_per_mmHg\"] }, \"capillaries\":{ \"resistance\": [340,\"s\"], \"compliance\": [0.03,\"liter_per_mmHg\"] }, \"veins\":{ \"resistance\": [330,\"s\"], \"compliance\": [0.5,\"liter_per_mmHg\"] }, \"ventricle\":{ \"resistance\": [10,\"s\"], \"wall_volume\": [0.1,\"liters\"], \"slack_volume\": [0.08,\"liters\"], \"wall_density\": [1055,\"g/l\"], \"body_surface_area\": [1.90,\"m^2\"] } }, \"half_sarcomere\":{ \"max_rate\": [5000,\"s^-1\"], \"temperature\": [288, \"Kelvin\"], \"cb_number_density\": [6.9e16, \"number of cb's/m^2\"], \"initial_hs_length\": [900, \"nm\"], \"ATPase_activation\":[false], \"delta_energy\":[70,\"kJ/mol\"], \"avagadro_number\":[6.02e23,\"mol^-1\"], \"reference_hs_length\":[1100,\"nm\"], \"myofilaments\":{ \"kinetic_scheme\": [\"3state_with_SRX\"], \"k_1\": [2,\"s^-1\"], \"k_force\": [0.6e-3, \"(N^-1)(m^2)\"], \"k_2\": [200, \"s^-1\"], \"k_3\": [100, \"(nm^-1)(s^-1)\"], \"k_4_0\": [200, \"s^-1\"], \"k_4_1\": [0.3, \"nm^-4\"], \"k_cb\": [0.001, \"N*m^-1\"], \"x_ps\": [5, \"nm\"], \"k_on\": [5e8, \"(M^-1)(s^-1)\"], \"k_off\": [200, \"s^-1\"], \"k_coop\": [5], \"bin_min\": [-10, \"nm\"], \"bin_max\": [10, \"nm\"], \"bin_width\": [1, \"nm\"], \"filament_compliance_factor\": [0.5], \"thick_filament_length\": [815, \"nm\"], \"thin_filament_length\": [1120, \"nm\"], \"bare_zone_length\": [80, \"nm\"], \"k_falloff\": [0.0024], \"passive_mode\": [\"exponential\"], \"passive_exp_sigma\": [300], \"passive_exp_L\": [80], \"passive_l_slack\": [900, \"nm\"] }, \"membranes\": { \"kinetic_scheme\": [\"Ten_Tusscher_2004\"], \"simple_2_compartment\":{ \"Ca_content\": [1e-3], \"k_leak\": [2e-3], \"k_act\": [5e-2], \"k_serca\": [10.0] }, \"Ten_Tusscher_2004\":{ \"g_to_factor\": [1], \"g_Kr_factor\": [1], \"g_Ks_factor\": [1], \"Ca_a_rel_factor\": [1], \"Ca_V_leak_factor\": [1], \"Ca_Vmax_up_factor\": [1], \"g_CaL_factor\": [1] } } }, \"growth\": { \"start_index\": [150000], \"moving_average_window\": [10000], \"driven_signal\": [\"stress\"], \"concenrtric\":{ \"G_stress_driven\":[10e-6], \"G_ATPase_driven\":[1] }, \"eccentric\":{ \"G_number_of_hs\":[-5e-6], \"G_ATPase_driven\":[-2] } }, \"profiling\":{ \"profiling_activation\":[false] }, \"saving_to_spreadsheet\":{ \"saving_data_activation\":[false], \"output_data_format\":[\"csv\"], \"start_index\":[0], \"stop_index\":[2000000] } } . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_AS.html#instruction-file",
+    "relUrl": "/pages/demos/growth/growth_AS.html#instruction-file"
+  },"56": {
+    "doc": "Growth Aortic Stenosis (pressure overload)",
+    "title": "Outputs",
+    "content": " ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_AS.html#outputs",
+    "relUrl": "/pages/demos/growth/growth_AS.html#outputs"
+  },"57": {
+    "doc": "Growth Mitral Regurgitation (volume overload)",
+    "title": "Growth Mitral Regurgitation (volume overload)",
+    "content": ". | Instruction | Note | Instruction file | Outputs | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_MR.html",
+    "relUrl": "/pages/demos/growth/growth_MR.html"
+  },"58": {
+    "doc": "Growth Mitral Regurgitation (volume overload)",
+    "title": "Instruction",
+    "content": ". | Lunch Anaconda prompt. | Navigate to Python_code folder in PyMyoVent’s repository directory: . | $ cd path_to_PyMyoVent_repo\\Python_code | . | Use the following command to run the growth_MR demo with no perturbation in ventricular loading applied to the system. | $ python PyMyoVent.py run_defined_model ..\\demo_files\\growth_MR\\growth_MR_model.json | After around one and half an hour, the simulation would be finished. | . | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_MR.html#instruction",
+    "relUrl": "/pages/demos/growth/growth_MR.html#instruction"
+  },"59": {
+    "doc": "Growth Mitral Regurgitation (volume overload)",
+    "title": "Note",
+    "content": ". | The baroreceptor module starts to regulate the arterial pressure at \"start_index\":[5000], which can be modified by the user. | The baroreceptor module tries to maintain the mean arterial pressure at 87.7 mm Hg, as a normal level for healthy human, by regulating heart rate, myofilaments contractility, intracellular Ca handling, and vascular tone. | This model uses an electrophysiology model proposed by ten Tusscher. | The ventricular loading is perturbed to simulate the mitral regurgitation condition. | The growth module is set to be activated at \"start_index\": [150000], and is able to capture any sort of ventricular growth. But in response to volume overload condition (mitral regurgitation), the ventricular chamber volume increases more than wall thickness and hence eccentric growth happens. | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_MR.html#note",
+    "relUrl": "/pages/demos/growth/growth_MR.html#note"
+  },"60": {
+    "doc": "Growth Mitral Regurgitation (volume overload)",
+    "title": "Instruction file",
+    "content": "{ \"output_parameters\": { \"input_file\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR.json\"], \"csv_file\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR.csv\"], \"summary_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_summary.png\"], \"pv_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_pv.png\"], \"flows_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_flows.png\"], \"hs_fluxes_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_hs_fluxes.png\"], \"baro_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_baro.png\"], \"circulatory\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_arterial.png\"], \"growth_figure\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_growth.png\"], \"growth_summary\": [\"..\\\\temp\\\\growth_MR\\\\growth_MR_growth_sum.png\"] }, \"system_control\":{ \"simulation\":{ \"no_of_time_points\": [1500000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [0.857,\"s\"] }, \"baroreceptor\":{ \"start_index\":[50000], \"N_t\":[5000], \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_set\": [87.7,\"mmHg\"] }, \"efferent\":{ \"heart_period\":{ \"G_T\": [0.07] }, \"k_1\":{ \"G_k1\": [-0.1] }, \"k_on\":{ \"G_k_on\":[0.08] }, \"ca_uptake\":{ \"G_up\": [-0.05] }, \"g_cal\":{ \"G_gcal\": [-0.07] }, \"c_venous\":{ \"G_c_venous\": [0.1] }, \"r_arteriolar\":{ \"G_r_arteriolar\": [-0.1] } } } }, \"perturbations\": { \"perturbation_activation\":[true], \"volume\":{ \"start_index\": [150000], \"stop_index\": [160000], \"increment\": [0] }, \"valve\":{ \"aortic\":{ \"start_index\": [0], \"stop_index\": [505000], \"increment\": [0.0] }, \"mitral\":{ \"start_index\": [500000], \"stop_index\": [1500000], \"increment\": [0.03] } }, \"compliance\": { \"aorta\":{ \"start_index\": [200000], \"stop_index\": [205000], \"increment\": [0] }, \"capillaries\": { \"start_index\": [200000], \"stop_index\": [205000], \"increment\": [0] }, \"venous\":{ \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] } }, \"resistance\": { \"aorta\":{ \"start_index\": [450000], \"stop_index\": [460000], \"increment\": [0.0] }, \"capillaries\": { \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] }, \"venous\":{ \"start_index\": [80000], \"stop_index\": [85000], \"increment\": [0.0] }, \"ventricle\":{ \"start_index\": [500000], \"stop_index\": [505000], \"increment\": [0] } }, \"myosim\":{ \"k_1\":{ \"start_index\": [25000], \"stop_index\": [25001], \"increment\": [0] }, \"k_2\":{ \"start_index\": [25000], \"stop_index\": [35000], \"increment\": [0.0] }, \"k_4_0\":{ \"start_index\": [200000], \"stop_index\": [210000], \"increment\": [0] } }, \"ca_handling\":{ \"ca_uptake\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"ca_leak\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"g_cal\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] } } }, \"circulation\":{ \"no_of_compartments\": [6], \"blood\":{ \"volume\":[5,\"liters\"] }, \"aorta\":{ \"resistance\": [40,\"s\"], \"compliance\": [0.0004,\"liter_per_mmHg\"] }, \"arteries\":{ \"resistance\": [80,\"s\"], \"compliance\": [0.0009,\"liter_per_mmHg\"] }, \"arterioles\":{ \"resistance\": [400,\"s\"], \"compliance\": [0.005,\"liter_per_mmHg\"] }, \"capillaries\":{ \"resistance\": [340,\"s\"], \"compliance\": [0.03,\"liter_per_mmHg\"] }, \"veins\":{ \"resistance\": [330,\"s\"], \"compliance\": [0.5,\"liter_per_mmHg\"] }, \"ventricle\":{ \"resistance\": [10,\"s\"], \"wall_volume\": [0.1,\"liters\"], \"slack_volume\": [0.08,\"liters\"], \"wall_density\": [1055,\"g/l\"], \"body_surface_area\": [1.90,\"m^2\"] } }, \"half_sarcomere\":{ \"max_rate\": [5000,\"s^-1\"], \"temperature\": [288, \"Kelvin\"], \"cb_number_density\": [6.9e16, \"number of cb's/m^2\"], \"initial_hs_length\": [900, \"nm\"], \"ATPase_activation\":[false], \"delta_energy\":[70,\"kJ/mol\"], \"avagadro_number\":[6.02e23,\"mol^-1\"], \"reference_hs_length\":[1100,\"nm\"], \"myofilaments\":{ \"kinetic_scheme\": [\"3state_with_SRX\"], \"k_1\": [2,\"s^-1\"], \"k_force\": [0.6e-3, \"(N^-1)(m^2)\"], \"k_2\": [200, \"s^-1\"], \"k_3\": [100, \"(nm^-1)(s^-1)\"], \"k_4_0\": [200, \"s^-1\"], \"k_4_1\": [0.3, \"nm^-4\"], \"k_cb\": [0.001, \"N*m^-1\"], \"x_ps\": [5, \"nm\"], \"k_on\": [5e8, \"(M^-1)(s^-1)\"], \"k_off\": [200, \"s^-1\"], \"k_coop\": [5], \"bin_min\": [-10, \"nm\"], \"bin_max\": [10, \"nm\"], \"bin_width\": [1, \"nm\"], \"filament_compliance_factor\": [0.5], \"thick_filament_length\": [815, \"nm\"], \"thin_filament_length\": [1120, \"nm\"], \"bare_zone_length\": [80, \"nm\"], \"k_falloff\": [0.0024], \"passive_mode\": [\"exponential\"], \"passive_exp_sigma\": [300], \"passive_exp_L\": [80], \"passive_l_slack\": [900, \"nm\"] }, \"membranes\": { \"kinetic_scheme\": [\"Ten_Tusscher_2004\"], \"simple_2_compartment\":{ \"Ca_content\": [1e-3], \"k_leak\": [2e-3], \"k_act\": [5e-2], \"k_serca\": [10.0] }, \"Ten_Tusscher_2004\":{ \"g_to_factor\": [1], \"g_Kr_factor\": [1], \"g_Ks_factor\": [1], \"Ca_a_rel_factor\": [1], \"Ca_V_leak_factor\": [1], \"Ca_Vmax_up_factor\": [1], \"g_CaL_factor\": [1] } } }, \"growth\": { \"start_index\": [150000], \"moving_average_window\": [10000], \"driven_signal\": [\"stress\"], \"concenrtric\":{ \"G_stress_driven\":[10e-6], \"G_ATPase_driven\":[1] }, \"eccentric\":{ \"G_number_of_hs\":[-5e-6], \"G_ATPase_driven\":[-2] } }, \"profiling\":{ \"profiling_activation\":[false] }, \"saving_to_spreadsheet\":{ \"saving_data_activation\":[false], \"output_data_format\":[\"csv\"], \"start_index\":[0], \"stop_index\":[2000000] } } . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_MR.html#instruction-file",
+    "relUrl": "/pages/demos/growth/growth_MR.html#instruction-file"
+  },"61": {
+    "doc": "Growth Mitral Regurgitation (volume overload)",
+    "title": "Outputs",
+    "content": " ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_MR.html#outputs",
+    "relUrl": "/pages/demos/growth/growth_MR.html#outputs"
+  },"62": {
+    "doc": "Growth normal",
+    "title": "Growth normal",
+    "content": ". | Growth normal . | Instruction | Note | Instruction file | Outputs | . | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_normal.html",
+    "relUrl": "/pages/demos/growth/growth_normal.html"
+  },"63": {
+    "doc": "Growth normal",
+    "title": "Instruction",
+    "content": ". | Lunch Anaconda prompt. | Navigate to Python_code folder in PyMyoVent’s repository directory: . | $ cd path_to_PyMyoVent_repo\\Python_code | . | Use the following command to run the growth_normal demo with no perturbation in ventricular loading applied to the system. | $ python PyMyoVent.py run_defined_model ..\\demo_files\\growth_normal\\growth_normal_model.json | After around one and half an hour, the simulation would be finished. | . | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_normal.html#instruction",
+    "relUrl": "/pages/demos/growth/growth_normal.html#instruction"
+  },"64": {
+    "doc": "Growth normal",
+    "title": "Note",
+    "content": ". | The baroreceptor module starts to regulate the arterial pressure at \"start_index\":[5000], which can be modified by the user. | The baroreceptor module tries to maintain the mean arterial pressure at 87.7 mm Hg, as a normal level for healthy human, by regulating heart rate, myofilaments contractility, intracellular Ca handling, and vascular tone. | This model uses an electrophysiology model proposed by ten Tusscher. | The ventricular loading is normal and no perturbation has applied. | The growth module starts to allow the ventricle to adapt its size and shape in response to any change in ventricular loading after \"start_index\": [150000], which can be changed by the user. | Growth module is able to capture both types of cardiac growth, namely concentric and eccentric. | . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_normal.html#note",
+    "relUrl": "/pages/demos/growth/growth_normal.html#note"
+  },"65": {
+    "doc": "Growth normal",
+    "title": "Instruction file",
+    "content": "{ \"output_parameters\": { \"input_file\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal.json\"], \"csv_file\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal.csv\"], \"summary_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_summary.png\"], \"pv_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_pv.png\"], \"flows_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_flows.png\"], \"hs_fluxes_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_hs_fluxes.png\"], \"baro_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_baro.png\"], \"circulatory\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_arterial.png\"], \"growth_figure\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_growth.png\"], \"growth_summary\": [\"..\\\\temp\\\\growth_normal\\\\growth_normal_growth_sum.png\"] }, \"system_control\":{ \"simulation\":{ \"no_of_time_points\": [1500000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [0.857,\"s\"] }, \"baroreceptor\":{ \"start_index\":[50000], \"N_t\":[5000], \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_set\": [87.7,\"mmHg\"] }, \"efferent\":{ \"heart_period\":{ \"G_T\": [0.07] }, \"k_1\":{ \"G_k1\": [-0.1] }, \"k_on\":{ \"G_k_on\":[0.08] }, \"ca_uptake\":{ \"G_up\": [-0.05] }, \"g_cal\":{ \"G_gcal\": [-0.07] }, \"c_venous\":{ \"G_c_venous\": [0.1] }, \"r_arteriolar\":{ \"G_r_arteriolar\": [-0.1] } } } }, \"circulation\":{ \"no_of_compartments\": [6], \"blood\":{ \"volume\":[5,\"liters\"] }, \"aorta\":{ \"resistance\": [40,\"s\"], \"compliance\": [0.0004,\"liter_per_mmHg\"] }, \"arteries\":{ \"resistance\": [80,\"s\"], \"compliance\": [0.0009,\"liter_per_mmHg\"] }, \"arterioles\":{ \"resistance\": [400,\"s\"], \"compliance\": [0.005,\"liter_per_mmHg\"] }, \"capillaries\":{ \"resistance\": [340,\"s\"], \"compliance\": [0.03,\"liter_per_mmHg\"] }, \"veins\":{ \"resistance\": [330,\"s\"], \"compliance\": [0.5,\"liter_per_mmHg\"] }, \"ventricle\":{ \"resistance\": [10,\"s\"], \"wall_volume\": [0.1,\"liters\"], \"slack_volume\": [0.08,\"liters\"], \"wall_density\": [1055,\"g/l\"], \"body_surface_area\": [1.90,\"m^2\"] } }, \"half_sarcomere\":{ \"max_rate\": [5000,\"s^-1\"], \"temperature\": [288, \"Kelvin\"], \"cb_number_density\": [6.9e16, \"number of cb's/m^2\"], \"initial_hs_length\": [900, \"nm\"], \"ATPase_activation\":[false], \"delta_energy\":[70,\"kJ/mol\"], \"avagadro_number\":[6.02e23,\"mol^-1\"], \"reference_hs_length\":[1100,\"nm\"], \"myofilaments\":{ \"kinetic_scheme\": [\"3state_with_SRX\"], \"k_1\": [2,\"s^-1\"], \"k_force\": [0.6e-3, \"(N^-1)(m^2)\"], \"k_2\": [200, \"s^-1\"], \"k_3\": [100, \"(nm^-1)(s^-1)\"], \"k_4_0\": [200, \"s^-1\"], \"k_4_1\": [0.3, \"nm^-4\"], \"k_cb\": [0.001, \"N*m^-1\"], \"x_ps\": [5, \"nm\"], \"k_on\": [5e8, \"(M^-1)(s^-1)\"], \"k_off\": [200, \"s^-1\"], \"k_coop\": [5], \"bin_min\": [-10, \"nm\"], \"bin_max\": [10, \"nm\"], \"bin_width\": [1, \"nm\"], \"filament_compliance_factor\": [0.5], \"thick_filament_length\": [815, \"nm\"], \"thin_filament_length\": [1120, \"nm\"], \"bare_zone_length\": [80, \"nm\"], \"k_falloff\": [0.0024], \"passive_mode\": [\"exponential\"], \"passive_exp_sigma\": [300], \"passive_exp_L\": [80], \"passive_l_slack\": [900, \"nm\"] }, \"membranes\": { \"kinetic_scheme\": [\"Ten_Tusscher_2004\"], \"simple_2_compartment\":{ \"Ca_content\": [1e-3], \"k_leak\": [2e-3], \"k_act\": [5e-2], \"k_serca\": [10.0] }, \"Ten_Tusscher_2004\":{ \"g_to_factor\": [1], \"g_Kr_factor\": [1], \"g_Ks_factor\": [1], \"Ca_a_rel_factor\": [1], \"Ca_V_leak_factor\": [1], \"Ca_Vmax_up_factor\": [1], \"g_CaL_factor\": [1] } } }, \"growth\": { \"start_index\": [150000], \"moving_average_window\": [10000], \"driven_signal\": [\"stress\"], \"concenrtric\":{ \"G_stress_driven\":[5e-6], \"G_ATPase_driven\":[1] }, \"eccentric\":{ \"G_number_of_hs\":[-5e-6], \"G_ATPase_driven\":[-2] } }, \"profiling\":{ \"profiling_activation\":[false] }, \"saving_to_spreadsheet\":{ \"saving_data_activation\":[false], \"output_data_format\":[\"csv\"], \"start_index\":[0], \"stop_index\":[2000000] } } . ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_normal.html#instruction-file",
+    "relUrl": "/pages/demos/growth/growth_normal.html#instruction-file"
+  },"66": {
+    "doc": "Growth normal",
+    "title": "Outputs",
+    "content": " ",
+    "url": "http://localhost:4000/pages/demos/growth/growth_normal.html#outputs",
+    "relUrl": "/pages/demos/growth/growth_normal.html#outputs"
+  },"67": {
     "doc": "Help",
     "title": "Help",
     "content": "If you encounter a problem, we recommend the following strategies: . | Take a step back, and make sure you can run the demos. | Getting started is a good place to start. | . | If that doesn’t work, submit an issue . | Do you want to know how to submit an issue? | . | . ",
     "url": "http://localhost:4000/pages/help/help.html",
     "relUrl": "/pages/help/help.html"
-  },"55": {
+  },"68": {
     "doc": "PyMyoVent",
     "title": "PyMyoVent",
     "content": " ",
     "url": "http://localhost:4000/",
     "relUrl": "/"
-  },"56": {
+  },"69": {
     "doc": "PyMyoVent",
     "title": "Overview",
     "content": "This is the homepage for PyMyoVent, software written in Python that simulates a single ventricle pumping blood through a closed circulation. PyMyoVent is a multiscaled model that bridges from molecular to organ-level function. More information about the different components is provided at Modules. Key contributors to the project are listed on the Team page. ",
     "url": "http://localhost:4000/#overview",
     "relUrl": "/#overview"
-  },"57": {
+  },"70": {
     "doc": "PyMyoVent",
     "title": "Example simulation",
     "content": ". ",
     "url": "http://localhost:4000/#example-simulation",
     "relUrl": "/#example-simulation"
-  },"58": {
+  },"71": {
     "doc": "PyMyoVent",
     "title": "Getting started",
     "content": "To get started: . | 1- Get familiar with how to setup the required environment. | 2- Then try Getting Started. | . ",
     "url": "http://localhost:4000/#getting-started",
     "relUrl": "/#getting-started"
-  },"59": {
+  },"72": {
     "doc": "Instruction File",
     "title": "Instruction File",
     "content": ". | Overview | output_parameters | baroreflex | perturbations | circulation | half_sarcomere | growth | profiling | saving_to_spreadsheet | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html",
     "relUrl": "/pages/instruction_files/instruction_files.html"
-  },"60": {
+  },"73": {
     "doc": "Instruction File",
     "title": "Overview",
-    "content": "PyMyoVent uses JSON format files as the input files where an individual user can have control every single modules. PyMyoVent’s instruction files are placed at: path_to_PyMyoVent_repo\\demo_files . Here we explain the instruction file for Getting Started model. ",
+    "content": "PyMyoVent uses JSON format files as the input files where an individual user can has the control over single modules. PyMyoVent’s instruction files are placed at: path_to_PyMyoVent_repo\\demo_files . Here we explain the instruction file for Getting Started model. ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#overview",
     "relUrl": "/pages/instruction_files/instruction_files.html#overview"
-  },"61": {
+  },"74": {
     "doc": "Instruction File",
     "title": "output_parameters",
     "content": "\"output_parameters\": { \"excel_file\": [\"..\\\\temp\\\\getting_started\\\\getting_started.xlsx\"], \"csv_file\": [\"..\\\\temp\\\\getting_started\\\\getting_started.csv\"], \"input_file\": [\"..\\\\temp\\\\getting_started\\\\getting_started.json\"], \"summary_figure\": [\"..\\\\temp\\\\getting_started\\\\getting_started_summary.png\"], \"pv_figure\": [\"..\\\\temp\\\\getting_started\\\\getting_started_pv.png\"], \"baro_figure\": [\"..\\\\temp\\\\getting_started\\\\getting_started_baro.png\"], \"flows_figure\": [\"..\\\\temp\\\\getting_started\\\\getting_started_flows.png\"], \"hs_fluxes_figure\": [\"..\\\\temp\\\\getting_started\\\\getting_started_hs_fluxes.png\"], \"multi_threading\":[\"..\\\\temp\\\\getting_started\\\\getting_started_multi_thread.png\"] }, . | \"output_parameters\": This block contains the output directory path for output figures. | \"excel_file\": Directory path for the output data spread sheet in .xlsx format. | \"csv_file\": Directory path for the output data spread sheet in .csv format. | \"input_file\": Directory path for making a copy of input instruction file. | \"summary_figure\": Directory path for the simulation summary figure. | \"pv_figure\": Directory path for the pressure-volume loop figure. | \"baro_figure\": Directory path for the baroreceptor module’s results figure. | \"flows_figure\": Directory path for the blood flow circulation figure. | \"hs_fluxes_figure\": Directory path for MyoSim fluxes figure. | \"multi_threading\": Directory path for multi threading simulation output figure. | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#output_parameters",
     "relUrl": "/pages/instruction_files/instruction_files.html#output_parameters"
-  },"62": {
+  },"75": {
     "doc": "Instruction File",
     "title": "baroreflex",
     "content": "\"baroreflex\": { \"baro_scheme\": [\"simple_baroreceptor\"], }, . | \"baroreflex\": This block controls how the simulation runs. | \"baro_scheme\": It governs what type of simulation should be used. | So far there are two types of simulation: . | fixed_heart_rate | simple_baroreceptor | . | . | . | . \"fixed_heart_rate\":{ \"simulation\":{ \"no_of_time_points\": [10000], \"time_step\": [0.001], \"duty_ratio\": [0.3], \"basal_heart_period\": [1,\"s\"] } }, . | \"fixed_heart_rate\": This enforces the simulation to be run with a constat heart rate. | \"simulation\": This block contains the simulation’s parameters for \"fixed_heart_rate\". | \"no_of_time_points\": Number of time steps the simulation need to be run. | \"time_step\": The resolution of simulation. | \"duty_ratio\": The fraction of one period of cycle that the action potential is activated. | \"basal_heart_period\": The period of the beating heart. | . | . | . \"simple_baroreceptor\":{ \"simulation\":{ \"start_index\":[2000], \"memory\":[2,\"s\"], \"no_of_time_points\": [150000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [1,\"s\"] }, \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_n\": [90,\"mmHg\"] }, \"regulation\":{ \"heart_period\":{ \"G_T\": [0.03] }, \"k_1\":{ \"G_k1\": [-0.05] }, \"k_on\":{ \"G_k_on\":[0.02] }, \"ca_uptake\":{ \"G_up\": [-0.02] }, \"g_cal\":{ \"G_gcal\": [-0.03] } } } . | \"simple_baroreceptor\": This enforces the simulation to be run while having the baroreceptor module activated. | \"simulation\": This block contains the simulation’s parameters for the \"simple_baroreceptor\". | \"start_index\": The start index for activating of the \"simple_baroreceptor\". | \"memory\": The memory in seconds in which the rate of controlled parameters become averged over. | \"no_of_time_points\": Number of time steps the simulation need to be run. | \"time_step\": The resolution of simulation. | \"duty_ratio\": The fraction of one period of cycle that the action potential is activated. | \"basal_heart_period\": The basal value for the period of the beating heart. | . | \"afferent\": This block contains the parameters for the afferent pathway of the baroreceptor module. | \"b_max\": The maximum threshold baroreceptor output signal | \"b_min\": The minimum threshold baroreceptor output signal | \"S\": The sensitivity constant factor of the baroreceptor output signal in response to any change in the arterial pressure from the mean arterial pressure. | \"P_n\": The targeted mean arterial pressure (i.e. set-point level). | . | \"regulation\": This block contains the parameters for the regulation of controlled parameteres. | \"heart_period\": The heart period block. | \"G_T\": The gain factor for the heart period. | . | \"k_1\": The k_1 constant factor block. | \"G_k1\": The gain factor for the k_1 factor of MyoSim module. | . | \"k_on\": The k_on constant factor block. | \"G_k_on\": The gain factor for the k_on factor of MyoSim module. | . | \"ca_uptake\": The maximal SERCA_uptake current block. | \"G_up\": The gain factor for the maximal SERCA_uptake current. | . | \"G_cal\": The maximal Ca_current through the L-type channel. | \"G_gcal\": The gain factor for the maximal Ca_current through the L-type channel. | . | . | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#baroreflex",
     "relUrl": "/pages/instruction_files/instruction_files.html#baroreflex"
-  },"63": {
+  },"76": {
     "doc": "Instruction File",
     "title": "perturbations",
     "content": "\"perturbations\": { \"perturbation_activation\":[false], . | \"perturbations\": This block controls different types of perturbation to the simulation. | \"perturbation_activation\": The activation switch control for the perturbation class. | . | . \"volume\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, . | \"volume\": The blood volume perturbation block through the venous compartment. | \"start_index\": The start index for the blood volume perturbation. | \"stop_index\": The stop index for the blood volume perturbation. | \"increment\": The incremental magnitude of change in the blood volume. | . | . \"valve\":{ \"aortic\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"mitral\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, . | \"valve\": The valvular regurgitation block. | \"aortic\": The aortic valve regurgitaion block. | \"start_index\": The start index for the aortic valve regurgitation perturbation. | \"stop_index\": The stop index for the aortic valve regurgitation perturbation. | \"increment\": The incremental magnitude of change in the aortic valve regurgitation. | . | \"mitral\": The mitral valve regurgitaion block. | \"start_index\": The start index for the mitral valve regurgitation perturbation. | \"stop_index\": The stop index for the mitral valve regurgitation perturbation. | \"increment\": The incremental magnitude of change in the mitral valve regurgitation . | . | . | . \"compliance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, . | \"compliance\": The compliance factor perturbation block. | \"aorta\": The aortic compliance factor perturbation block. | \"start_index\": The start index for the aortic compliance factor perturbation perturbation. | \"stop_index\": The stop index for the aortic compliance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the aortic compliance factor perturbation. | . | \"capillaries\": The capillaries compliance factor perturbation block. | \"start_index\": The start index for the capillaries compliance factor perturbation perturbation. | \"stop_index\": The stop index for the capillaries compliance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the capillaries compliance factor perturbation. | . | \"venous\": The venous compliance factor perturbation block. | \"start_index\": The start index for the venous compliance factor perturbation perturbation. | \"stop_index\": The stop index for the venous compliance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the venous compliance factor perturbation. | . | . | . \"resistance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"ventricle\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, . | \"resistance\": The resistance factor perturbation block. | \"aorta\": The aortic resistance factor perturbation block. | \"start_index\": The start index for the aortic resistance factor perturbation perturbation. | \"stop_index\": The stop index for the aortic resistance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the aortic resistance factor perturbation. | . | \"capillaries\": The capillaries resistance factor perturbation block. | \"start_index\": The start index for the capillaries resistance factor perturbation perturbation. | \"stop_index\": The stop index for the capillaries resistance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the capillaries resistance factor perturbation. | . | \"venous\": The venous resistance factor perturbation block. | \"start_index\": The start index for the venous resistance factor perturbation perturbation. | \"stop_index\": The stop index for the venous resistance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the venous resistance factor perturbation. | . | \"ventricle\": The ventricular resistance factor perturbation block. | \"start_index\": The start index for the ventricular resistance factor perturbation perturbation. | \"stop_index\": The stop index for the ventricular resistance factor perturbation perturbation. | \"increment\": The incremental magnitude of change in the ventricular resistance factor perturbation. | . | . | . \"myosim\":{ \"k_1\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_2\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_4_0\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, . | \"myosim\": The MyoSim parameters perturbation block. | \"k_1\": The k_1 factor perturbation block. | \"start_index\": The start index for k_1 factor perturbation. | \"stop_index\": The stop index for k_1 factor perturbation. | \"increment\": The incremental magnitude of change in k_1 factor perturbation. | . | \"k_2\": The k_2 factor perturbation block. | \"start_index\": The start index for k_2 factor perturbation. | \"stop_index\": The stop index for k_2 factor perturbation. | \"increment\": The incremental magnitude of change in k_2 factor perturbation. | . | \"k_4_0\": The k_4_0 factor perturbation block. | \"start_index\": The start index for k_4_0 factor perturbation. | \"stop_index\": The stop index for k_4_0 factor perturbation. | \"increment\": The incremental magnitude of change in k_4_0 factor perturbation. | . | . | . \"ca_handling\":{ \"ca_uptake\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"ca_leak\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] }, \"g_cal\":{ \"start_index\": [40000], \"stop_index\": [41000], \"increment\": [0] } } . | \"ca_handling\": The calcium handling parameters perturbation block. | \"ca_uptake\": The maximal SERCA uptake current perturbation block. | \"start_index\": The start index for the maximal SERCA uptake current perturbation. | \"stop_index\": The stop index for the maximal SERCA uptake current perturbation. | \"increment\": The incremental magnitude of change in the maximal SERCA uptake current perturbation. | . | \"ca_leak\": The maximal SR leak current perturbation block. | \"start_index\": The start index for the maximal SR leak current perturbation. | \"stop_index\": The stop index for the maximal SR leak current perturbation. | \"increment\": The incremental magnitude of change in the maximal maximal SR leak current perturbation. | . | \"g_cal\": The maximal L-type calcium current perturbation block. | \"start_index\": The start index for the maximal L-type calcium current perturbation. | \"stop_index\": The stop index for the maximal L-type calcium current perturbation. | \"increment\": The incremental magnitude of change in the maximal maximal L-type calcium current perturbation. | . | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#perturbations",
     "relUrl": "/pages/instruction_files/instruction_files.html#perturbations"
-  },"64": {
+  },"77": {
     "doc": "Instruction File",
     "title": "circulation",
     "content": "\"circulation\":{ \"no_of_compartments\": [6], \"blood\":{ \"volume\":[5,\"liters\"] }, . | \"circulation\": The circulation module block. | \"no_of_compartments\": Number of compartments used in the circulatory module. | \"blood\": The blood’s related parameters. | \"volume\": The total blood volume circulating in the siumulation. | . | . | . \"aorta\":{ \"resistance\": [40,\"s\"], \"compliance\": [0.0005,\"liter_per_mmHg\"] }, . | \"aorta\": The aortic circulatory parameters block. | \"resistance\": The resistance factor for the aorta compartment. | \"compliance\": The compliance factor for the aorta compartment. | . | . \"arteries\":{ \"resistance\": [20,\"s\"], \"compliance\": [0.0011,\"liter_per_mmHg\"] }, . | \"arteries\": The arteries circulatory parameters block. | \"resistance\": The resistance factor for the arteries compartment. | \"compliance\": The compliance factor for the arteries compartment. | . | . \"arterioles\":{ \"resistance\": [520,\"s\"], \"compliance\": [0.005,\"liter_per_mmHg\"] }, . | \"arterioles\": The arterioles circulatory parameters block. | \"resistance\": The resistance factor for the arterioles compartment. | \"compliance\": The compliance factor for the arterioles compartment. | . | . \"capillaries\":{ \"resistance\": [310,\"s\"], \"compliance\": [0.03,\"liter_per_mmHg\"] }, . | \"capillaries\": The capillaries circulatory parameters block. | \"resistance\": The resistance factor for the capillaries compartment. | \"compliance\": The compliance factor for the capillaries compartment. | . | . \"veins\":{ \"resistance\": [300,\"s\"], \"compliance\": [0.5,\"liter_per_mmHg\"] }, . | \"veins\": The venous circulatory parameters block. | \"resistance\": The resistance factor for the veins compartment. | \"compliance\": The compliance factor for the veins compartment. | . | . \"ventricle\":{ \"resistance\": [10,\"s\"], \"wall_volume\": [0.1,\"liters\"], \"slack_volume\": [0.08,\"liters\"], \"wall_density\": [1055,\"g/l\"], \"body_surface_area\": [1.90,\"m^2\"] } . | \"ventricle\": The ventricular circulatory parameters block. | \"resistance\": The resistance factor for the ventricle compartment. | \"wall_volume\": The mayocardial volume for the ventricular wall. | \"slack_volume\": The slack ventricular volume. | \"wall_density\": The density of myocardial wall. | \"body_surface_area\": The body surface area of the patient. | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#circulation",
     "relUrl": "/pages/instruction_files/instruction_files.html#circulation"
-  },"65": {
+  },"78": {
     "doc": "Instruction File",
     "title": "half_sarcomere",
     "content": "\"half_sarcomere\":{ \"max_rate\": [5000,\"s^-1\"], \"temperature\": [288, \"Kelvin\"], \"cb_number_density\": [6.9e16, \"number of cb's/m^2\"], \"initial_hs_length\": [900, \"nm\"], \"ATPase_activation\":[false], \"delta_energy\":[70,\"kJ/mol\"], \"avagadro_number\":[6.02e23,\"mol^-1\"], \"reference_hs_length\":[1100,\"nm\"], . | \"half_sarcomere\": MyoSim parameters block. | \"max_rate\": A float defining the maximum rate considered in the simulations. Rate values above this will be limited to max_rate. | \"temperature\": The tempreture. | \"cb_number_density\": The density of myosin heads (Number of myosin heads in a unit cross-section area of half-sarcomeres). | \"initial_hs_length\": Initial length for the half-sarcomeres. | \"ATPase_activation\": Switch control for ATPase calculation. | \"delta_energy\": The amount of energy become released during myosin ATPase. | \"avagadro_number\": Avagadro number. | \"reference_hs_length\": The reference length for calculating of ATPase. | . | . \"myofilaments\":{ \"kinetic_scheme\": [\"3state_with_SRX\"], \"k_1\": [1.75,\"s^-1\"], \"k_force\": [1e-3, \"(N^-1)(m^2)\"], \"k_2\": [200, \"s^-1\"], \"k_3\": [100, \"(nm^-1)(s^-1)\"], \"k_4_0\": [200, \"s^-1\"], \"k_4_1\": [0.5, \"nm^-4\"], \"k_cb\": [0.001, \"N*m^-1\"], \"x_ps\": [5, \"nm\"], \"k_on\": [1e8, \"(M^-1)(s^-1)\"], \"k_off\": [200, \"s^-1\"], \"k_coop\": [5], \"bin_min\": [-10, \"nm\"], \"bin_max\": [10, \"nm\"], \"bin_width\": [1, \"nm\"], \"filament_compliance_factor\": [0.5], \"thick_filament_length\": [815, \"nm\"], \"thin_filament_length\": [1120, \"nm\"], \"bare_zone_length\": [80, \"nm\"], \"k_falloff\": [0.0024], \"passive_mode\": [\"exponential\"], \"passive_exp_sigma\": [500], \"passive_exp_L\": [80], \"passive_l_slack\": [900, \"nm\"] }, . | \"myofilaments\": The myofilament parameters block. | \"kinetic_scheme\": The switch control for the kinetic’s type of half-sarcomeres. | \"k_1\": The avtivation constant rate of myosin heads from OFF state to ON state. | \"k_force\": The force dependency constant factor of myosin heads during activation. | \"k_2\": The deactivation constant rate myosin heads from ON state to OFF state. | \"k_3\": The attachment constant rate of myosin heads to the activated binding sites. | \"k_4_0\": The detachment constant rate of myosin heads from the activated binding sites. | \"k_4_1\": The strain dependency constant factor of myosin heads during detachment. | \"k_cb\": The cross-bridge stiffness factor. | \"x_ps\": The power stroke of an attached cross-bridge. | \"k_on\": The activation constant rate of binding sites. | \"k_off\": The deactivation constant rate of binding sites. | \"k_coop\": The cooperativity factor of thin filaments. | \"bin_min\": The minimum possible value of x in nm for the cross-bridge distribution | \"bin_max\": The maximum possible value of x in nm for the cross-bridge distribution | \"bin_width\": The width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate | \"filament_compliance_factor\": The compliance factor of myofilaments. | . The following parameters are used to calculate the overlap of the thick and thin filaments, and thus the number of myosin heads that are able to interact with actin . | \"thick_filament_length\": The length of thick myofilament in nm. | \"thin_filament_length\": The length of thin myofilament in nm. | \"bare_zone_length\": The length of bare zone in | \"k_falloff\": A constant factor. | \"passive_mode\": The mode type for calculating the passive force in half-sarcomeres. | . The following parameters are used for passive_mode of exponential . | \"passive_exp_sigma\": The sigma constant factor. | \"passive_exp_L\": The constant factor that sets the curvature of the relationship. | \"passive_l_slack\": Slack length of half-sarcomere. | . | . \"membranes\": { \"kinetic_scheme\": [\"simple_2_compartment\"], } . | \"membranes\": This block governs the parameters for an implemented electrophysiology model. | \"kinetic_scheme\": The modle’s name for the electrophysiology model that play’s a “switch control” role in the “membrane” class. \"simple_2_compartment\":{ \"Ca_content\": [1e-3], \"k_leak\": [2e-3], \"k_act\": [5e-2], \"k_serca\": [10.0] }, . | \"simple_2_compartment\": The parameters block for the “simple two compartment” electrophysiology model. | \"Ca_content\": Amount of calcium content in the sarcoplasmic reticulum (SR). | \"k_leak\": Rate constant factor for calcium leak current from SR. | \"k_act\": Rate constant factor for active calcium current from SR during stimulation. | \"k_serca\": Rate constant factor SERCA uptake current. \"Ten_Tusscher_2004\":{ \"g_to_factor\": [1], \"g_Kr_factor\": [1], \"g_Ks_factor\": [1], \"Ca_a_rel_factor\": [1], \"Ca_V_leak_factor\": [1], \"Ca_Vmax_up_factor\": [1], \"g_CaL_factor\": [1] } . | . | \"Ten_Tusscher_2004\": The parameters’ multiplier block for the “ten Tusscher” electrophysiology model. | The ten Tusscher electrophysiology model is a sophisticated model that include a large number of constant factors and state conditions. In this block, only some parameter multiplier can be modifed in order to do something like a sensitivity test on the included parameters. | . | . | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#half_sarcomere",
     "relUrl": "/pages/instruction_files/instruction_files.html#half_sarcomere"
-  },"66": {
+  },"79": {
     "doc": "Instruction File",
     "title": "growth",
     "content": "\"growth\": { \"growth_activation\": [false], \"start_index\": [200000], \"moving_average_window\": [5000], \"driven_signal\": [\"stress\"], }, . | \"growth\": This block belngs to the “ventricular growth” class parameters. | \"growth_activation\": The activation control parameter for the “growth” module. | \"start_index\": The start index for activating the growth module. | \"moving_average_window\": The The number of time steps that the growth rates needs to be averaged over. | \"driven_signal\": A switch control based on the driving signal for the “growth” module. | . \"concenrtric\":{ \"G_stress_driven\":[1e-6], \"G_ATPase_driven\":[-2] }, . | \"concenrtric\": The parameters block for “concentric” growth pattern. | \"G_stress_driven\": The gain factor for stress driven “concentric” growth pattern. | \"G_ATPase_driven\": The gain factor for ATPase driven “concentric” growth pattern. | . | . \"eccentric\":{ \"G_number_of_hs\":[-3e-6], \"G_ATPase_driven\":[0] } . | \"eccenrtric\": The parameters block for “eccentric” growth pattern. | \"G_stress_driven\": The gain factor for stress driven “eccentric” growth pattern. | \"G_ATPase_driven\": The gain factor for ATPase driven “eccentric” growth pattern. | . | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#growth",
     "relUrl": "/pages/instruction_files/instruction_files.html#growth"
-  },"67": {
+  },"80": {
     "doc": "Instruction File",
     "title": "profiling",
     "content": "\"profiling\":{ \"profiling_activation\":[false] . | \"profiling\": The profiling block. | \"profiling_activation\": The activation control parameter for profiling the simulation. | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#profiling",
     "relUrl": "/pages/instruction_files/instruction_files.html#profiling"
-  },"68": {
+  },"81": {
     "doc": "Instruction File",
     "title": "saving_to_spreadsheet",
     "content": "\"saving_to_spreadsheet\":{ \"saving_data_activation\":[false], \"output_data_format\":[\"csv\"], \"start_index\":[0], \"stop_index\":[15000] }, . | \"saving_to_spreadsheet\": This block controls dumping output data. | \"saving_data_activation\": The activation control parameter for dumping output data. | \"output_data_format\": The output dumped data format. This can varies between “csv” and “xlsx” formats. | \"start_index\": The start index for dumping data to the output spread sheet. | \"stop_index\": The stop index for dumping data to the output spread sheet. | . | . ",
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#saving_to_spreadsheet",
     "relUrl": "/pages/instruction_files/instruction_files.html#saving_to_spreadsheet"
-  },"69": {
+  },"82": {
     "doc": "Modules",
     "title": "Modules",
     "content": "PyMyoVent is built on a number of sub-modules representing diffetent functionality of the software in various scale levels. ",
     "url": "http://localhost:4000/pages/modules/modules.html",
     "relUrl": "/pages/modules/modules.html"
-  },"70": {
+  },"83": {
     "doc": "Perturbation",
     "title": "Perturbation",
     "content": ". | Overview | Theory . | Parameters | . | . ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html",
     "relUrl": "/pages/modules/perturbation/perturbation.html"
-  },"71": {
+  },"84": {
     "doc": "Perturbation",
     "title": "Overview",
     "content": "This module is developed to control different types of perturbation and the way they are being applied to a simulation. ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html#overview",
     "relUrl": "/pages/modules/perturbation/perturbation.html#overview"
-  },"72": {
+  },"85": {
     "doc": "Perturbation",
     "title": "Theory",
     "content": ". | The Perturbation module can perturb a simulation from molecular level (e.g. the attachment rate constant of myosin heads to the binding sites in actin, k_3) to the organ level (e.g. blood volume perturbation and hemorrhage condition). | Each type of perturbation is defined with three parameters: . | start_index: Starting time index for the perturbation to be applied. | stop_index: Stopping time index for the perturbation to be applied. | increment: The inceremental value to be added at each time step during perturbation time. | . | . Parameters . \"perturbations\": { \"perturbation_activation\":[false], \"volume\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"valve\":{ \"aortic\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"mitral\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"compliance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"resistance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"ventricle\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"myosim\":{ \"k_1\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_2\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_4_0\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"ca_handling\":{ \"ca_uptake\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"ca_leak\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"g_cal\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } } }, . ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html#theory",
     "relUrl": "/pages/modules/perturbation/perturbation.html#theory"
-  },"73": {
+  },"86": {
     "doc": "Publications",
     "title": "Publications",
     "content": "Here are the list of peer reviewed articles built on PyMyoVent framework. Each sub-folder include the utilized demos and “Analyze” scripts for generating the published figures and tables. ",
     "url": "http://localhost:4000/pages/publications/publications.html",
     "relUrl": "/pages/publications/publications.html"
-  },"74": {
+  },"87": {
     "doc": "Single Ventricle",
     "title": "Single Ventricle",
     "content": ". | Overview | Theory | . ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html"
-  },"75": {
+  },"88": {
     "doc": "Single Ventricle",
     "title": "Overview",
     "content": "The Single Ventricle module is originally adopted by Campbell KB. et al. where they assumed a thin walled hemispherical geometry for the left ventricle. PyMyoVent uses similar assumption and considers the whole heart as a single hemispherical left ventricle. In this model the half-sarcomeres are assumed to be circumferentially oriented at the basal mid-wall of the hemisphere, i.e., the mid-transmural wall in the middle of the LV wall thickness. | Single ventricle geometry adopted from Campbell KB. et al. work. ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html#overview",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html#overview"
-  },"76": {
+  },"89": {
     "doc": "Single Ventricle",
     "title": "Theory",
     "content": "| . This module, in particular, governs two characteristics of the ventricle: . | The associated change in half-sarcomeres length due to the change in ventricular volume. | The associated mid-wall radius to the hemispherical volume, which is related to the LV cavity volume and half of the LV wall volume can be defined as follows: | . | Where: . | Vventricle is the cavity volume of the ventricle derived from the circulatory module. | Wvolume is the volume of ventricle wall. | . | The associated circumference of mid-wall at the basal level is defined with the following equation. The change in the mid-wall circumference enforces the change in the half-sarcomeres length. | . | And finally the ventricular wall thickness is determined with: | . | Where: . | ri is the internal radius of the left ventricle. | . | . | The ventricular pressure according to Laplace’s law. | Where: . | ri is the internal radius of the left ventricle. | Wthickness is the ventricular wall thickness. | Ftotal is the total stress in the half-sarcomeres. | . | . | . ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html#theory",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html#theory"
-  },"77": {
+  },"90": {
     "doc": "How to submit an issue",
     "title": "How to submit an issue",
     "content": "Okay, something has gone wrong, you’ve worked through running demos, and you’ve come to the conclusion that there is a problem with the code. | Go to the PyMyoVent respository . | Click on the Issues tab . | Click on the Green “New issue” button . | . ",
     "url": "http://localhost:4000/pages/help/submit_an_issue.html",
     "relUrl": "/pages/help/submit_an_issue.html"
-  },"78": {
+  },"91": {
     "doc": "System Control",
     "title": "System Control",
     "content": ". | Overview | Theory . | Fixed heart rate . | Parameters | . | Simple baroreceptor . | Parameters | . | . | . ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html",
     "relUrl": "/pages/modules/system_control/system_control.html"
-  },"79": {
+  },"92": {
     "doc": "System Control",
     "title": "Overview",
     "content": "This module controls how a single simulation should be run and whether the simulation needs being controlled or not. So far, there are two approaches implemented into the System Control module, but any new approach can be easily added. ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html#overview",
     "relUrl": "/pages/modules/system_control/system_control.html#overview"
-  },"80": {
+  },"93": {
     "doc": "System Control",
     "title": "Theory",
     "content": "In general, System Control governs a simulation’s running time, resolution, and the stimulus puls. But based on the complexity level, an indiviual user can select between two approached implemented so far: . | Fixed heart rate approch | Simple baroreceptor approach | . Fixed heart rate . | This approach assumes a simulation runs with a constant heart rate. The activation pulse is defined based on a periodic square-wave waveform. | . | An individual user can define the signal period and also the signal stimulus duration (i.e. duty ratio) at each period. | The resolution of simulation is defined with time_step parameter. The finer the resolution, the more precise the results get, but it takes a longer simulation time. | . Parameters . \"fixed_heart_rate\":{ \"simulation\":{ \"no_of_time_points\": [5000], \"time_step\": [0.001], \"duty_ratio\": [0.3], \"basal_heart_period\": [1,\"s\"] } }, . | Despite the Simple Baroreceptor approach, this method does not regulate any parameter in the simulation due to any perturbation. Hence, the simulation | . Simple baroreceptor . Parameters . \"simple_baroreceptor\":{ \"simulation\":{ \"start_index\":[2000], \"memory\":[2,\"s\"], \"no_of_time_points\": [15000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [1,\"s\"] }, \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_n\": [90,\"mmHg\"] }, \"regulation\":{ \"heart_period\":{ \"G_T\": [0.03] }, \"k_1\":{ \"G_k1\": [-0.05] }, \"k_3\":{ \"G_k3\": [-0.0] }, \"k_on\":{ \"G_k_on\":[0.02] }, \"ca_uptake\":{ \"G_up\": [-0.02] }, \"g_cal\":{ \"G_gcal\": [-0.03] } } } . ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html#theory",
     "relUrl": "/pages/modules/system_control/system_control.html#theory"
-  },"81": {
+  },"94": {
     "doc": "Team",
     "title": "Team",
     "content": "Key contributors to the PyMyoVent project include: . | Ken Campbell . | leads the overall project | developed the MyoSim model | wrote the first version of PyMyoVent | . | Stuart Campbell . | developed a prototype model | helped write the first publication | . | Jonathan Wenk . | directs current research at the University of Kentucky | . | Brianna Chrisman . | wrote the first prototype of the modeling software as an undergraduate student with Stuart Campbell. | . | Hossein Sharifi . | lead developer at the University of Kentucky | developed the baroreceptor and growth modules | . | . ",

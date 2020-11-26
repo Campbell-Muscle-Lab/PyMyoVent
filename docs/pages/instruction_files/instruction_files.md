@@ -9,7 +9,7 @@ has_children: False
 * TOC
 {:toc}
 ## Overview
-**PyMyoVent** uses [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) files as the input files where an individual user can have control every single modules.
+**PyMyoVent** uses [JSON format](http://en.wikipedia.org/wiki/JSON#:~:text=JavaScript%20Object%20Notation%20(JSON%2C%20pronounced,or%20any%20other%20serializable%20value).) files as the input files where an individual user can has the control over single modules.
 
 PyMyoVent's instruction files are placed at:
 `path_to_PyMyoVent_repo\demo_files`
@@ -52,7 +52,7 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 },
 ````
 - `"baroreflex":` This block controls how the simulation runs.
-    - `"baro_scheme":` It governs what type of simulation should be used. 
+    - `"baro_scheme":` It governs what type of simulation should be used.
         - So far there are two types of simulation:
             1. `fixed_heart_rate`
             2. `simple_baroreceptor`
@@ -67,11 +67,11 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
       }
     },
 ````
-- `"fixed_heart_rate":` This enforces the simulation to be run with a constat heart rate. 
+- `"fixed_heart_rate":` This enforces the simulation to be run with a constat heart rate.
     - `"simulation":` This block contains the simulation's parameters for `"fixed_heart_rate"`.
         - `"no_of_time_points":` Number of time steps the simulation need to be run.
         - `"time_step":` The resolution of simulation.
-        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated. 
+        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated.
         - `"basal_heart_period":` The period of the beating heart.
 
 ````
@@ -112,15 +112,15 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 - `"simple_baroreceptor":` This enforces the simulation to be run while having the baroreceptor module activated.
     - `"simulation":` This block contains the simulation's parameters for the `"simple_baroreceptor"`.
         - `"start_index":` The start index for activating of the `"simple_baroreceptor"`.
-        - `"memory":` The memory in seconds in which the rate of controlled parameters become averged over. 
+        - `"memory":` The memory in seconds in which the rate of controlled parameters become averged over.
         - `"no_of_time_points":` Number of time steps the simulation need to be run.
         - `"time_step":` The resolution of simulation.
-        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated. 
+        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated.
         - `"basal_heart_period":` The basal value for the period of the beating heart.
     - `"afferent":` This block contains the parameters for the afferent pathway of the baroreceptor module.
         - `"b_max":` The maximum threshold baroreceptor output signal
         - `"b_min":` The minimum threshold baroreceptor output signal
-        - `"S":` The sensitivity constant factor of the baroreceptor output signal in response to any change in the arterial pressure from the mean arterial pressure. 
+        - `"S":` The sensitivity constant factor of the baroreceptor output signal in response to any change in the arterial pressure from the mean arterial pressure.
         - `"P_n":` The targeted mean arterial pressure (i.e. set-point level).
     - `"regulation":` This block contains the parameters for the regulation of controlled parameteres.
         - `"heart_period":` The heart period block.
@@ -140,8 +140,8 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 "perturbations": {
     "perturbation_activation":[false],
 ````
-- `"perturbations":` This block controls different types of perturbation to the simulation. 
-    - `"perturbation_activation":` The activation switch control for the perturbation class. 
+- `"perturbations":` This block controls different types of perturbation to the simulation.
+    - `"perturbation_activation":` The activation switch control for the perturbation class.
 
 ````
 "volume":{
@@ -151,9 +151,9 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
     },
 ````
 - `"volume":` The blood volume perturbation block through the venous compartment.
-    - `"start_index":` The start index for the blood volume perturbation. 
-    - `"stop_index":` The stop index for the blood volume perturbation. 
-    - `"increment":` The incremental magnitude of change in the blood volume. 
+    - `"start_index":` The start index for the blood volume perturbation.
+    - `"stop_index":` The stop index for the blood volume perturbation.
+    - `"increment":` The incremental magnitude of change in the blood volume.
 
 ````
 "valve":{
@@ -171,13 +171,13 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 ````
 - `"valve":` The valvular regurgitation block.
     - `"aortic":` The aortic valve regurgitaion block.
-        - `"start_index":` The start index for the aortic valve regurgitation perturbation. 
-        - `"stop_index":` The stop index for the aortic valve regurgitation perturbation. 
+        - `"start_index":` The start index for the aortic valve regurgitation perturbation.
+        - `"stop_index":` The stop index for the aortic valve regurgitation perturbation.
         - `"increment":` The incremental magnitude of change in the aortic valve regurgitation.
     - `"mitral":` The mitral valve regurgitaion block.
-        - `"start_index":` The start index for the mitral valve regurgitation perturbation. 
-        - `"stop_index":` The stop index for the mitral valve regurgitation perturbation. 
-        - `"increment":` The incremental magnitude of change in the mitral valve regurgitation . 
+        - `"start_index":` The start index for the mitral valve regurgitation perturbation.
+        - `"stop_index":` The stop index for the mitral valve regurgitation perturbation.
+        - `"increment":` The incremental magnitude of change in the mitral valve regurgitation .
 
 ````
 "compliance": {
@@ -200,16 +200,16 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 ````
 - `"compliance":` The compliance factor perturbation block.
     - `"aorta":` The aortic compliance factor perturbation block.
-        - `"start_index":` The start index for the aortic compliance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the aortic compliance factor perturbation perturbation. 
+        - `"start_index":` The start index for the aortic compliance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the aortic compliance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the aortic compliance factor perturbation.
     - `"capillaries":` The capillaries compliance factor perturbation block.
-        - `"start_index":` The start index for the capillaries compliance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the capillaries compliance factor perturbation perturbation. 
+        - `"start_index":` The start index for the capillaries compliance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the capillaries compliance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the capillaries compliance factor perturbation.
     - `"venous":` The venous compliance factor perturbation block.
-        - `"start_index":` The start index for the venous compliance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the venous compliance factor perturbation perturbation. 
+        - `"start_index":` The start index for the venous compliance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the venous compliance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the venous compliance factor perturbation.
 
 ````
@@ -238,20 +238,20 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 ````
 - `"resistance":` The resistance factor perturbation block.
     - `"aorta":` The aortic resistance factor perturbation block.
-        - `"start_index":` The start index for the aortic resistance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the aortic resistance factor perturbation perturbation. 
+        - `"start_index":` The start index for the aortic resistance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the aortic resistance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the aortic resistance factor perturbation.
      - `"capillaries":` The capillaries resistance factor perturbation block.
-        - `"start_index":` The start index for the capillaries resistance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the capillaries resistance factor perturbation perturbation. 
+        - `"start_index":` The start index for the capillaries resistance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the capillaries resistance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the capillaries resistance factor perturbation.
     - `"venous":` The venous resistance factor perturbation block.
-        - `"start_index":` The start index for the venous resistance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the venous resistance factor perturbation perturbation. 
+        - `"start_index":` The start index for the venous resistance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the venous resistance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the venous resistance factor perturbation.
     - `"ventricle":` The ventricular resistance factor perturbation block.
-        - `"start_index":` The start index for the ventricular resistance factor perturbation perturbation. 
-        - `"stop_index":` The stop index for the ventricular resistance factor perturbation perturbation. 
+        - `"start_index":` The start index for the ventricular resistance factor perturbation perturbation.
+        - `"stop_index":` The stop index for the ventricular resistance factor perturbation perturbation.
         - `"increment":` The incremental magnitude of change in the ventricular resistance factor perturbation.
 
 ````
@@ -418,7 +418,7 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 - `"half_sarcomere":` MyoSim parameters block.
     - `"max_rate":` A float defining the maximum rate considered in the simulations. Rate values above this will be limited to max_rate.
     - `"temperature":` The tempreture.
-    - `"cb_number_density":` The density of myosin heads (Number of myosin heads in a unit cross-section area of half-sarcomeres). 
+    - `"cb_number_density":` The density of myosin heads (Number of myosin heads in a unit cross-section area of half-sarcomeres).
     - `"initial_hs_length":` Initial length for the half-sarcomeres.
     - `"ATPase_activation":` Switch control for ATPase calculation.
     - `"delta_energy":` The amount of energy become released during myosin ATPase.
@@ -453,9 +453,9 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
       "passive_l_slack": [900, "nm"]
     },
 ````
-- `"myofilaments":` The myofilament parameters block. 
-    - `"kinetic_scheme":` The switch control for the kinetic's type of half-sarcomeres. 
-    - `"k_1":` The avtivation constant rate of myosin heads from OFF state to ON state. 
+- `"myofilaments":` The myofilament parameters block.
+    - `"kinetic_scheme":` The switch control for the kinetic's type of half-sarcomeres.
+    - `"k_1":` The avtivation constant rate of myosin heads from OFF state to ON state.
     - `"k_force":` The force dependency constant factor of myosin heads during activation.
     - `"k_2":` The deactivation constant rate myosin heads from ON state to OFF state.
     - `"k_3":` The attachment constant rate of myosin heads to the activated binding sites.
@@ -464,19 +464,19 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
     - `"k_cb":` The cross-bridge stiffness factor.
     - `"x_ps":` The power stroke of an attached cross-bridge.
     - `"k_on":` The activation constant rate of binding sites.
-    - `"k_off":` The deactivation constant rate of binding sites. 
-    - `"k_coop":` The cooperativity factor of thin filaments. 
-    - `"bin_min":` The minimum possible value of x in nm for the cross-bridge distribution 
-    - `"bin_max":` The maximum possible value of x in nm for the cross-bridge distribution 
+    - `"k_off":` The deactivation constant rate of binding sites.
+    - `"k_coop":` The cooperativity factor of thin filaments.
+    - `"bin_min":` The minimum possible value of x in nm for the cross-bridge distribution
+    - `"bin_max":` The maximum possible value of x in nm for the cross-bridge distribution
     - `"bin_width":` The width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate
-    - `"filament_compliance_factor":` The compliance factor of myofilaments. 
+    - `"filament_compliance_factor":` The compliance factor of myofilaments.
 
-    The following parameters are used to calculate the overlap of the thick and thin filaments, and thus the number of myosin heads that are able to interact with actin 
+    The following parameters are used to calculate the overlap of the thick and thin filaments, and thus the number of myosin heads that are able to interact with actin
     - `"thick_filament_length":` The length of thick myofilament in nm.
     - `"thin_filament_length":` The length of thin myofilament in nm.
-    - `"bare_zone_length":` The length of bare zone in 
+    - `"bare_zone_length":` The length of bare zone in
     - `"k_falloff":` A constant factor.
-    - `"passive_mode":` The mode type for calculating the passive force in half-sarcomeres. 
+    - `"passive_mode":` The mode type for calculating the passive force in half-sarcomeres.
 
     The following parameters are used for `passive_mode` of `exponential`
     - `"passive_exp_sigma":` The sigma constant factor.
@@ -515,8 +515,8 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
       }
       ````
       - `"Ten_Tusscher_2004":` The parameters' multiplier block for the "ten Tusscher" electrophysiology model.
-        - The [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view) electrophysiology model is a sophisticated model that include a large number of constant factors and state conditions. In this block, only some parameter multiplier can be modifed in order to do something like a sensitivity test on the included parameters. 
-      
+        - The [ten Tusscher](http://models.physiomeproject.org/exposure/c7f7ced1e002d9f0af1b56b15a873736/tentusscher_noble_noble_panfilov_2004_a.cellml/view) electrophysiology model is a sophisticated model that include a large number of constant factors and state conditions. In this block, only some parameter multiplier can be modifed in order to do something like a sensitivity test on the included parameters.
+
 ## growth
 
 ````
@@ -542,7 +542,7 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
   - `"concenrtric":` The parameters block for "concentric" growth pattern.
     - `"G_stress_driven":` The gain factor for stress driven "concentric" growth pattern.
     - `"G_ATPase_driven":` The gain factor for ATPase driven "concentric" growth pattern.
-  
+
   ````
   "eccentric":{
       "G_number_of_hs":[-3e-6],
@@ -560,7 +560,7 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
     "profiling_activation":[false]
 ````
 - `"profiling":` The profiling block.
-  - `"profiling_activation":` The activation control parameter for profiling the simulation. 
+  - `"profiling_activation":` The activation control parameter for profiling the simulation.
 
 ## saving_to_spreadsheet
 
@@ -577,4 +577,3 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
   - `"output_data_format":` The output dumped data format. This can varies between "csv" and "xlsx" formats.
   - `"start_index":` The start index for dumping data to the output spread sheet.
   - `"stop_index":` The stop index for dumping data to the output spread sheet.
-
