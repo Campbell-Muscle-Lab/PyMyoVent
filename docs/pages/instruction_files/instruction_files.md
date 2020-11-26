@@ -22,117 +22,105 @@ Here we explain the instruction file for [Getting Started](../demos/getting_star
 
 ````
 "output_parameters": {
-    "excel_file": ["..\\temp\\getting_started\\getting_started.xlsx"],
-    "csv_file": ["..\\temp\\getting_started\\getting_started.csv"],
-    "input_file": ["..\\temp\\getting_started\\getting_started.json"],
-    "summary_figure": ["..\\temp\\getting_started\\getting_started_summary.png"],
-    "pv_figure": ["..\\temp\\getting_started\\getting_started_pv.png"],
-    "baro_figure": ["..\\temp\\getting_started\\getting_started_baro.png"],
-    "flows_figure": ["..\\temp\\getting_started\\getting_started_flows.png"],
-    "hs_fluxes_figure": ["..\\temp\\getting_started\\getting_started_hs_fluxes.png"],
-    "multi_threading":["..\\temp\\getting_started\\getting_started_multi_thread.png"]
+    "input_file": ["..\\temp\\growth_AS\\growth_AS.json"],
+    "csv_file": ["..\\temp\\growth_AS\\growth_AS.csv"],
+    "summary_figure": ["..\\temp\\growth_AS\\growth_AS_summary.png"],
+    "pv_figure": ["..\\temp\\growth_AS\\growth_AS_pv.png"],
+    "flows_figure": ["..\\temp\\growth_AS\\growth_AS_flows.png"],
+    "hs_fluxes_figure": ["..\\temp\\growth_AS\\growth_AS_hs_fluxes.png"],
+    "baro_figure": ["..\\temp\\growth_AS\\growth_AS_baro.png"],
+    "circulatory": ["..\\temp\\growth_AS\\growth_AS_arterial.png"],
+    "growth_figure": ["..\\temp\\growth_AS\\growth_AS_growth.png"],
+    "growth_summary": ["..\\temp\\growth_AS\\growth_AS_growth_sum.png"]
   },
 ````
 - `"output_parameters":` This block contains the output directory path for output figures.
-    - `"excel_file":` Directory path for the output data spread sheet in .xlsx format.
-    - `"csv_file":`  Directory path for the output data spread sheet in .csv format.
     - `"input_file":` Directory path for making a copy of input instruction file.
+    - `"csv_file":`  Directory path for the output data spread sheet in .csv format.
     - `"summary_figure":` Directory path for the simulation summary figure.
     - `"pv_figure":` Directory path for the pressure-volume loop figure.
-    - `"baro_figure":` Directory path for the baroreceptor module's results figure.
     - `"flows_figure":` Directory path for the blood flow circulation figure.
     - `"hs_fluxes_figure":` Directory path for MyoSim fluxes figure.
-    - `"multi_threading":` Directory path for multi threading simulation output figure.
+    - `"baro_figure":` Directory path for the baroreceptor module's results figure.
+    - `"circulatory":` Directory path for the systemic circulation results figure.
+    - `"growth_figure":` Directory path for growth module figure.
+    - `"growth_summary":` Directory path for growth module summaary figure.
 
-## baroreflex
-
-````
-"baroreflex": {
-    "baro_scheme": ["simple_baroreceptor"],
-},
-````
-- `"baroreflex":` This block controls how the simulation runs.
-    - `"baro_scheme":` It governs what type of simulation should be used.
-        - So far there are two types of simulation:
-            1. `fixed_heart_rate`
-            2. `simple_baroreceptor`
+## system_control
 
 ````
-"fixed_heart_rate":{
-      "simulation":{
-        "no_of_time_points": [10000],
-        "time_step": [0.001],
-        "duty_ratio": [0.3],
-        "basal_heart_period": [1,"s"]
-      }
+"system_control":{
+    "simulation":{
+      "no_of_time_points": [1500000],
+      "time_step": [0.001],
+      "duty_ratio": [0.003],
+      "basal_heart_period": [0.857,"s"]
     },
-````
-- `"fixed_heart_rate":` This enforces the simulation to be run with a constat heart rate.
-    - `"simulation":` This block contains the simulation's parameters for `"fixed_heart_rate"`.
-        - `"no_of_time_points":` Number of time steps the simulation need to be run.
-        - `"time_step":` The resolution of simulation.
-        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated.
-        - `"basal_heart_period":` The period of the beating heart.
-
-````
-"simple_baroreceptor":{
-      "simulation":{
-        "start_index":[2000],
-        "memory":[2,"s"],
-        "no_of_time_points": [150000],
-        "time_step": [0.001],
-        "duty_ratio": [0.003],
-        "basal_heart_period": [1,"s"]
-      },
+    "baroreceptor":{
+      "start_index":[50000],
+      "N_t":[5000],
       "afferent": {
         "b_max": [2],
         "b_min": [0],
         "S": [0.067,"mmHg"],
-        "P_n": [90,"mmHg"]
+        "P_set": [87.7,"mmHg"]
       },
-      "regulation":{
+      "efferent":{
         "heart_period":{
-          "G_T": [0.03]
+          "G_T": [0.07]
         },
         "k_1":{
-          "G_k1": [-0.05]
+          "G_k1": [-0.1]
         },
         "k_on":{
-          "G_k_on":[0.02]
+          "G_k_on":[0.08]
         },
         "ca_uptake":{
-          "G_up": [-0.02]
+          "G_up": [-0.05]
         },
         "g_cal":{
-          "G_gcal": [-0.03]
+          "G_gcal": [-0.07]
+        },
+        "c_venous":{
+          "G_c_venous": [0.1]
+        },
+        "r_arteriolar":{
+          "G_r_arteriolar": [-0.1]
         }
       }
     }
+  },
+
 ````
-- `"simple_baroreceptor":` This enforces the simulation to be run while having the baroreceptor module activated.
-    - `"simulation":` This block contains the simulation's parameters for the `"simple_baroreceptor"`.
-        - `"start_index":` The start index for activating of the `"simple_baroreceptor"`.
-        - `"memory":` The memory in seconds in which the rate of controlled parameters become averged over.
-        - `"no_of_time_points":` Number of time steps the simulation need to be run.
-        - `"time_step":` The resolution of simulation.
-        - `"duty_ratio":` The fraction of one period of cycle that the action potential is activated.
-        - `"basal_heart_period":` The basal value for the period of the beating heart.
-    - `"afferent":` This block contains the parameters for the afferent pathway of the baroreceptor module.
-        - `"b_max":` The maximum threshold baroreceptor output signal
-        - `"b_min":` The minimum threshold baroreceptor output signal
-        - `"S":` The sensitivity constant factor of the baroreceptor output signal in response to any change in the arterial pressure from the mean arterial pressure.
-        - `"P_n":` The targeted mean arterial pressure (i.e. set-point level).
-    - `"regulation":` This block contains the parameters for the regulation of controlled parameteres.
-        - `"heart_period":` The heart period block.
-            - `"G_T":` The gain factor for the heart period.
-        - `"k_1":` The *k_1* constant factor block.
-            - `"G_k1":` The gain factor for the *k_1* factor of MyoSim module.
-        - `"k_on":` The *k_on* constant factor block.
-            - `"G_k_on":` The gain factor for the *k_on* factor of MyoSim module.
-        - `"ca_uptake":` The maximal *SERCA_uptake* current block.
-            - `"G_up":` The gain factor for the maximal *SERCA_uptake* current.
-        - `"G_cal":` The maximal *Ca_current* through the L-type channel.
-            - `"G_gcal":` The gain factor for the maximal *Ca_current* through the L-type channel.
+- `"system_control"`: This block controls how the simulation runs.
+  - `"simulation"` : Contains all the simulation parameters.
+    - `"no_of_time_points"`: Number of time steps the simulation need to be run.
+    - `"time_step"`: The resolution of the simulation.
+    - `"duty_ratio"`: The ratio of stimulus duration over a cardiac cycle.
+    - `"basal_heart_period"`: Heart period.
+  - `"baroreceptor"`: Contains all the baroreceptor module parameters.
+   - `"start_index"`: The start index for activating of the baroreceptor.
+   - `"N_t"`: The number of time steps that the rate change of controlled parameters get averaged over.
+   - `"afferent"`: Contains the parameters for the afferent neuron pathway.
+    - `"b_max":` The maximum threshold baroreceptor output signal
+    - `"b_min":` The minimum threshold baroreceptor output signal
+    - `"S":` The slope of sigmoidal curve near the set-point level.
+    - `"P_set":` The targeted mean arterial pressure (i.e. set-point level).
+  - `"efferent"`: contains the parameters for efferent neuron pathway.
+    - `"heart_period":` The heart period block.
+      - `"G_T":` The gain factor for the heart period.
+    - `"k_1":` The *k_1* constant factor block.
+      - `"G_k1":` The gain factor for the *k_1* factor of MyoSim module.
+    - `"k_on":` The *k_on* constant factor block.
+      - `"G_k_on":` The gain factor for the *k_on* factor of MyoSim module.
+    - `"ca_uptake":` The maximal *SERCA_uptake* current block.
+      - `"G_up":` The gain factor for the maximal *SERCA_uptake* current.
+    - `"G_cal":` The maximal *Ca_current* through the L-type channel.
+      - `"G_gcal":` The gain factor for the maximal *Ca_current* through the L-type channel.
+    - `"c_venous":` The venous compliance factor block.
+      - `"G_c_venous":` The gain factor for the venous compliance factor.
+    - `"r_arteriolar":` The arteriolar resistance factor block.
+      - `"G_r_arteriolar":` The gain factor for the arteriolar resistance factor.
 
 ## perturbations
 
