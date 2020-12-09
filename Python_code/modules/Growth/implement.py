@@ -9,6 +9,52 @@ def update_growth(self,time_step):
     self.number_of_hs = return_number_of_hs(self,time_step)
 
 # stress driven growth
+
+
+def return_lv_wall_volume(self,time_step,cb_force):
+    f = cb_force#self.syscon.mean_active_force
+    f_null = self.cb_force_null#self.cb_stress_null
+
+    #window = self.ma_window
+    """wv_0 = self.wall_volume
+    dwvdt_0 = self.G_wv*(f-f_null)*self.wall_volume
+    wv = dwvdt_0*time_step+wv_0"""
+
+    wv_0 = self.wall_volume
+    self.wv_rate = np.roll(self.wv_rate,-1)
+    dwvdt_0 = self.G_wv*self.wall_volume*(f-f_null)
+    self.wv_rate[-1] = dwvdt_0
+    dwvdt = np.mean(self.wv_rate)
+    wv = dwvdt*time_step+wv_0
+
+    self.wall_volume = wv
+    return self.wall_volume
+
+def return_number_of_hs(self,time_step,pas_force):
+    p = pas_force #self.syscon.mean_passive_force #
+    p_null = self.pas_force_null#self.passive_stress_null
+
+    """n_1 = self.n_of_hs
+    dndt_0 = self.G_n_hs * self.n_of_hs* (p - p_null)
+    n=dndt_0*time_step+n_1"""
+
+    n_1 = self.n_of_hs
+    self.n_hs_rate = np.roll(self.n_hs_rate,-1 )
+    dndt_0 = self.G_n_hs * self.n_of_hs* (p - p_null)
+    self.n_hs_rate[-1] = dndt_0
+    dndt = np.mean(self.n_hs_rate)
+    n=dndt*time_step+n_1
+
+    self.n_of_hs = n
+
+    if self.n_of_hs<=self.min_n_hs:
+        print('too less')
+    if self.n_of_hs>=self.max_n_hs:
+        print('n_hs',self.n_of_hs)
+
+    return self.n_of_hs
+
+
 def return_lv_wall_thickness(self,time_step):
 
     if self.growth["driven_signal"][0] == "stress":
@@ -57,64 +103,21 @@ def return_lv_wall_thickness(self,time_step):
         self.tw = dwdt*time_step + self.tw
 
     return self.tw
-def return_lv_wall_volume(self,time_step):
-    f = self.hs.myof.cb_force
-    f_null = self.cb_stress_null
-
-    #window = self.ma_window
-    wv_0 = self.wall_volume
-    self.wv_rate = np.roll(self.wv_rate,-1)
-    dwvdt_0 = self.G_wv*(f-f_null)*self.wall_volume
-    #self.wv_rate = np.append(self.wv_rate,dwvdt_0)
-    self.wv_rate[-1] = dwvdt_0
-    #dwvdt = np.mean(self.wv_rate[-window:])
-    dwvdt = np.mean(self.wv_rate)
-    wv = dwvdt*time_step+wv_0
-
-    self.wall_volume = wv
-    return self.wall_volume
-def return_number_of_hs(self,time_step):
-    p = self.hs.myof.pas_force
-    p_null = self.passive_stress_null
-
-#    window_null = int(self.start_index/1)
-#    self.pass_array = np.append(self.pass_array,p)
-#    p_null =np.mean(self.pass_array)
-#    self.passive_stress_null = p_null
-
-    window = self.ma_window
-
-    n_1 = self.n_of_hs
-    self.n_hs_rate = np.roll(self.n_hs_rate,-1 )
-    dndt_0 = self.G_n_hs * self.n_of_hs* (p - p_null)
-    #self.n_hs_rate = np.append(self.n_hs_rate,dndt_0)
-    self.n_hs_rate[-1] = dndt_0
-    #dndt = np.mean(self.n_hs_rate[-window:])
-    dndt = np.mean(self.n_hs_rate)
-    n=dndt*time_step+n_1
-    self.n_of_hs = n
-
-    if self.n_of_hs<=self.min_n_hs:
-        print('too less')
-    if self.n_of_hs>=self.max_n_hs:
-        #print('lv vol',lv_volume)
-        print('n_hs',self.n_of_hs)
-
-    return self.n_of_hs
 
 
 def update_data_holder(self,time_step):
 
     self.gr_time = self.gr_time + time_step
     self.data_buffer_index += 1
-    self.gr_data.at[self.data_buffer_index,'pas_force_null'] = self.passive_stress_null
-
+    self.gr_data['pas_force_null'] = \
+        pd.Series(np.full(self.data_buffer_size,self.pas_force_null))
     if self.growth["driven_signal"][0] == "stress":
-        self.gr_data.at[self.data_buffer_index,'cb_force_null'] = self.cb_stress_null
 
+        self.gr_data['cb_force_null'] = \
+            pd.Series(np.full(self.data_buffer_size,self.cb_force_null))
     if self.growth["driven_signal"][0] == "ATPase":
         self.gr_data.at[self.data_buffer_index,'ATPase_null'] = self.ATPase_null
     # 1000 is to convert liter to mili liter
 #    self.gr_data.at[self.data_buffer_index, 'ventricle_wall_thickness'] = self.wall_thickness
     self.gr_data.at[self.data_buffer_index, 'ventricle_wall_volume'] = self.wall_volume
-    self.gr_data.at[self.data_buffer_index, 'number_of_hs'] = self.number_of_hs
+    self.gr_data.at[self.data_buffer_index, 'number_of_hs'] = self.n_of_hs

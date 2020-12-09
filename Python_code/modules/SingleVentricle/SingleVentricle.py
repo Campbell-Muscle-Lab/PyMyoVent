@@ -5,7 +5,6 @@ import pandas as pd
 import cProfile
 import timeit
 from openpyxl import Workbook
-from lxml import etree
 from scipy import signal
 from scipy.integrate import solve_ivp
 from scipy.constants import mmHg as mmHg_in_pascals
@@ -159,6 +158,16 @@ class single_circulation():
         internal_area = 2.0 * np.pi * np.power(internal_r, 2.0)
         self.wall_thickness = 0.001 * self.ventricle_wall_volume /internal_area
 
+        # Baro
+
+        self.syscon=syscon.system_control(self.sys_params,hs_params,self.hs,
+                        circ_params,self.output_buffer_size)
+        self.baro_activation_array = np.full(self.output_buffer_size+1,False)
+        if "baroreceptor" in self.sys_params:
+            self.membrane_kinetic_scheme = hs_params['membranes']['kinetic_scheme'][0]
+            start_index = int(self.sys_params["baroreceptor"]["start_index"][0])
+            self.baro_activation_array[start_index:]=True
+        self.baro_activation = self.baro_activation_array[0]
 
         # Look for growth module
         self.growth_activation_array = np.full(self.output_buffer_size+1,False)
@@ -178,21 +187,13 @@ class single_circulation():
 
             initial_numbers_of_hs = self.n_hs
             self.gr = \
-            gr.growth(growth_params,initial_numbers_of_hs,self.hs,circ_params,
+            gr.growth(growth_params,initial_numbers_of_hs,self.hs,self.syscon,circ_params,
                             self.output_buffer_size)
 
             self.growth_activation_array[start_index:] = True
             self.growth_activation = self.growth_activation_array[0]
 
-        # Baro
-        self.syscon=syscon.system_control(self.sys_params,hs_params,self.hs,
-                        circ_params,self.output_buffer_size)
-        self.baro_activation_array = np.full(self.output_buffer_size+1,False)
-        if "baroreceptor" in self.sys_params:
 
-            start_index = int(self.sys_params["baroreceptor"]["start_index"][0])
-            self.baro_activation_array[start_index:]=True
-        self.baro_activation = self.baro_activation_array[0]
 
         print("hsl: %f" % self.hs.hs_length)
         print("slack hsl: %f" % self.slack_hsl)
@@ -435,8 +436,12 @@ class single_circulation():
                         self.output_parameters["pv_figure"][0],dpi=300)#,[[78.5,79.8],[142.8,143.8]]
 
         if self.baro_activation:
-            syscon.system_control.display_baro_results(self.data,
-                            self.output_parameters["baro_figure"][0],dpi=300)
+            if self.membrane_kinetic_scheme == 'Ten_Tusscher_2004':
+                syscon.system_control.display_baro_results_tt(self.data,
+                                self.output_parameters["baro_figure"][0],dpi=300)
+            elif self.membrane_kinetic_scheme == 'simple_2_compartment':
+                syscon.system_control.display_baro_results(self.data,
+                                self.output_parameters["baro_figure"][0],dpi=300)
             syscon.system_control.display_arterial_pressure(self.data,
                             self.output_parameters["circulatory"][0],dpi=300)
 

@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-def display_baro_results (data_structure, output_file_string="",dpi=None):
+def display_baro_results_tt (data_structure, output_file_string="",dpi=None):
     no_of_rows = 10
     no_of_cols = 1
 
@@ -71,6 +71,88 @@ def display_baro_results (data_structure, output_file_string="",dpi=None):
     ax9.tick_params(labelsize = 10)
     ax9.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax9.set_xlabel('Time (s)', fontsize = 10)
+
+    if (output_file_string):
+        save_figure_to_file(f, output_file_string, dpi)
+
+def display_baro_results (data_structure, output_file_string="",dpi=None):
+    no_of_rows = 12
+    no_of_cols = 1
+
+    f = plt.figure(constrained_layout=True)
+    f.set_size_inches([10, 12])
+    spec2 = gridspec.GridSpec(nrows=no_of_rows, ncols=no_of_cols,
+                              figure=f)
+
+    ax0 = f.add_subplot(spec2[0, 0])
+    ax0.plot('time','pressure_arteries',data=data_structure)
+    #ax1.set_xlabel('time (s)', fontsize = 15)
+    ax0.set_ylabel('$P_a$ $(mm$ $Hg)$', fontsize = 10)
+    ax0.tick_params(labelsize = 10)
+
+    ax1=f.add_subplot(spec2[1,0])
+    ax1.plot('time','MAP',data=data_structure)
+    ax1.set_ylabel('MAP $(mm$ $Hg)$', fontsize = 10)
+    ax1.tick_params(labelsize = 10)
+
+    if(hasattr(data_structure,'baroreceptor_output')):
+        ax2 = f.add_subplot(spec2[2, 0])
+        ax2.plot('time','baroreceptor_output',data=data_structure)
+        ax2.set_ylabel('baroreceptor\noutput\nsignal', fontsize = 10)
+        ax2.tick_params(labelsize = 10)
+
+    ax3 = f.add_subplot(spec2[3, 0])
+    ax3.plot('time','heart_rate',data=data_structure)
+    ax3.set_ylabel('Heart Beat (BPM)', fontsize = 10)
+    ax3.tick_params(labelsize = 10)
+
+    ax4=f.add_subplot(spec2[4,0])
+    ax4.plot('time','k_1',data=data_structure)
+    ax4.set_ylabel('$k_1$ ($s^{-1}$)', fontsize = 10)
+    ax4.tick_params(labelsize = 10)
+
+    ax5=f.add_subplot(spec2[5,0])
+    ax5.plot('time','k_on',data=data_structure)
+    ax5.set_ylabel('$k_{on}$ ($M^{-1}s^{-1}$)', fontsize = 10)
+    ax5.tick_params(labelsize = 10)
+
+    ax6=f.add_subplot(spec2[6,0])
+    ax6.plot('time','k_serca',data=data_structure)
+    ax6.set_ylabel('$k_{serca}$\n (units)', fontsize = 10)
+    ax6.tick_params(labelsize = 10)
+    ax6.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+
+    ax7=f.add_subplot(spec2[7,0])
+    ax7.plot('time','k_act',data=data_structure)
+    ax7.set_ylabel('$k_{act}$\n (units)', fontsize = 10)
+    ax7.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax7.tick_params(labelsize = 10)
+
+    ax8=f.add_subplot(spec2[8,0])
+    ax8.plot('time','k_leak',data=data_structure)
+    ax8.set_ylabel('$k_{leak}$\n (units)', fontsize = 10)
+    ax8.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax8.tick_params(labelsize = 10)
+
+    ax9=f.add_subplot(spec2[9,0])
+    ax9.plot('time','duty_ratio',data=data_structure)
+    ax9.set_ylabel('duty_ratio\n (s)', fontsize = 10)
+    ax9.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax9.tick_params(labelsize = 10)
+
+
+    ax10=f.add_subplot(spec2[10,0])
+    ax10.plot('time','compliance_veins',data=data_structure)
+    ax10.set_ylabel('$C_{venous}$\n ($units$)', fontsize = 10)
+    ax10.tick_params(labelsize = 10)
+    ax10.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+
+    ax11=f.add_subplot(spec2[11,0])
+    ax11.plot('time','resistance_arterioles',data=data_structure)
+    ax11.set_ylabel('$R_{arteriolar}$\n ($units$)', fontsize = 10)
+    ax11.tick_params(labelsize = 10)
+    ax11.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax11.set_xlabel('Time (s)', fontsize = 10)
 
     if (output_file_string):
         save_figure_to_file(f, output_file_string, dpi)

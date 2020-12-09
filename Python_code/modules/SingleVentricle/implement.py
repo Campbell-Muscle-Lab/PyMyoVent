@@ -17,14 +17,23 @@ def implement_time_step(self, time_step, activation,i):
     if self.growth_activation:
             #Calculating null stress for growth module
         if self.growth_activation_array[i-1]==False:
-            self.gr.growth_driver()
-        self.gr.update_growth(time_step)
+            #self.gr.growth_driver()
+            self.gr.cb_force_null = self.syscon.mean_active_force
+            self.gr.pas_force_null = self.syscon.mean_passive_force
+            print('***')
+            print('Growth module is activated!')
+            print('with passive force_null of ',self.gr.pas_force_null)
+            print('and active force_null of',self.gr.cb_force_null)
+            print('***')
 
+#        self.gr.update_growth(time_step,self.ventricle_wall_volume,self.n_hs)
+        self.ventricle_wall_volume = self.gr.return_lv_wall_volume(time_step,self.hs.myof.cb_force)
+        self.n_hs = self.gr.return_number_of_hs(time_step,self.hs.myof.pas_force)
 #        self.wall_thickness = self.gr.wall_thickness
 #        self.ventricle_wall_volume = return_wall_volume(self,self.v[-1])
-        self.ventricle_wall_volume = self.gr.wall_volume
+#        self.ventricle_wall_volume = self.gr.wall_volume
 #        print(self.ventricle_wall_volume)
-        self.n_hs = self.gr.number_of_hs
+#        self.n_hs = self.gr.number_of_hs
 
     if self.growth_activation_array[-1]:
 #        self.ventricle_wall_volume = return_wall_volume(self, self.v[-1])
@@ -61,6 +70,8 @@ def implement_time_step(self, time_step, activation,i):
         arterial_pressure=self.p[1]
 
         self.syscon.update_MAP(arterial_pressure)
+        self.syscon.update_mean_active_force(self.hs.myof.cb_force)
+        self.syscon.update_mean_passive_force(self.hs.myof.pas_force)
         self.syscon.update_baroreceptor(time_step,arterial_pressure)
         if self.baro_activation:
             # Update the heart period
@@ -69,9 +80,15 @@ def implement_time_step(self, time_step, activation,i):
 
             self.hs.myof.k_1,self.hs.myof.k_on = \
             self.syscon.return_contractility(self.hs.myof.k_1,self.hs.myof.k_on,time_step)
+            if self.membrane_kinetic_scheme == 'Ten_Tusscher_2004':
 
-            self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor= \
-            self.syscon.update_ca_transient(self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor,time_step)
+                self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor= \
+                self.syscon.update_ca_tran_tt(self.hs.membr.Ca_Vmax_up_factor,self.hs.membr.g_CaL_factor,time_step)
+
+            elif self.membrane_kinetic_scheme == 'simple_2_compartment':
+                self.hs.membr.k_serca, self.hs.membr.k_act, self.hs.membr.k_leak = \
+                    self.syscon.updat_ca_tran_two_compartment(self.hs.membr.k_serca,self.hs.membr.k_act, \
+                    self.hs.membr.k_leak,self.syscon.duty_ratio,time_step)
 
             self.compliance[-2] = self.syscon.return_venous_compliance(self.compliance[-2],time_step)
             self.resistance [2] = self.syscon.return_arteriolar_resistance(self.resistance [2],time_step)
