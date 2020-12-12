@@ -29,7 +29,6 @@ class myofilaments():
         self.x = np.arange(self.bin_min, self.bin_max+self.bin_width,
                            self.bin_width)
         self.no_of_x_bins = np.size(self.x)
-        print(self.x)
 
         self.thick_filament_length = \
             float(myofil_params["thick_filament_length"][0])
@@ -48,6 +47,25 @@ class myofilaments():
             self.k_3 = float(myofil_params["k_3"][0])
             self.k_4_0 = float(myofil_params["k_4_0"][0])
             self.k_4_1 = float(myofil_params["k_4_1"][0])
+            self.k_cb = float(myofil_params["k_cb"][0])
+            self.x_ps = float(myofil_params["x_ps"][0])
+
+            self.y_length = self.no_of_x_bins + 4
+            self.y = np.zeros(self.y_length)
+            # Start with all myosins in M1 and all binding sites off
+            self.y[0] = 1.0
+            self.y[-2] = 1.0
+            self.r4 = self.k_4_0 + (self.k_4_1 * np.power(self.x, 4))
+
+        if (self.kinetic_scheme == '3state_with_SRX_and_exp_J4'):
+
+            self.k_1 = float(myofil_params["k_1"][0])
+            self.k_force = float(myofil_params["k_force"][0])
+            self.k_2 = float(myofil_params["k_2"][0])
+            self.k_3 = float(myofil_params["k_3"][0])
+            self.k_4_0 = float(myofil_params["k_4_0"][0])
+            self.k_4_1 = float(myofil_params["k_4_1"][0])
+            self.exp_delta = float(myofil_params["exp_delta"][0])
             self.k_cb = float(myofil_params["k_cb"][0])
             self.x_ps = float(myofil_params["x_ps"][0])
 

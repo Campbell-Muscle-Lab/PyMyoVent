@@ -852,13 +852,13 @@ def plot_Ca(voi,states):
     print("Saving Ca_states figure to")
     save_figure_to_file(f, "TT_Ca_states", dpi=None)
 
-def display_Ca(data):
+def display_Ca(voi,states):
     from matplotlib import pyplot as plt
     import matplotlib.gridspec as gridspec
     import numpy as np
     f=plt.figure(1,constrained_layout=True)
     f.set_size_inches([15,6])
-    plt.plot("time", "Ca",data=data, label = 'Ca')
+    plt.plot(voi,states[3],label='Ca transient')
     plt.xlabel("time (ms)")
     plt.ylabel('Ca [mM]')
     plt.legend(bbox_to_anchor=(1.05, 1),loc = 'best')
@@ -1007,11 +1007,20 @@ def display_states(voi,states):
 
 
 if __name__ == "__main__":
-    no_of_time_points = 300000
+    no_of_time_points = 2000
     activation_array=activation(no_of_time_points)
     (voi, states, algebraic) = solve_model(no_of_time_points)
     #data = solve_model(no_of_time_points)
 #    display_Ca(data)
     #plot_Ca(voi, states)
-    display_states(voi, states)
+    #display_states(voi, states)
+    display_Ca(voi, states)
+    import os
+
+    cwd=os.getcwd()
+    data = pd.DataFrame({'time':voi,'Ca_transient_tt':states[3]})
+    
+    fname = 'ca_trans_tt_data'
+    filename = cwd + "/"+fname+".csv"
+    data.to_csv(filename)
 #    plot_model(voi, states, algebraic)

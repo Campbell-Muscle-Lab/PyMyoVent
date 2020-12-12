@@ -16,6 +16,7 @@ class system_control():
         self.sys_params = sys_params
         self.hs = hs_class
 
+
         # simulation params
         sim_temp = sys_params["simulation"]
 
@@ -24,6 +25,28 @@ class system_control():
         self.dt = float(sim_temp["time_step"][0])
         self.no_of_time_points = int(sim_temp["no_of_time_points"][0])
 
+        self.T_systole = self.duty_ratio
+        self.counter_systole = int(self.T_systole/self.dt)
+        self.T_diastole = self.T-self.T_systole
+        self.counter_diastole = int(self.T_diastole/self.dt)
+
+        # MAP
+        self.MAP_memory = int(self.T/self.dt)
+        self.pressure_arteries_array = np.zeros(self.MAP_memory)
+        self.MAP_counter = self.counter_diastole
+        self.MAP = 0
+        # Mean sarcomere force
+        # 1) Active force
+        self.mean_active_force_memory = int(self.T/self.dt)
+        self.active_force_array = np.zeros(self.mean_active_force_memory)
+        self.mean_active_force_counter = self.counter_diastole
+        self.mean_active_force = 0
+        # 2) Passive force
+        self.mean_passive_force_memory = int(self.T/self.dt)
+        self.passive_force_array = np.zeros(self.mean_passive_force_memory)
+        self.mean_passive_force_counter = self.counter_diastole
+        self.mean_passive_force = 0
+
         if "baroreceptor" in sys_params:
 
             # baroreceptor params
@@ -31,30 +54,11 @@ class system_control():
             self.start_index = int(baro_temp["start_index"][0])
             memory = int(baro_temp["N_t"][0])
             #Activation function
-            self.T_systole = self.duty_ratio
-            self.T_diastole = self.T-self.T_systole
-            self.counter_diastole = int(self.T_diastole/self.dt)
-            self.counter_systole = int(self.T_systole/self.dt)
             self.baroreceptor_counter = self.counter_diastole
             self.T_counter = self.counter_diastole
             self.cardiac_cycle_counter = 0
             self.activation_level = 0.0
-            # MAP
-            self.MAP_memory = int(self.T/self.dt)
-            self.pressure_arteries_array = np.zeros(self.MAP_memory)
-            self.MAP_counter = self.T_counter
-            self.MAP = 0
-            # Mean sarcomere force
-            # 1) Active force
-            self.mean_active_force_memory = int(self.T/self.dt)
-            self.active_force_array = np.zeros(self.mean_active_force_memory)
-            self.mean_active_force_counter = self.T_counter
-            self.mean_active_force = 0
-            # 2) Passive force
-            self.mean_passive_force_memory = int(self.T/self.dt)
-            self.passive_force_array = np.zeros(self.mean_passive_force_memory)
-            self.mean_passive_force_counter = self.T_counter
-            self.mean_passive_force = 0
+
 
             # afferent pathway (baroreceptor control)
             self.b_max = float(baro_temp["afferent"]["b_max"][0])
@@ -157,6 +161,8 @@ class system_control():
                                             np.zeros(self.data_buffer_size),
                                             'mean_passive_force':
                                             np.zeros(self.data_buffer_size)})
+
+
 
         if "baroreceptor" in sys_params:
 

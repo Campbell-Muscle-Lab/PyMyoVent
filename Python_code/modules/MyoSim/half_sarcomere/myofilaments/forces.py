@@ -18,7 +18,7 @@ def check_myofilament_forces(self, delta_hsl):
 
 
 def return_cb_force(self, delta_hsl):
-    if (self.kinetic_scheme == '3state_with_SRX'):
+    if (self.kinetic_scheme == '3state_with_SRX' or self.kinetic_scheme == '3state_with_SRX_and_exp_J4'):
         bin_pops = self.y[2 + np.arange(0, self.no_of_x_bins)]
         cb_force = \
             self.parent_hs.cb_number_density * \
@@ -52,11 +52,10 @@ def return_passive_force(self, delta_hsl):
 
 
 def return_hs_length_for_force(self, force):
-    
+
     def f(dx):
         d = check_myofilament_forces(self, dx)
         return d['total_force']
-    
+
     sol = opt.brentq(f,-1000, 1000)
     return self.parent_hs.hs_length + sol
-

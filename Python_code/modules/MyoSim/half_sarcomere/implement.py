@@ -40,7 +40,7 @@ def update_data_holder(self, dt, activation):
     self.hs_data.at[self.data_buffer_index, 'cb_force'] = self.myof.cb_force
     self.hs_data.at[self.data_buffer_index, 'pas_force'] = self.myof.pas_force
 
-    if (self.myof.kinetic_scheme == '3state_with_SRX'):
+    if (self.myof.kinetic_scheme == '3state_with_SRX' or self.myof.kinetic_scheme == '3state_with_SRX_and_exp_J4'):
         self.hs_data.at[self.data_buffer_index, 'M_OFF'] = \
             self.myof.y[0]
         self.hs_data.at[self.data_buffer_index, 'M_ON'] = \

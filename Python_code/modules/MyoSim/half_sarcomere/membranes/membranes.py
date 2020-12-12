@@ -87,7 +87,7 @@ class membranes():
             sol = solve_ivp(derivs, [0, time_step], y, method = 'RK23')
             self.y = sol.y[:, -1]
             self.myofilament_Ca_conc = self.y[0]
-
+            
         if (self.kinetic_scheme == "Ten_Tusscher_2004"):
 
             membrane_factors = dict();

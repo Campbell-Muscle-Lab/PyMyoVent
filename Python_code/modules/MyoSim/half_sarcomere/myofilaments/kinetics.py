@@ -37,6 +37,64 @@ def return_fluxes(self, y, Ca_conc):
         r4 = self.k_4_0 + (self.k_4_1 * np.power(self.x, 4))
         r4[r4 > self.parent_hs.max_rate] = self.parent_hs.max_rate
         J4 = r4 * M_bound
+
+        if (self.n_overlap > 0.0):
+            Jon = (self.k_on * Ca_conc * (self.n_overlap - n_on) *
+                (1.0 + self.k_coop * (n_on / self.n_overlap)))
+        else:
+            Jon = 0.0
+
+        if (self.n_overlap > 0.0):
+            Joff = self.k_off * (n_on - n_bound) * \
+                (1.0 + self.k_coop * ((self.n_overlap - n_on) /
+                                      self.n_overlap))
+        else:
+            Joff = 0.0
+
+        fluxes = dict()
+        fluxes['J1'] = J1
+        fluxes['J2'] = J2
+        fluxes['J3'] = J3
+        fluxes['J4'] = J4
+        fluxes['Jon'] = Jon
+        fluxes['Joff'] = Joff
+
+        return fluxes
+
+    elif (self.kinetic_scheme == '3state_with_SRX_and_exp_J4'):
+        # Unpack
+        M_OFF = y[0]
+        M_ON = y[1]
+        M_bound = y[2 + np.arange(self.no_of_x_bins)]
+        n_off = y[-2]
+        n_on = y[-1]
+        n_bound = np.sum(M_bound)
+
+        r1 = np.minimum(self.parent_hs.max_rate,
+                        self.k_1 *(1.0 + self.k_force * self.parent_hs.hs_force))
+        J1 = r1 * M_OFF
+
+        r2 = np.minimum(self.parent_hs.max_rate, self.k_2)
+        J2 = r2 * M_ON
+
+        r3 = self.k_3 * \
+                np.exp(-self.k_cb * (self.x**2) /
+                    (2.0 * 1e18 * scipy_constants.Boltzmann * self.parent_hs.temperature))
+        r3[r3 > self.parent_hs.max_rate] = self.parent_hs.max_rate
+        J3 = r3 * self.bin_width * M_ON * (n_on - n_bound)
+
+        # imply other detachment mode if existed
+        r4 = self.k_4_0 * \
+                np.exp(-self.k_cb * self.x * self.exp_delta /
+                        (2.0 * 1e18 * scipy_constants.Boltzmann * self.parent_hs.temperature))
+
+        # determine what indicies are for |x| > 8 nm
+        indicies = np.where(np.abs(self.x)>8)
+        r4[indicies] = r4[indicies] + (np.abs(self.x[indicies])- 8)*self.parent_hs.max_rate
+
+        #r4[r4 > self.parent_hs.max_rate] = self.parent_hs.max_rate
+        J4 = r4 * M_bound
+
         if (self.n_overlap > 0.0):
             Jon = (self.k_on * Ca_conc * (self.n_overlap - n_on) *
                 (1.0 + self.k_coop * (n_on / self.n_overlap)))

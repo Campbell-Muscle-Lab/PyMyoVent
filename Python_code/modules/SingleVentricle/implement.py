@@ -65,13 +65,13 @@ def implement_time_step(self, time_step, activation,i):
 
     "New section added by HS"
 
+    arterial_pressure=self.p[1]
+    self.syscon.update_MAP(arterial_pressure)
+    self.syscon.update_mean_active_force(self.hs.myof.cb_force)
+    self.syscon.update_mean_passive_force(self.hs.myof.pas_force)
+
     if self.baro_activation_array[-1]:
 
-        arterial_pressure=self.p[1]
-
-        self.syscon.update_MAP(arterial_pressure)
-        self.syscon.update_mean_active_force(self.hs.myof.cb_force)
-        self.syscon.update_mean_passive_force(self.hs.myof.pas_force)
         self.syscon.update_baroreceptor(time_step,arterial_pressure)
         if self.baro_activation:
             # Update the heart period
@@ -166,8 +166,9 @@ def update_data_holders(self, time_step, activation):
     # Now update data structure for half_sarcomere
     self.hs.update_data_holder(time_step, activation)
     #if self.baro_scheme == "simple_baroreceptor":
-    if self.baro_activation_array[-1]:
-        self.syscon.update_data_holder(time_step)
+    self.syscon.update_data_holder(time_step)
+    #if self.baro_activation_array[-1]:
+    #    self.syscon.update_data_holder(time_step)
 
     if self.growth_activation:
         self.gr.update_data_holder(time_step)
