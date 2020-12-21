@@ -1,0 +1,6 @@
+{
+  "protocol":{
+    "no_of_time_points": 10000,
+    "time_step": 0.001
+  }
+}

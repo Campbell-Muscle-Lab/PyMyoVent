@@ -1,0 +1,13 @@
+{
+    "PyMyoVent_batch":
+    {
+        "job":
+        [
+            {
+                "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model.json",
+                "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol.json",
+                "output_structure_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_files.json"
+            }
+        ]
+    }
+}

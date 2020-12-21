@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 """
 Created on Sun Oct 20 15:04:38 2019
 
@@ -6,116 +6,129 @@ Created on Sun Oct 20 15:04:38 2019
 """
 
 import sys
-import os
 import json
-import numpy as np
 
-#from modules.SingleVentricle.driver import return_sim_struct_from_xml_file, \
-#    run_simulation_from_xml_file, run_simulation_from_json_file
-from modules.SingleVentricle.SingleVentricle import single_circulation as sc
-#from analysis.multi_threads import run_multi_processing
+from single_ventricle_circulation import single_ventricle_circulation as svc
 
-if __name__ == "__main__":
-
+def PyMyoVent():
     # Get the number of arguments
     no_of_arguments = len(sys.argv)
 
     # Switch depending on number of arguments
     if (no_of_arguments == 1):
-        print('PyMyoVent called with no inputs')
+        run_batch('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/batch.json')
 
-    if (no_of_arguments == 2):
-        if (sys.argv[1] == 'run_default_model'):
-            print('Running default model')
+def run_batch(batch_json_file_string):
+    
+    if (batch_json_file_string==[]):
+        print('No batch file specified. Exiting')
+        return
+    
+    with open(batch_json_file_string,'r') as bf:
+        batch_data = json.load(bf)
+        jobs = batch_data['PyMyoVent_batch']['job']
+        for job in jobs:
+            svc_object = svc.single_ventricle_circulation(job['model_file_string'])
+            svc_object.run_simulation(
+                protocol_file_string = job['protocol_file_string'],
+                output_structure_file_string = job['output_structure_file_string'])
 
-            json_file_strings = '..\demo_files\getting_started\getting_started_model.json'
+if __name__ == "__main__":
+    PyMyoVent()
+    
 
-            with open(json_file_strings,'r') as f:
-                json_input_data = json.load(f)
+    # if (no_of_arguments == 2):
+    #     if (sys.argv[1] == 'run_default_model'):
+    #         print('Running default model')
 
-            output_temp =\
-             json_input_data['output_parameters']['input_file'][0]
+    #         json_file_strings = '..\demo_files\getting_started\getting_started_model.json'
 
-            # Check directory exists and save image file
-            dir_path = os.path.dirname(output_temp)
-            if not os.path.isdir(dir_path):
-                os.makedirs(dir_path)
-                print('Saving inputs to to %s' % output_temp)
+    #         with open(json_file_strings,'r') as f:
+    #             json_input_data = json.load(f)
 
-            with open(json_file_strings,'r') as f,open(output_temp,'w') as fo:
-                fo.write(f.read())
+    #         output_temp =\
+    #          json_input_data['output_parameters']['input_file'][0]
 
-            sim_object = sc(json_input_data)
-            sim_object.run_simulation()
+    #         # Check directory exists and save image file
+    #         dir_path = os.path.dirname(output_temp)
+    #         if not os.path.isdir(dir_path):
+    #             os.makedirs(dir_path)
+    #             print('Saving inputs to to %s' % output_temp)
+
+    #         with open(json_file_strings,'r') as f,open(output_temp,'w') as fo:
+    #             fo.write(f.read())
+
+    #         sim_object = sc(json_input_data)
+    #         sim_object.run_simulation()
 
 
-    if (no_of_arguments == 3):
-        if (sys.argv[1] == 'run_defined_model'):
+    # if (no_of_arguments == 3):
+    #     if (sys.argv[1] == 'run_defined_model'):
 
-            print('Running model %s' % sys.argv[2])
+    #         print('Running model %s' % sys.argv[2])
 
-            json_file_strings = sys.argv[2]
-            with open(json_file_strings,'r') as f:
-                json_input_data = json.load(f)
+    #         json_file_strings = sys.argv[2]
+    #         with open(json_file_strings,'r') as f:
+    #             json_input_data = json.load(f)
 
-            output_temp =\
-             json_input_data['output_parameters']['input_file'][0]
+    #         output_temp =\
+    #          json_input_data['output_parameters']['input_file'][0]
 
-            # Check directory exists and save image file
-            dir_path = os.path.dirname(output_temp)
-            if not os.path.isdir(dir_path):
-                os.makedirs(dir_path)
-                print('Saving inputs to to %s' % output_temp)
+    #         # Check directory exists and save image file
+    #         dir_path = os.path.dirname(output_temp)
+    #         if not os.path.isdir(dir_path):
+    #             os.makedirs(dir_path)
+    #             print('Saving inputs to to %s' % output_temp)
 
-            with open(json_file_strings,'r') as f,open(output_temp,'w') as fo:
-                fo.write(f.read())
+    #         with open(json_file_strings,'r') as f,open(output_temp,'w') as fo:
+    #             fo.write(f.read())
 
-            sim_object = sc(json_input_data)
-            sim_object.run_simulation()
+    #         sim_object = sc(json_input_data)
+    #         sim_object.run_simulation()
 
-        if (sys.argv[1] == 'run_multi_threads'):
-            import nested_lookup as nl
+    #     if (sys.argv[1] == 'run_multi_threads'):
+    #         import nested_lookup as nl
 
-            print('Running mmodel %s' % sys.argv[2])
+    #         print('Running mmodel %s' % sys.argv[2])
 
-            json_file_strings = sys.argv[2]
-            with open(json_file_strings,'r') as f:
-                json_input_data = json.load(f)
+    #         json_file_strings = sys.argv[2]
+    #         with open(json_file_strings,'r') as f:
+    #             json_input_data = json.load(f)
 
-            #run_multi_threads(json_input_data)
-            #return_input_data(json_input_data)
-            run_multi_processing(json_input_data)
+    #         #run_multi_threads(json_input_data)
+    #         #return_input_data(json_input_data)
+    #         run_multi_processing(json_input_data)
 
-        if (sys.argv[1] == 'run_batch_file'):
+    #     if (sys.argv[1] == 'run_batch_file'):
 
-            print('Running model %s' % sys.argv[2])
+    #         print('Running model %s' % sys.argv[2])
 
-            batch_file_string = sys.argv[2]
-            with open(batch_file_string,'r') as f:
-                batch_input_data = json.load(f)
+    #         batch_file_string = sys.argv[2]
+    #         with open(batch_file_string,'r') as f:
+    #             batch_input_data = json.load(f)
 
-            input_path_array = np.array(list(batch_input_data["input_path"].values()))
-            number_of_data_points = len(input_path_array)
+    #         input_path_array = np.array(list(batch_input_data["input_path"].values()))
+    #         number_of_data_points = len(input_path_array)
 
-            for i in range(number_of_data_points):
+    #         for i in range(number_of_data_points):
 
-                json_file_path = input_path_array[i][0]
-                print(json_file_path)
+    #             json_file_path = input_path_array[i][0]
+    #             print(json_file_path)
 
-                with open(json_file_path,'r') as f:
-                    json_data = json.load(f)
+    #             with open(json_file_path,'r') as f:
+    #                 json_data = json.load(f)
 
-                output_temp =\
-                    json_data['output_parameters']['input_file'][0]
+    #             output_temp =\
+    #                 json_data['output_parameters']['input_file'][0]
 
-                # Check directory exists and save image file
-                dir_path = os.path.dirname(output_temp)
-                if not os.path.isdir(dir_path):
-                    os.makedirs(dir_path)
-                    print('Saving inputs to to %s' % output_temp)
+    #             # Check directory exists and save image file
+    #             dir_path = os.path.dirname(output_temp)
+    #             if not os.path.isdir(dir_path):
+    #                 os.makedirs(dir_path)
+    #                 print('Saving inputs to to %s' % output_temp)
 
-                with open(json_file_path,'r') as f,open(output_temp,'w') as fo:
-                        fo.write(f.read())
+    #             with open(json_file_path,'r') as f,open(output_temp,'w') as fo:
+    #                     fo.write(f.read())
 
-                sim_object = sc(json_data)
-                sim_object.run_simulation()
+    #             sim_object = sc(json_data)
+    #             sim_object.run_simulation()

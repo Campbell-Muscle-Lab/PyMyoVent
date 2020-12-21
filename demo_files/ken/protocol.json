@@ -1,0 +1,15 @@
+{
+  "protocol":{
+    "no_of_time_points": 100,
+    "time_step": 0.001
+  },
+  "perturbation":
+  [
+    {
+      "variable": "blood_volume",
+      "t_start_s": 10,
+      "t_stop_s": 11,
+      "total_change": 1
+    }
+  ]
+}

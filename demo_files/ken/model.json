@@ -1,0 +1,81 @@
+{
+    "circulation":{
+        "no_of_compartments": 7,
+        "body_surface_area": 1.9,
+        "blood_volume": 5,
+        "aorta":{
+            "resistance": 40,
+            "compliance": 0.0004
+     },
+        "arteries":{
+            "resistance": 80,
+            "compliance": 0.0009
+        },
+        "arterioles":{
+            "resistance": 400,
+            "compliance": 0.005
+        },
+        "capillaries":{
+            "resistance": 340,
+            "compliance": 0.03
+        },
+        "venules":{
+            "resistance": 400,
+            "compliance": 0.06
+        },
+        "veins":{
+            "resistance": 330,
+            "compliance": 0.5
+        },
+        "ventricle":{
+            "inter_beat_interval": 1,
+            "resistance": 10,
+            "wall_volume": 0.1,
+            "slack_volume": 0.08,
+            "wall_density": 1055
+        }
+    },
+    "half_sarcomere":{
+        
+        "initial_hs_length": 900,
+        "reference_hs_length": 1100,
+        "myofilaments":{
+            "kinetic_scheme": "3state_with_SRX",
+            "max_rate": 5000,
+            "temperature": 310,
+            "cb_number_density": 6.9e16,
+            "k_1": 2,
+            "k_force": 0.6e-3,
+            "k_2": 200,
+            "k_3": 100,
+            "k_4_0": 200,
+            "k_4_1": 0.3,
+            "k_cb": 0.001,
+            "x_ps": 5,
+            "k_on": 5e8,
+            "k_off": 200,
+            "k_coop": 5,
+            "bin_min": -10,
+            "bin_max": 10,
+            "bin_width": 1,
+            "filament_compliance_factor": 0.5,
+            "thick_filament_length": 815,
+            "thin_filament_length": 1120,
+            "bare_zone_length": 80,
+            "k_falloff": 0.0024,
+            "passive_mode": "exponential",
+            "passive_exp_sigma": 300,
+            "passive_exp_L": 80,
+            "passive_l_slack": 900,
+            "delta_energy": 70
+        },
+        "membranes": {
+            "kinetic_scheme": "simple_2_compartment",
+            "Ca_content": 1e-3,
+            "k_leak": 2e-3,
+            "k_act": 5e-2,
+            "k_serca": 10.0,
+            "t_open": 0.3
+        }
+    }
+}
