@@ -77,9 +77,7 @@ def multi_panel_from_flat_data(
     formatting = default_formatting()
     if ('formatting' in template_data):
         for entry in template_data['formatting']:
-            print(entry)
             formatting[entry] = template_data['formatting'][entry]
-    print(formatting)
     
     # Pull default processing
     processing = default_processing()

@@ -129,10 +129,6 @@ class single_ventricle_circulation():
 
         # Set the time
         self.data['time'] = 0
-        
-        # Display
-        print("Displaying initial circulation data")
-        print(self.data)
    
     def create_data_structure(self):
         """ creates a data frame from the data dicts of each component """
@@ -149,9 +145,7 @@ class single_ventricle_circulation():
         for f in data_fields: 
             s = pd.Series(data=z, name=f)
             self.sim_data = pd.concat([self.sim_data, s], axis=1)
-       
-        print(data_fields)
-        return
+
 
     def run_simulation(self,
                        protocol_file_string=[],
@@ -180,9 +174,6 @@ class single_ventricle_circulation():
         # 
         self.oh = oh.output_handler(output_handler_file_string,
                                     self.sim_data)
-
-        print('Single_ventricle_circulation data fields:')
-        print(self.sim_data)
 
     
     def implement_time_step(self, time_step):
