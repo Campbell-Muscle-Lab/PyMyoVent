@@ -6,6 +6,7 @@ from scipy.constants import mmHg as mmHg_in_pascals
 
 def implement_time_step(self, time_step, activation,i):
     """ Steps circulatory system forward in time """
+    
     # Update the half-sarcomere
     self.hs.update_simulation(time_step, 0.0, activation, 1)
     #sol = solve_ivp(self.derivs, [0, time_step], self.v)

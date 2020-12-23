@@ -27,109 +27,101 @@ class membranes():
         for p in params:
             self.model[p] = membrane_struct[p]
 
-        # Set up the rates and the y vector which are kinetics specific
-        if (self.model['kinetic_scheme'] == "simple_2_compartment"):
-            self.y = np.zeros(2)
-            self.y[1] = self.model['Ca_content']
-            self.myofilament_Ca_conc = self.y[0]
+        # Create structures to store data. These will be filled
+        # by model appropriate fields and values
+        self.data = dict()
+        self.flux_fields = []
+        self.y = []
+        
+        # Model specific setup
+        if (self.model['kinetic_scheme'] == 'simple_2_compartment'):
+            self.set_up_simple_2_compartment()
 
-        # if (self.kinetic_scheme == "Ten_Tusscher_2004"):
-        #     # Adjust membrane factors
-        #     temp = membrane_params["Ten_Tusscher_2004"]
+    def implement_time_step(self, time_step, activation):
+        """ Evolve kinetics and then update data """
+        self.evolve_kinetics(time_step, activation)
+        self.update_data()
 
+    def set_up_simple_2_compartment(self):
+       # Set up data fields
+        data_fields = ['membrane_activation', 'Ca_cytosol', 'Ca_SR', 't_act_left']
+        self.flux_fields = ['J_release', 'J_uptake']
+        data_fields = data_fields + self.flux_fields
+    
+        # Initialise the y vector
+        self.y_length = 2
+        self.y = np.zeros(self.y_length)
+        # Start with Ca in SR
+        self.y[1] = self.model['Ca_content']
 
-        #     self.g_to_factor = float(temp["g_to_factor"][0]) #const 20
-        #     self.g_Kr_factor = float(temp["g_Kr_factor"][0]) #const 14
-        #     self.g_Ks_factor = float(temp["g_Ks_factor"][0]) #const 15
-        #     self.Ca_a_rel_factor = float(temp["Ca_a_rel_factor"][0]) #const 34
-        #     self.Ca_V_leak_factor = float(temp["Ca_V_leak_factor"][0]) #const 38
-        #     self.Ca_Vmax_up_factor = float(temp["Ca_Vmax_up_factor"][0]) #const 39
-        #     self.g_CaL_factor = float(temp["g_CaL_factor"][0]) #const 18
-
-        #     membrane_factors = dict();
-        #     membrane_factors['g_to'] = self.g_to_factor #const 20
-        #     membrane_factors['g_Kr'] = self.g_Kr_factor #const 14
-        #     membrane_factors['g_Ks'] = self.g_Ks_factor #const 15
-        #     membrane_factors['Ca_a_rel'] = self.Ca_a_rel_factor #const 34
-        #     membrane_factors['Ca_V_leak'] = self.Ca_V_leak_factor #const 38
-        #     membrane_factors['Ca_Vmax_up'] = self.Ca_Vmax_up_factor #const 39
-        #     membrane_factors['g_CaL'] = self.g_CaL_factor #const 18
-        #     (self.y, self.constants) = \
-        #         tt_initConsts_with_adjustments(membrane_factors)
-
-        #     # Ten_Tusscher model assumese Ca_conc is in mM
-        #     self.myofilament_Ca_conc = 0.001*self.y[3]
-
-        # if (self.kinetic_scheme=="Shannon_Bers_2004"):
-
-        #     (self.y, self.constants) = sb_initConsts()
-        #     self.myofilament_Ca_conc = 0.001*self.y[32]
-
-        # if (self.kinetic_scheme=="Grandi_2009"):
-        #     (self.y, self.constants)=g_initConsts()
-
+        # Initialise the data dict        
+        for f in data_fields:
+            self.data[f] = 0
+        self.fluxes = dict()
+        for f in self.flux_fields:
+            self.fluxes[f] = 0
+        self.update_data()
+        
+    def update_data(self):
+        # Update model dict for reporting back to half_sarcomere
+        
+        if (self.model['kinetic_scheme'] == 'simple_2_compartment'):
+            self.data['Ca_cytosol'] = self.y[0]
+            self.data['Ca_SR'] = self.y[1]
+            
+            for f in self.flux_fields:
+                self.data[f] = self.fluxes[f] 
+                
     def evolve_kinetics(self, time_step, activation):
         """ evolves kinetics """
 
-        if (self.kinetic_scheme == "simple_2_compartment"):
+        if (self.model['kinetic_scheme'] == "simple_2_compartment"):
             # Pull out the v vector
             y = self.y
 
+            if (activation > 0):
+                self.data['t_act_left'] = self.model['t_open']
+
             def derivs(t, y):
+                fluxes = self.return_fluxes(y)
                 dy = np.zeros(np.size(y))
-                dy[0] = (self.model['k_leak'] + 
-                         activation * self.model['k_act']) * y[1] - \
-                        self.model['k_serca'] * y[0]
+                dy[0] = fluxes['J_release'] - fluxes['J_uptake']
                 dy[1] = -dy[0]
+                
                 return dy
 
             # Evolve
             sol = solve_ivp(derivs, [0, time_step], y, method = 'RK23')
             self.y = sol.y[:, -1]
-            self.myofilament_Ca_conc = self.y[0]
+            
+            # Decrement t_act_left
+            self.data['t_act_left'] = self.data['t_act_left'] - time_step
+            if (self.data['t_act_left'] < 0):
+                self.data['t_act_left'] = 0
+                
+            # Update activation
+            self.data['membrane_activation'] = activation
+       
+            
+    def return_fluxes(self, y):
+        """ Return fluxes """
+        
+        if (self.model['kinetic_scheme'] == 'simple_2_compartment'):
+            
+            Ca_cytosol = y[0]
+            Ca_SR = y[1]
+            
+            if (self.data['t_act_left'] > 0):
+                act = 1
+            else:
+                act = 0;
+            
+            J_release = ((self.model['k_leak'] +
+                         (act * self.model['k_act'])) * Ca_SR)
+            J_uptake = self.model['k_serca'] * Ca_cytosol
 
-#         if (self.kinetic_scheme == "Ten_Tusscher_2004"):
-
-#             membrane_factors = dict();
-#             membrane_factors['g_to'] = self.g_to_factor #const 20
-#             membrane_factors['g_Kr'] = self.g_Kr_factor #const 14
-#             membrane_factors['g_Ks'] = self.g_Ks_factor #const 15
-#             membrane_factors['Ca_a_rel'] = self.Ca_a_rel_factor #const 34
-#             membrane_factors['Ca_V_leak'] = self.Ca_V_leak_factor #const 38
-#             membrane_factors['Ca_Vmax_up'] = self.Ca_Vmax_up_factor #const 39
-#             membrane_factors['g_CaL'] = self.g_CaL_factor #const 18
-#             (initstates, self.constants) = \
-#                 tt_initConsts_with_adjustments(membrane_factors)
-
-#             # Ten_Tusscher model assumes time step is in ms
-#             sol = solve_ivp(partial(tt_computeRates_with_activation,
-#                                     constants=self.constants,
-#                                     activation=activation),
-#                             [0, 1000*time_step], self.y,
-#                             method='BDF')
-# #            sol = solve_ivp(partial(tt_computeRatesonly,constants=self.constants,activation=activation),
-# #                            [0, 1000*time_step], self.y,
-# #                            method='BDF')
-#             self.y = sol.y[:, -1]
-#             # Ten_Tusscher model assumese Ca_conc is in mM
-# #            self.myofilament_Ca_conc = 0.001*self.y[3]
-#             self.myofilament_Ca_conc = 0.001*self.y[3]
-#         if (self.kinetic_scheme=="Shannon_Bers_2004"):
-
-#             sol=solve_ivp(partial(sb_computeRates,
-#                                     constants=self.constants,activation=activation),\
-#                                     [0, 1000*time_step], self.y,
-#                                     method='BDF')
-#             self.y = sol.y[:, -1]
-#             # Shannon model assumese Ca_conc is in mM
-#             self.myofilament_Ca_conc = 0.001*self.y[32]
-
-#         if (self.kinetic_scheme=="Grandi_2009"):
-#             sol=solve_ivp(partial(g_computeRates,
-#                                     constants=self.constants,activation=activation),\
-#                                     [0, 1000*time_step], self.y,
-#                                     method='BDF')
-#             #(self.voi, self.states, self.algebraic) = sb_solve_system()
-#             self.y = sol.y[:, -1]
-#             # Grandi model assumese Ca_conc is in mM
-#             self.myofilament_Ca_conc = 0.001*self.y[32]
+            fluxes = dict()
+            fluxes['J_release'] = J_release
+            fluxes['J_uptake'] = J_uptake
+            
+            return fluxes

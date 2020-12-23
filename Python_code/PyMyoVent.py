@@ -31,7 +31,7 @@ def run_batch(batch_json_file_string):
             svc_object = svc.single_ventricle_circulation(job['model_file_string'])
             svc_object.run_simulation(
                 protocol_file_string = job['protocol_file_string'],
-                output_structure_file_string = job['output_structure_file_string'])
+                output_handler_file_string = job['output_handler_file_string'])
 
 if __name__ == "__main__":
     PyMyoVent()

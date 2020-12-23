@@ -1,0 +1,6 @@
+{
+  "output_files":{
+    "simulation_output_file_string": "../temp/output_ken.csv",
+    "summary_image": "../temp/summary_image.png"
+  }
+}

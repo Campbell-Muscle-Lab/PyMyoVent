@@ -1,0 +1,107 @@
+{
+    "layout":
+    {
+        "fig_width": 7
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)"
+    },
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Activation",
+                "series":
+                [
+                    {
+                        "field": "membrane_activation"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Ca (uM)",
+                "series":
+                [
+                    {
+                        "field": "Ca_cytosol",
+                        "scaling_factor": 1e6
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Force\n(kN m^-2)",
+                "series":
+                [
+                    {
+                        "field": "hs_force",
+                        "field_label": "Total",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "pas_force",
+                        "field_label": "Passive",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "cb_force",
+                        "field_label": "Cross-bridge",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Thin\nfilament",
+                "series":
+                [
+                    {
+                        "field": "n_on",
+                        "field_label": "N_{on}"
+                    },
+                    {
+                        "field": "n_off",
+                        "field_label": "N_{off}"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Thick\nfilament",
+                "series":
+                [
+                    {
+                        "field": "M_SRX",
+                        "field_label": "M_{SRX}"
+                    },
+                    {
+                        "field": "M_DRX",
+                        "field_label": "M_{DRX}"
+                    },
+                    {
+                        "field": "M_FG",
+                        "field_label": "M_{FG}"
+                    }
+                ]
+            }
+        }
+
+
+    ]
+}

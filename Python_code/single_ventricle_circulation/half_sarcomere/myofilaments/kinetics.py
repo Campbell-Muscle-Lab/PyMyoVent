@@ -5,12 +5,53 @@ from scipy.integrate import solve_ivp
 
 def evolve_kinetics(self, time_step, Ca_conc):
     """Updates kinetics, switches to different sub-functions as required"""
-    if (self.kinetic_scheme == '3state_with_SRX'):
-        update_3state_with_SRX(self, time_step, Ca_conc)
+    if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+        update_3_state_with_SRX(self, time_step, Ca_conc)
+
+
+def update_3_state_with_SRX(self, time_step, Ca_conc):
+    """ Updates kinetics for thick and thin filaments """
+
+    # Pull out the myofilaments vector
+    y = self.y
+
+    # Get the overlap
+    self.n_overlap = self.return_f_overlap()
+
+    def derivs(t, y):
+        dy = np.zeros(np.size(y))
+
+        fluxes = return_fluxes(self, y, Ca_conc)
+
+        # Calculate the derivs
+        dy[0] = -fluxes['J_1'] + fluxes['J_2']
+        dy[1] = (fluxes['J_1'] + np.sum(fluxes['J_4'])) - \
+            (fluxes['J_2'] + np.sum(fluxes['J_3']))
+        J_3 = fluxes['J_3']
+        J_4 = fluxes['J_4']
+        for i in np.arange(0, self.no_of_x_bins):
+            dy[i + 2] = J_3[i] - J_4[i]
+        dy[-2] = -fluxes['J_on'] + fluxes['J_off']
+        dy[-1] = fluxes['J_on'] - fluxes['J_off']
+        return dy
+
+    # Evolve the system
+    sol = solve_ivp(derivs, [0, time_step], y, method='RK23')
+    self.y = sol.y[:, -1]
+
+    # Do some tidying for extreme situations
+    self.y[np.nonzero(self.y > 1.0)] = 1.0
+    self.y[np.nonzero(self.y < 0.0)] = 0.0
+    sum_of_heads = np.sum(self.y[np.arange(2+self.no_of_x_bins)])
+    # These appear in M_off
+    self.y[0] = self.y[0] + (1.0-sum_of_heads)
+
+    self.fluxes = return_fluxes(self, self.y, Ca_conc)
+
 
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
-    if (self.model['kinetic_scheme'] == '3state_with_SRX'):
+    if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
 
         # Unpack
         M_SRX = y[0]
@@ -60,45 +101,6 @@ def return_fluxes(self, y, Ca_conc):
 
         return fluxes
 
-
-def update_3state_with_SRX(self, time_step, Ca_conc):
-    """ Updates kinetics for thick and thin filaments """
-
-    # Pull out the myofilaments vector
-    y = self.y
-
-    # Get the overlap
-    self.n_overlap = self.return_n_overlap()
-
-    def derivs(t, y):
-        dy = np.zeros(np.size(y))
-
-        fluxes = return_fluxes(self, y, Ca_conc)
-
-        # Calculate the derivs
-        dy[0] = -fluxes['J1'] + fluxes['J2']
-        dy[1] = (fluxes['J1'] + np.sum(fluxes['J4'])) - \
-            (fluxes['J2'] + np.sum(fluxes['J3']))
-        J3 = fluxes['J3']
-        J4 = fluxes['J4']
-        for i in np.arange(0, self.no_of_x_bins):
-            dy[i + 2] = J3[i] - J4[i]
-        dy[-2] = -fluxes['Jon'] + fluxes['Joff']
-        dy[-1] = fluxes['Jon'] - fluxes['Joff']
-        return dy
-
-    # Evolve the system
-    sol = solve_ivp(derivs, [0, time_step], y, method='RK23')
-    self.y = sol.y[:, -1]
-
-    # Do some tidying for extreme situations
-    self.y[np.nonzero(self.y > 1.0)] = 1.0
-    self.y[np.nonzero(self.y < 0.0)] = 0.0
-    sum_of_heads = np.sum(self.y[np.arange(2+self.no_of_x_bins)])
-    # These appear in M_off
-    self.y[0] = self.y[0] + (1.0-sum_of_heads)
-
-    self.fluxes = return_fluxes(self, self.y, Ca_conc)
 
 # def return_ATPase(self,wall_volume):
 
