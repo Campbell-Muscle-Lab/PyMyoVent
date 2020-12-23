@@ -7,9 +7,6 @@ from .membranes import membranes as memb
 class half_sarcomere():
     """Class for a half-sarcomere"""
 
-    from .display import display_fluxes
-    #from .update_contractility import update_contractility
-
     def __init__(self, hs_struct):
         
         # Create a dict to store data
@@ -44,7 +41,7 @@ class half_sarcomere():
         if (np.abs(delta_hsl) > 0.0):
             # Need to move some things
             self.myof.move_cb_distributions(delta_hsl)
-            self.hs_length = self.hs_length + delta_hsl
+            self.data['hs_length'] = self.data['hs_length'] + delta_hsl
     
         # Update forces
         self.myof.set_myofilament_forces()

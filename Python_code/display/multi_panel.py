@@ -32,8 +32,10 @@ def default_formatting():
     formatting['legend_location'] = 'upper left'
     formatting['legend_bbox_to_anchor'] = [1.05, 1]
     formatting['legend_fontsize'] = 9
+    formatting['legend_handlelength'] = 1
     formatting['tick_fontsize'] = 11
     formatting['patch_alpha'] = 0.3
+    formatting['max_rows_per_legend'] = 4
     
     return formatting
 
@@ -75,8 +77,10 @@ def multi_panel_from_flat_data(
     formatting = default_formatting()
     if ('formatting' in template_data):
         for entry in template_data['formatting']:
+            print(entry)
             formatting[entry] = template_data['formatting'][entry]
-
+    print(formatting)
+    
     # Pull default processing
     processing = default_processing()
     if 'processing' in template_data:
@@ -207,6 +211,10 @@ def multi_panel_from_flat_data(
             
             if 'scaling_factor' in y_d:
                 y = y * y_d['scaling_factor']
+                
+            if 'log_display' in y_d:
+                if y_d['log_display']=='on':
+                    y = np.log10(y)
             
             # Track min and max y
             if (j==0):
@@ -228,7 +236,7 @@ def multi_panel_from_flat_data(
                 ax[i].plot(x, y,
                         linewidth = formatting['data_linewidth'],
                         color=col,
-                        clip_on=False)
+                        clip_on=True)
                 line_counter +=1
                 if y_d['field_label']:
                     legend_symbols.append(
@@ -283,10 +291,10 @@ def multi_panel_from_flat_data(
             ylim=tuple(p_data['y_info']['ticks'])
         else:
             ylim=(min_y, max_y)
-            y_scaling = []
-            if ('y_scaling' in p_data['y_info']):
-                y_scaling = p_data['y_info']['y_scaling']
-            ylim = deduce_axis_limits(ylim, mode_string=y_scaling)
+            scaling_type = []
+            if ('scaling_type' in p_data['y_info']):
+                scaling_type = p_data['y_info']['scaling_type']
+            ylim = deduce_axis_limits(ylim, mode_string=scaling_type)
         
         ax[i].set_ylim(ylim)
         ax[i].set_yticks(ylim)
@@ -320,6 +328,7 @@ def multi_panel_from_flat_data(
                 
         # Set y label
         ax[i].set_ylabel(p_data['y_info']['label'],
+                      loc='center',
                       verticalalignment='center',
                       labelpad = formatting['y_label_pad'],
                       fontfamily = formatting['fontname'],
@@ -330,10 +339,13 @@ def multi_panel_from_flat_data(
         if legend_symbols:
             ax[i].legend(legend_symbols, legend_strings,
                          loc=formatting['legend_location'],
+                         handlelength = formatting['legend_handlelength'],
                          bbox_to_anchor=(formatting['legend_bbox_to_anchor'][0],
                                          formatting['legend_bbox_to_anchor'][1]),
                          prop={'family': formatting['fontname'],
-                               'size': formatting['legend_fontsize']})
+                               'size': formatting['legend_fontsize']},
+                         ncol = int(np.ceil(len(legend_symbols)/
+                                            formatting['max_rows_per_legend'])))
    
     # Tidy overall figure
     # Move plots inside margins
@@ -369,7 +381,7 @@ def deduce_axis_limits(lim, mode_string=[]):
               
     return ((lim[0],lim[1]))
 
-def multiple_greater_than(v, multiple=0.5):
+def multiple_greater_than(v, multiple=0.2):
     if (v>0):
         n = np.floor(np.log10(v))
         m = multiple*np.power(10,n)
@@ -381,7 +393,7 @@ def multiple_greater_than(v, multiple=0.5):
         
     return v
 
-def multiple_less_than(v, multiple=0.5):
+def multiple_less_than(v, multiple=0.2):
     if (v>0):
         n = np.floor(np.log10(v))
         m = multiple*np.power(10,n)
