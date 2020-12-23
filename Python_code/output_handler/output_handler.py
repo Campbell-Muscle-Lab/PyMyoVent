@@ -55,10 +55,36 @@ class output_handler():
             template_file_string = os.path.join(
                 this_dir,'templates/summary_template.json')
             
-            fig,ax = multi_panel_from_flat_data(
-                        pandas_data = sim_data,
+            self.create_image_from_template(
+                        sim_data,
                         template_file_string = template_file_string,
                         output_image_file_string = output_file_string)
             
-            plt.close(fig)
+        # User defined files
+        if ('user_defined_images' in self.oh_data):
+            user_defined = self.oh_data['user_defined_images']['user_defined']
+            for ud in user_defined:
+                self.create_image_from_template(
+                    sim_data,
+                    ud['template_file_string'],
+                    ud['output_file_string'])
+
+            
+    def create_image_from_template(self,
+                                   sim_data,
+                                   template_file_string,
+                                   output_image_file_string):
+        
+        if not os.path.isabs(template_file_string):
+            template_file_string = os.path.join(os.getcwd(),
+                                                template_file_string)
+        if not os.path.isabs(output_image_file_string):
+            output_image_file_string = os.path.join(os.getcwd(),
+                                                    output_image_file_string)
+        fig,ax = multi_panel_from_flat_data(
+                        pandas_data = sim_data,
+                        template_file_string = template_file_string,
+                        output_image_file_string = output_image_file_string)
+        
+        plt.close(fig)
             

@@ -25,12 +25,12 @@
             },
             {
                 "name": "venules",
-                "resistance": 200,
+                "resistance": 50,
                 "compliance": 0.1
             },
             {
                 "name": "veins",
-                "resistance": 100,
+                "resistance": 10,
                 "compliance": 0.35
             },
             {

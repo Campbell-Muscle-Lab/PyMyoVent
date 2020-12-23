@@ -129,7 +129,20 @@ class single_ventricle_circulation():
 
         # Set the time
         self.data['time'] = 0
-   
+
+    def rebuild_system_arrays(self):
+        """ builds reistance array"""
+        
+        for i,v in enumerate(self.model['compartment_list']):
+            r = self.data[('%s_resistance' % v)]
+            self.data['resistance'][i] = r
+
+        for i,v in enumerate(self.model['compartment_list']):
+            if (i < (self.model['no_of_compartments']-1)):
+                c = self.data[('%s_compliance' % v)]
+                self.data['compliance'][i]=c
+
+
     def create_data_structure(self):
         """ creates a data frame from the data dicts of each component """
         
@@ -157,7 +170,7 @@ class single_ventricle_circulation():
             print("No protocol_file_string. Exiting")
             return
         self.prot = prot.protocol(protocol_file_string)
-        
+         
         # Now that you know how many time-points there are,
         # create the data structure
         self.create_data_structure()
@@ -184,6 +197,13 @@ class single_ventricle_circulation():
         # Display progress
         if (self.t_counter % 1000 == 0):
             print('Sim time (s): %.0f' % self.data['time'])
+            
+        # Check and implement perturbations
+        for p in self.prot.perturbations:
+            if ((self.t_counter >= p.data['t_start_ind']) and
+                (self.t_counter < p.data['t_stop_ind'])):
+                self.data[p.data['variable']] += p.data['increment']
+        self.rebuild_system_arrays()
         
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)

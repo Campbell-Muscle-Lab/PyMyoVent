@@ -1,4 +1,14 @@
 {
     "simulation_output_file_string": "../temp/output_ken.csv",
-    "summary_image_file_string": "../temp/summary_image.png"
+    "summary_image_file_string": "../temp/summary_image.png",
+    "user_defined_images":
+    {
+        "user_defined":
+        [
+            {
+                "template_file_string": "../demo_files/ken/template_perturbation_demo.json",
+                "output_file_string": "../temp/perturbation_demo.png"
+            }
+        ]
+    }
 }

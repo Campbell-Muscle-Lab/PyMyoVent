@@ -22,7 +22,7 @@ def PyMyoVent():
         import output_handler.output_handler as oh
         import pandas as pd
         sim_data = pd.read_csv('C:/ken/GitHub/CampbellMuscleLab/models/PyMyoVent/temp/output_ken.csv')
-        oh.output_handler('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler_image_only.json',
+        oh.output_handler('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler.json',
                           sim_data)
 
 def run_batch(batch_json_file_string):

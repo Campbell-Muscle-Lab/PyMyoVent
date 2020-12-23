@@ -1,15 +1,30 @@
 {
   "protocol":{
-    "no_of_time_steps": 15000,
-    "time_step": 0.001
+    "no_of_time_steps": 8000,
+    "time_step": 0.005
   },
-  "perturbation":
-  [
-    {
-      "variable": "blood_volume",
-      "t_start_s": 10,
-      "t_stop_s": 11,
-      "total_change": 1
-    }
-  ]
+  "perturbations":
+  {
+    "perturbation":
+    [
+      {
+        "variable": "blood_volume",
+        "t_start_s": 20,
+        "t_stop_s": 21,
+        "total_change": 2
+      },
+      {
+        "variable": "aorta_resistance",
+        "t_start_s": 30,
+        "t_stop_s": 31,
+        "total_change": 80
+      },
+      {
+        "variable": "veins_compliance",
+        "t_start_s": 5,
+        "t_stop_s": 6,
+        "total_change": -0.1
+      }
+    ]
+  }
 }
