@@ -38,4 +38,10 @@ class heart_rate():
             self.data['t_active_left'] = 0
         
         return activation
+    
+    def return_heart_rate(self):
+        """ returns heart rate in beats per minute """
+        
+        return 60 * 1 / (self.data['t_active_period'] +
+                             self.data['t_quiescent_period'])
         

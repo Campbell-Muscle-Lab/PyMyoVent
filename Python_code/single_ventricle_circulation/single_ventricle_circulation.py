@@ -5,6 +5,7 @@ import pandas as pd
 
 from .half_sarcomere import half_sarcomere as hs
 from .heart_rate import heart_rate as hr
+from .baroreflex import baroreflex as br
 
 from protocol import protocol as prot
 from output_handler import output_handler as oh
@@ -126,11 +127,25 @@ class single_ventricle_circulation():
         # Set the wall thickness
         self.data['ventricle_wall_thickness'] = \
             self.return_wall_thickness(self.data['v'][-1])
+            
+        # Set the heart rate
+        self.data['heart_rate'] = self.hr.return_heart_rate()
+        
+        # If requried, create the baroreceptor
+        self.data['baroreflex_active'] = 1
+        self.data['baroreflex_setpoint'] = 0
+        if ('baroreflex' in sc_model):
+            self.br = br.baroreflex(sc_model['baroreflex'],
+                                    self,
+                                    self.data['pressure_arteries'])
+            self.data['baroreflex_setpoint'] = self.br.data['baro_b_setpoint']
+        else:
+            self.br = []
 
         # Set the time
         self.data['time'] = 0
 
-    def rebuild_system_arrays(self):
+    def rebuild_from_perturbations(self):
         """ builds reistance array"""
         
         for i,v in enumerate(self.model['compartment_list']):
@@ -141,6 +156,8 @@ class single_ventricle_circulation():
             if (i < (self.model['no_of_compartments']-1)):
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i]=c
+                
+        self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
 
 
     def create_data_structure(self):
@@ -154,6 +171,10 @@ class single_ventricle_circulation():
                         list(self.hs.data.keys()) + \
                         list(self.hs.memb.data.keys()) + \
                         list(self.hs.myof.data.keys())
+        
+        # Add in fields from optional modules                        
+        if (self.br):
+            data_fields = data_fields + list(self.br.data.keys())
         
         for f in data_fields: 
             s = pd.Series(data=z, name=f)
@@ -196,14 +217,29 @@ class single_ventricle_circulation():
        
         # Display progress
         if (self.t_counter % 1000 == 0):
-            print('Sim time (s): %.0f' % self.data['time'])
+            print('Sim time (s): %.0f  %.0f%% complete' % 
+                  (self.data['time'],
+                   100*self.t_counter/self.prot.data['no_of_time_steps']))
             
         # Check and implement perturbations
         for p in self.prot.perturbations:
             if ((self.t_counter >= p.data['t_start_ind']) and
                 (self.t_counter < p.data['t_stop_ind'])):
                 self.data[p.data['variable']] += p.data['increment']
-        self.rebuild_system_arrays()
+            
+        self.rebuild_from_perturbations()
+        
+        # Check for baroreflex and implement
+        if (self.br):
+            self.data['baroreflex_active']=0
+            for b in self.prot.baro_activations:
+                if ((self.t_counter >= b.data['t_start_ind']) and
+                    (self.t_counter < b.data['t_stop_ind'])):
+                    self.data['baroreflex_active'] = 1
+                  
+            self.br.implement_time_step(self.data['pressure_arteries'],
+                                        time_step,
+                                        reflex_active=self.data['baroreflex_active'])
         
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)
@@ -245,6 +281,9 @@ class single_ventricle_circulation():
             self.sim_data.at[self.t_counter, f] = self.hs.memb.data[f]
         for f in list(self.hs.myof.data.keys()):
             self.sim_data.at[self.t_counter, f] = self.hs.myof.data[f]
+        if (self.br):
+            for f in list(self.br.data.keys()):
+                self.sim_data.at[self.t_counter, f] = self.br.data[f]
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
@@ -252,6 +291,9 @@ class single_ventricle_circulation():
         
     def update_data(self):
         # Update data for the simulation
+        
+        # Update data for the heart-rate
+        self.data['heart_rate'] = self.hr.return_heart_rate()
         
         flows = self.return_flows(self.data['v'])
         for i,f in enumerate(self.model['flow_list']):

@@ -6,8 +6,8 @@
         "user_defined":
         [
             {
-                "template_file_string": "../demo_files/ken/template_perturbation_demo.json",
-                "output_file_string": "../temp/perturbation_demo.png"
+                "template_file_string": "../demo_files/ken/template_baro_test_demo.json",
+                "output_file_string": "../temp/baro_test_demo.png"
             }
         ]
     }

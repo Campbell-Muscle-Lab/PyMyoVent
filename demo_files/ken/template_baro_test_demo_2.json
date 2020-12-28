@@ -1,0 +1,42 @@
+{
+    "layout":
+    {
+        "fig_width": 7,
+        "left_margin": 0,
+        "right_margin": 0,
+        "grid_wspace": -1,
+        "panel_height": 3
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)"
+    },
+    "formatting":
+    {
+        "x_label_fontsize": 9,
+        "y_label_fontsize": 9,
+        "tick_fontsize": 9,
+        "legend_fontsize": 6,
+        "y_label_pad": 10 
+    },
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "flow",
+                "series":
+                [
+                    {
+                        "field": "flow_ventricle_to_aorta",
+                        "style": "envelope"
+                    },
+                    {
+                        "field": "flow_ventricle_to_aorta"
+                    }
+                ]
+            }
+        }
+    ]
+}

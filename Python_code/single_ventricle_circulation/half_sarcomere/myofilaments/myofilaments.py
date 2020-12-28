@@ -12,31 +12,30 @@ class myofilaments():
     def __init__(self, myofil_struct, parent_half_sarcomere):
         self.parent_hs = parent_half_sarcomere
 
-        # Set up a dict for the myofilaments
-        self.model = dict()
-        
-        params = myofil_struct.keys()
-        for p in params:
-            self.model[p] = myofil_struct[p]
-        
-        self.x = np.arange(self.model['bin_min'],
-                           self.model['bin_max']+
-                               self.model['bin_width'],
-                           self.model['bin_width'])
-        self.no_of_x_bins = np.size(self.x)
-        self.f_overlap = self.return_f_overlap()
-        
-        # Create a dict to monitor status
+        # Set up dictionaries to hold data about the myofilaments
+        # and informatioo required for implementation
         self.data = dict()
+        self.implementation = dict()
+        
+        for key in list(myofil_struct.keys()):
+            if not (key == 'implementation'):
+                self.data[key] = myofil_struct[key]
+        for key in list(myofil_struct['implementation'].keys()):
+            self.implementation[key] = myofil_struct['implementation'][key]
+        
+        # Pull off implementation
+        self.x = np.arange(self.implementation['bin_min'],
+                           self.implementation['bin_max']+
+                               self.implementation['bin_width'],
+                           self.implementation['bin_width'])
+        self.no_of_x_bins = np.size(self.x)
+        self.n_overlap = self.return_n_overlap()
 
         # Set up the rates and the y vector which are kinetics specific
-        if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
             self.set_up_3_state_with_SRX()
             
-                
-            
-
-        # Initialise forces and then update
+       # Initialise forces and then update
         self.cb_force = 0.0
         self.pas_force = 0.0
         self.total_force= 0.0
@@ -45,11 +44,10 @@ class myofilaments():
     def set_up_3_state_with_SRX(self):
         # Set up data fields and variables
         
-        self.data_fields = ['M_SRX', 'M_DRX', 'M_FG',
-                       'n_off', 'n_on', 'n_bound',
-                       'n_overlap']
+        scheme_fields = ['M_SRX', 'M_DRX', 'M_FG',
+                         'n_off', 'n_on', 'n_bound',
+                         'n_overlap']
         self.flux_fields = ['J_1','J_2','J_3','J_4','J_on','J_off']
-        self.data_fields = self.data_fields + self.flux_fields
         
         self.y_length = self.no_of_x_bins + 4
         self.y = np.zeros(self.y_length)
@@ -58,26 +56,29 @@ class myofilaments():
         self.y[-2] = 1.0
         
         # Update the dict
-        for f in self.data_fields:
+        for f in scheme_fields:
             self.data[f] = 0
         self.fluxes = dict()
         for f in self.flux_fields:
             self.fluxes[f] = 0
-        self.n_overlap = self.return_f_overlap()
+            self.data[f] = 0
+        self.n_overlap = self.return_n_overlap()
         self.update_data()        
         
             
     def update_data(self):
         # Update model dict for reporting back to half_sarcomere
         
-        if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
             self.data['M_SRX'] = self.y[0]
             self.data['M_DRX'] = self.y[1]
             self.data["M_FG"] = np.sum(self.y[2+np.arange(self.no_of_x_bins)])
             self.data['n_off'] = self.y[-2]
             self.data['n_on'] = self.y[-1]
             self.data["n_overlap"] = self.n_overlap
-      
+            
+            
+            # Update the fluxes
             for f in self.flux_fields:
                 if ((f=='J_3') or (f=='J_4')):
                     x = np.sum(self.fluxes[f])
@@ -86,29 +87,30 @@ class myofilaments():
                 self.data[f] = x
 
 
-    def return_f_overlap(self):
+    def return_n_overlap(self):
         """ returns n_overlap """
         x_no_overlap = self.parent_hs.data['hs_length'] - \
-            self.model['thick_filament_length']
-        x_overlap = self.model['thin_filament_length'] - \
+            self.implementation['thick_filament_length']
+        x_overlap = self.implementation['thin_filament_length'] - \
             x_no_overlap
-        max_x_overlap = self.model['thick_filament_length'] - \
-            self.model['bare_zone_length']
+        max_x_overlap = self.implementation['thick_filament_length'] - \
+            self.implementation['bare_zone_length']
 
         if (x_overlap < 0.0):
-            f_overlap = 0.0
+            n_overlap = 0.0
 
         if ((x_overlap > 0.0) & (x_overlap <= max_x_overlap)):
-            f_overlap = x_overlap / max_x_overlap
+            n_overlap = x_overlap / max_x_overlap
 
         if (x_overlap > max_x_overlap):
-            f_overlap = 1.0
+            n_overlap = 1.0
 
-        protrusion = self.model['thin_filament_length'] - \
-            (self.parent_hs.data['hs_length'] + self.model['bare_zone_length'])
+        protrusion = self.implementation['thin_filament_length'] - \
+            (self.parent_hs.data['hs_length'] + 
+             self.implementation['bare_zone_length'])
             
         if (protrusion > 0.0):
             x_overlap = (max_x_overlap - protrusion)
-            f_overlap = x_overlap / max_x_overlap
+            n_overlap = x_overlap / max_x_overlap
 
-        return f_overlap
+        return n_overlap

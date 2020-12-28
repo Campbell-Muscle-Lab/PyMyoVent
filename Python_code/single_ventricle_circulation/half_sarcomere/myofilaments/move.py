@@ -5,9 +5,9 @@ import scipy.interpolate as interpol
 def move_cb_distributions(self, delta_hsl):
     """ Moves cb distributions """
 
-    delta_x = delta_hsl * self.model['filament_compliance_factor']
+    delta_x = delta_hsl * self.implementation['filament_compliance_factor']
 
-    if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
         interp_positions = self.x - delta_x
         bin_indices = 2 + np.arange(0, self.no_of_x_bins)
         

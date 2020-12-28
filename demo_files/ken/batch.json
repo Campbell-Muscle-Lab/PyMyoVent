@@ -5,7 +5,7 @@
         [
             {
                 "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model.json",
-                "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol.json",
+                "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol_baro_test.json",
                 "output_handler_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler.json"
             }
         ]

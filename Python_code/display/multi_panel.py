@@ -36,7 +36,7 @@ def default_formatting():
     formatting['tick_fontsize'] = 11
     formatting['patch_alpha'] = 0.3
     formatting['max_rows_per_legend'] = 4
-    
+
     return formatting
 
 def default_layout():
@@ -49,12 +49,13 @@ def default_layout():
     layout['right_margin'] = 0.1
     layout['grid_wspace'] = 0.1
     layout['grid_hspace'] = 0.1
-    
+
     return layout
 
 def default_processing():
     processing = dict()
-    processing['envelope_peak_prominence'] = 0.2
+    processing['max_points_per_trace'] = 20000
+    processing['envelope_n'] = 400
     
     return processing
 
@@ -65,7 +66,7 @@ def multi_panel_from_flat_data(
         template_file_string=[],
         output_image_file_string = [],
         dpi = 300):
-    
+
     # Check for template file, make an empty dict if absent
     if (template_file_string):
         with open(template_file_string, 'r') as f:
@@ -78,7 +79,7 @@ def multi_panel_from_flat_data(
     if ('formatting' in template_data):
         for entry in template_data['formatting']:
             formatting[entry] = template_data['formatting'][entry]
-    
+
     # Pull default processing
     processing = default_processing()
     if 'processing' in template_data:
@@ -93,8 +94,7 @@ def multi_panel_from_flat_data(
                                         sheet_name=excel_sheet)
         if file_type == 'csv':
             pandas_data = pd.read_csv(data_file_string)
-        
-    
+
     # Try to work out x data
     if 'x_display' in template_data:
         x_display = template_data['x_display']
@@ -113,10 +113,10 @@ def multi_panel_from_flat_data(
         x_ticks_defined=True    
     if 'label' not in x_display:
         x_display['label'] = x_display['global_x_field']
-            
+
     # Try to pull off the panel data and cycle through the panels one by one to
     # get the number of columns
-    
+
     # Check for panels tag. If it doesn't exist
     # make up panel data
     if 'panels' in template_data:
@@ -130,16 +130,16 @@ def multi_panel_from_flat_data(
         y_data['field'] = pandas_data.columns[0]
         panel_data['y_info']['series'] = [y_data]
         panel_data = [panel_data]
-            
+
     no_of_columns = 0
     for p_data in panel_data:
         test_column = p_data['column']
         if (test_column > no_of_columns):
             no_of_columns = test_column
-    
+
     # Now scan through panels working out how many panel rows to create
     row_counters = np.zeros(no_of_columns, dtype=int)
-    
+
     for i,p_data in enumerate(panel_data):
         # Update row counters
         row_counters[p_data['column']-1] += 1
@@ -147,7 +147,7 @@ def multi_panel_from_flat_data(
     no_of_rows = np.amax(row_counters)
     no_of_panels = np.sum(rows_per_column)
     ax=[]
-    
+
     # Now you know how many panels, create a figure of the right size
     layout = default_layout()
     if 'layout' in template_data:
@@ -157,7 +157,7 @@ def multi_panel_from_flat_data(
     fig_height = layout['top_margin'] + \
                 (no_of_rows * layout['panel_height']) + \
                  layout['bottom_margin']
-    
+
     # Now create figure
     fig = plt.figure(constrained_layout=False)
     fig.set_size_inches([layout['fig_width'], fig_height])
@@ -225,13 +225,20 @@ def multi_panel_from_flat_data(
             min_y = np.amin([min_y, np.amin(y)])
             max_y = np.amax([max_y, np.amax(y)])
             
+            # Down sample line if required
+            if (x.size > processing['max_points_per_trace']):
+                spacing = int(np.ceil(x.size/processing['max_points_per_trace']))
+            else:
+                spacing = 1
+            
             # Plot line depending on style
             if (y_d['style'] == 'line'):
                 if 'field_color' in y_d:
                     col = colors[y_d['field_color']]
                 else:
                     col = colors[line_counter]
-                ax[i].plot(x, y,
+                draw_indices = np.arange(x.size)[::spacing]
+                ax[i].plot(x[draw_indices], y[draw_indices],
                         linewidth = formatting['data_linewidth'],
                         color=col,
                         clip_on=True)
@@ -244,25 +251,22 @@ def multi_panel_from_flat_data(
                     legend_strings.append(y_d['field_label'])
                     
             if (y_d['style'] == 'envelope'):
-                # y_top = pd.Series(y).rolling(nn, min_periods=1).max().to_numpy()
-                # y_bottom = pd.Series(y).rolling(nn, min_periods=1).min().to_numpy()
-                top_ind,_ = find_peaks(y, prominence =
-                                       processing['envelope_peak_prominence']*np.amax(y))
-                x_top = x[top_ind]
-                y_top = y[top_ind]
-                bot_ind,_ = find_peaks(-y, prominence = 
-                                       processing['envelope_peak_prominence']*np.amax(-y))
-                x_bot = x[bot_ind]
-                y_bot = y[bot_ind]
-                y = np.concatenate((y_top, y_bot[-1:0:-1]))
-                x = np.concatenate((x_top, x_bot[-1:0:-1]))
-                xy = [x,y]
-                xy = np.array(np.array(xy).transpose())
+                # Hold the maximum and minimum values
+                y_top = pd.Series(y).rolling(processing['envelope_n'],
+                                             min_periods=1).max().to_numpy()
+                y_bot = pd.Series(y).rolling(processing['envelope_n'],
+                                             min_periods=1).min().to_numpy()
+                yp = np.hstack((y_top, y_bot[::-1], y_top[0]))
+                xp = np.hstack((x, x[::-1], x[0]))
+                xy = np.vstack((xp,yp))
+                xy = np.array(np.array(xy).transpose());
+                draw_indices = np.arange(xp.shape[0])[::spacing]
+                xy = xy[draw_indices,:]
                 if 'field_color' in y_d:
                     col = colors[y_d['field_counter']]
                 else:
                     col = colors[patch_counter]
-                polygon = pat.Polygon(xy, True, clip_on=False,
+                polygon = pat.Polygon(xy, True, clip_on=True,
                                       fc=col,
                                       alpha=formatting['patch_alpha'])
                 ax[i].add_patch(polygon)
@@ -274,16 +278,15 @@ def multi_panel_from_flat_data(
                     legend_strings.append(y_d['field_label'])
 
                 patch_counter = patch_counter+1
-                
+
         # Tidy up axes and legends
-        
+
         # Set x limits
         xlim = (min_x, max_x)
         if x_ticks_defined==False:
             xlim = deduce_axis_limits(xlim,'autoscaled')
         ax[i].set_xlim(xlim)
         ax[i].set_xticks(x_display['global_x_ticks'])
-       
         # Set y limits
         if ('ticks' in p_data['y_info']):
             ylim=tuple(p_data['y_info']['ticks'])
@@ -293,7 +296,7 @@ def multi_panel_from_flat_data(
             if ('scaling_type' in p_data['y_info']):
                 scaling_type = p_data['y_info']['scaling_type']
             ylim = deduce_axis_limits(ylim, mode_string=scaling_type)
-        
+
         ax[i].set_ylim(ylim)
         ax[i].set_yticks(ylim)
         
@@ -309,11 +312,11 @@ def multi_panel_from_flat_data(
         for tick_label in ax[i].get_yticklabels():
             tick_label.set_fontname(formatting['fontname'])
             tick_label.set_fontsize(formatting['tick_fontsize'])            
-       
+
         # Remove top and right-hand size of box
         ax[i].spines['top'].set_visible(False)
         ax[i].spines['right'].set_visible(False)
-       
+
         # Display x axis if bottom
         if (r==(rows_per_column[c]-1)):
             ax[i].set_xlabel(x_display['label'],
@@ -323,7 +326,7 @@ def multi_panel_from_flat_data(
         else:
             ax[i].spines['bottom'].set_visible(False)
             ax[i].tick_params(labelbottom=False, bottom=False)
-                
+
         # Set y label
         ax[i].set_ylabel(p_data['y_info']['label'],
                       loc='center',
@@ -332,7 +335,7 @@ def multi_panel_from_flat_data(
                       fontfamily = formatting['fontname'],
                       fontsize = formatting['y_label_fontsize'],
                       rotation = formatting['y_label_rotation'])
-        
+
         # Add legend if it exists
         if legend_symbols:
             ax[i].legend(legend_symbols, legend_strings,
@@ -344,7 +347,7 @@ def multi_panel_from_flat_data(
                                'size': formatting['legend_fontsize']},
                          ncol = int(np.ceil(len(legend_symbols)/
                                             formatting['max_rows_per_legend'])))
-   
+
     # Tidy overall figure
     # Move plots inside margins
     lhs = layout['left_margin']/layout['fig_width']
@@ -355,29 +358,31 @@ def multi_panel_from_flat_data(
     spec.tight_layout(fig, rect=r)
 
     fig.align_labels()
-    
+
     # Save if required
     if output_image_file_string:
         print('Saving figure to %s' % output_image_file_string)
         fig.savefig(output_image_file_string, dpi=dpi)
-        
+
     return (fig,ax)
-    
+
+
 def deduce_axis_limits(lim, mode_string=[]):
-    
+
     # Start simply
     lim = np.asarray(lim)
     lim[0] = multiple_less_than(lim[0])
     lim[1] = multiple_greater_than(lim[1])
-    
+
     if (mode_string != 'close_fit'):
         if (lim[0]>0):
             lim[0]=0
         else:
             if (lim[1]<0):
                 lim[1]=0
-              
+
     return ((lim[0],lim[1]))
+
 
 def multiple_greater_than(v, multiple=0.2):
     if (v>0):
@@ -388,7 +393,7 @@ def multiple_greater_than(v, multiple=0.2):
         n = np.floor(np.log10(-v))
         m = multiple*np.power(10,n)
         v = m*np.ceil(v/m)
-        
+
     return v
 
 def multiple_less_than(v, multiple=0.2):
@@ -400,10 +405,10 @@ def multiple_less_than(v, multiple=0.2):
         n = np.floor(np.log10(-v))
         m = multiple*np.power(10,n)
         v = m*np.floor(v/m)
-        
+
     return v
-            
+
+
 if __name__ == "__main__":
     (fig,ax) = multi_panel_from_flat_data()
     plt.close(fig)
-    

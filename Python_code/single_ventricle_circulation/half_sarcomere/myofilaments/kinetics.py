@@ -5,7 +5,7 @@ from scipy.integrate import solve_ivp
 
 def evolve_kinetics(self, time_step, Ca_conc):
     """Updates kinetics, switches to different sub-functions as required"""
-    if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
         update_3_state_with_SRX(self, time_step, Ca_conc)
 
 
@@ -16,7 +16,7 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
     y = self.y
 
     # Get the overlap
-    self.n_overlap = self.return_f_overlap()
+    self.n_overlap = self.return_n_overlap()
 
     def derivs(t, y):
         dy = np.zeros(np.size(y))
@@ -51,7 +51,7 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
 
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
-    if (self.model['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
 
         # Unpack
         M_SRX = y[0]
@@ -60,33 +60,33 @@ def return_fluxes(self, y, Ca_conc):
         n_on = y[-1]
         n_bound = np.sum(M_FG)
 
-        r_1 = np.minimum(self.model['max_rate'],
-                        self.model['k_1'] * 
-                        (1.0 + self.model['k_force'] * self.parent_hs.hs_force))
+        r_1 = np.minimum(self.implementation['max_rate'],
+                        self.data['k_1'] * 
+                        (1.0 + self.data['k_force'] * self.parent_hs.hs_force))
         J_1 = r_1 * M_SRX
 
-        r_2 = np.minimum(self.model['max_rate'], self.model['k_2'])
+        r_2 = np.minimum(self.implementation['max_rate'], self.data['k_2'])
         J_2 = r_2 * M_DRX
 
-        r_3 = self.model['k_3'] * \
-                np.exp(-self.model['k_cb'] * (self.x**2) /
+        r_3 = self.data['k_3'] * \
+                np.exp(-self.data['k_cb'] * (self.x**2) /
                     (2.0 * 1e18 * scipy_constants.Boltzmann * 
-                         self.model['temperature']))
-        r_3[r_3 > self.model['max_rate']] = self.model['max_rate']
-        J_3 = r_3 * self.model['bin_width'] * M_DRX * (n_on - n_bound)
+                         self.implementation['temperature']))
+        r_3[r_3 > self.implementation['max_rate']] = self.implementation['max_rate']
+        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * (n_on - n_bound)
 
-        r_4 = self.model['k_4_0'] + (self.model['k_4_1'] * np.power(self.x, 4))
-        r_4[r_4 > self.model['max_rate']] = self.model['max_rate']
+        r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
+        r_4[r_4 > self.implementation['max_rate']] = self.implementation['max_rate']
         J_4 = r_4 * M_FG
         if (self.n_overlap > 0.0):
-            J_on = (self.model['k_on'] * Ca_conc * (self.n_overlap - n_on) *
-                (1.0 + self.model['k_coop'] * (n_on / self.n_overlap)))
+            J_on = (self.data['k_on'] * Ca_conc * (self.n_overlap - n_on) *
+                (1.0 + self.data['k_coop'] * (n_on / self.n_overlap)))
         else:
             J_on = 0.0
 
         if (self.n_overlap > 0.0):
-            J_off = self.model['k_off'] * (n_on - n_bound) * \
-                (1.0 + self.model['k_coop'] * ((self.n_overlap - n_on) /
+            J_off = self.data['k_off'] * (n_on - n_bound) * \
+                (1.0 + self.data['k_coop'] * ((self.n_overlap - n_on) /
                                       self.n_overlap))
         else:
             J_off = 0.0
