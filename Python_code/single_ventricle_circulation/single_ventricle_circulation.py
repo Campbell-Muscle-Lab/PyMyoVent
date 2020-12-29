@@ -209,17 +209,53 @@ class single_ventricle_circulation():
         self.oh = oh.output_handler(output_handler_file_string,
                                     self.sim_data)
 
-    
+
+    def return_system_values(self, time_interval=2):
+        d = dict()
+        if (self.data['time'] > time_interval):
+            self.temp_data = \
+                self.sim_data[self.sim_data['time'].between(
+                    self.data['time']-time_interval, self.data['time'])]
+            d['volume_ventricle_max'] = \
+                self.temp_data['volume_ventricle'].max()
+            d['volume_ventricle_min'] = \
+                self.temp_data['volume_ventricle'].min()
+            d['stroke_volume'] = d['volume_ventricle_max'] - \
+                d['volume_ventricle_min']
+            d['ejection_fraction'] = d['stroke_volume'] / \
+                d['volume_ventricle_max']
+            d['heart_rate'] = self.data['heart_rate']
+            d['cardiac_output'] = d['stroke_volume'] * d['heart_rate']
+            d['hs_length_max'] = self.temp_data['hs_length'].max()
+            d['hs_length_min'] = self.temp_data['hs_length'].min()
+            d['delta_hs_length'] = d['hs_length_max'] - d['hs_length_min']
+            d['fractional_shortening'] = d['delta_hs_length'] / \
+                d['hs_length_max']
+            d['pressure_artery_max'] = \
+                self.temp_data['pressure_arteries'].max()
+            d['pressure_artery_min'] = \
+                self.temp_data['pressure_arteries'].min()
+            d['pressure_veins_mean'] = \
+                self.temp_data['pressure_veins'].mean()
+            d['volume_veins_mean'] = \
+                self.temp_data['volume_veins'].mean()
+            d['volume_veins_proportion'] = \
+                d['volume_veins_mean'] / self.data['blood_volume']
+                
+        return d
+
+
     def implement_time_step(self, time_step):
         """ Implements time step """
-        
         self.data['time'] = self.data['time'] + time_step
-       
+
         # Display progress
         if (self.t_counter % 1000 == 0):
-            print('Sim time (s): %.0f  %.0f%% complete' % 
+            print('Sim time (s): %.0f  %.0f%% complete' %
                   (self.data['time'],
                    100*self.t_counter/self.prot.data['no_of_time_steps']))
+            system_values = self.return_system_values()
+            print(system_values)
             
         # Check and implement perturbations
         for p in self.prot.perturbations:

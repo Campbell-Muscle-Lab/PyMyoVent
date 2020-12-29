@@ -94,10 +94,10 @@
     },
     "baroreflex":
     {
-        "b_setpoint": 90,
-        "b_slope": 0.05,
+        "b_setpoint": 85,
+        "b_slope": 0.01,
         "k_drive": 1,
-        "k_recov": 0.2,
+        "k_recov": 0.1,
         "controls":
         {
             "control":
@@ -112,43 +112,43 @@
                     "level": "membranes",
                     "variable": "k_act",
                     "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "symp_factor": 3.33
                 },
                 {
                     "level": "membranes",
                     "variable": "k_serca",
                     "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "symp_factor": 3.33
                 },
                 {
                     "level": "myofilaments",
                     "variable": "k_1",
                     "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "symp_factor": 3.33
                 },
                 {
                     "level": "myofilaments",
                     "variable": "k_3",
                     "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "symp_factor": 3.33
                 },
                 {
                     "level": "myofilaments",
                     "variable": "k_on",
-                    "para_factor": 3.333,
+                    "para_factor": 3.33,
                     "symp_factor": 0.333
                 },
                 {
                     "level": "circulation",
-                    "variable": "arterioles_resistance",
+                    "variable": "arteries_resistance",
                     "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "symp_factor": 3.33
                 },
                 {
                     "level": "circulation",
                     "variable": "veins_compliance",
-                    "para_factor": 0.333,
-                    "symp_factor": 3.333
+                    "para_factor": 3.33,
+                    "symp_factor": 0.333
                 }
             ]
         }

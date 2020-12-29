@@ -4,8 +4,8 @@
         "job":
         [
             {
-                "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model.json",
-                "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol_baro_test.json",
+                "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model_candidate.json",
+                "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol_baro_candidate.json",
                 "output_handler_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler.json"
             }
         ]

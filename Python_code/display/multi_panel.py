@@ -103,7 +103,7 @@ def multi_panel_from_flat_data(
     # Set plausible values if fields are missing
     if 'global_x_field' not in x_display:
         x_display['global_x_field'] = pandas_data.columns[0]
-    if 'global_x_ticks' not in x_display:
+    if 'ticks' not in x_display:
         x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
                  pandas_data[x_display['global_x_field']].iloc[-1])
         x_display['global_x_ticks'] = \
@@ -199,7 +199,7 @@ def multi_panel_from_flat_data(
             if 'x_field' not in p_data:
                 p_data['x_field'] = x_display['global_x_field']
             if 'x_ticks' not in p_data:
-                p_data['x_ticks'] = x_display['global_x_ticks']
+                p_data['x_ticks'] = x_display['ticks']
             
             x = pandas_data[p_data['x_field']].to_numpy()
             vi = np.nonzero((x >= p_data['x_ticks'][0]) & 
@@ -286,7 +286,7 @@ def multi_panel_from_flat_data(
         if x_ticks_defined==False:
             xlim = deduce_axis_limits(xlim,'autoscaled')
         ax[i].set_xlim(xlim)
-        ax[i].set_xticks(x_display['global_x_ticks'])
+        ax[i].set_xticks(x_display['ticks'])
         # Set y limits
         if ('ticks' in p_data['y_info']):
             ylim=tuple(p_data['y_info']['ticks'])
@@ -348,6 +348,9 @@ def multi_panel_from_flat_data(
                          ncol = int(np.ceil(len(legend_symbols)/
                                             formatting['max_rows_per_legend'])))
 
+        # Handle annotations
+        handle_annotations(template_data, ax[i], i, formatting)
+
     # Tidy overall figure
     # Move plots inside margins
     lhs = layout['left_margin']/layout['fig_width']
@@ -365,6 +368,45 @@ def multi_panel_from_flat_data(
         fig.savefig(output_image_file_string, dpi=dpi)
 
     return (fig,ax)
+
+
+def handle_annotations(template_data, ax, panel_index, formatting):
+    if not ('annotations' in template_data):
+        return
+
+    annotation_data = template_data['annotations']
+    for an in annotation_data['annotation']:
+        if ((an['panel'] == 'all') or (an['panel'] == panel_index)):
+            if (an['type'] == 'v_line'):
+                ax.plot(an['x_value']*np.array([1, 1]),
+                        ax.get_ylim(),
+                        an['line_style'],
+                        linewidth=an['linewidth'])
+                
+            if (an['type'] == 'box'):
+                xc = an['x_coords']
+                x = np.array([xc[0],xc[0],xc[1],xc[1],xc[0]])
+                y_lim = ax.get_ylim()
+                yc = an['y_rel_coords']
+                y = (y_lim[1]-y_lim[0]) * \
+                        np.array([yc[0],yc[1],yc[1],yc[0],yc[0]])
+                ax.plot(x,y,'k-',clip_on=False)
+                ax.text(np.mean(x[[0,2]]),np.mean(y[[0,1]]),
+                        an['label'],
+                        fontsize=an['label_fontsize'],
+                        fontfamily = formatting['fontname'],
+                        horizontalalignment='center',
+                        verticalalignment='center')
+
+            if (an['type'] == 'text'):
+                y_lim = ax.get_ylim()
+                ax.text(an['x_coord'],
+                        (y_lim[1]-y_lim[0]) * an['y_rel_coord'],
+                        an['label'],
+                        fontsize=an['label_fontsize'],
+                        fontfamily = formatting['fontname'],
+                        horizontalalignment='center',
+                        verticalalignment='center')
 
 
 def deduce_axis_limits(lim, mode_string=[]):
