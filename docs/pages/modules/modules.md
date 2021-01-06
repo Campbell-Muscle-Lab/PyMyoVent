@@ -1,6 +1,6 @@
 ---
 Title: Modules
-nav_order: 5
+nav_order: 6
 has_children: True
 ---
 
@@ -10,6 +10,5 @@ has_children: True
 
 * TOC
 {:toc}
-**PyMyoVent** is built on a number of sub-modules representing diffetent functionality of the software in various scale levels. 
+**PyMyoVent** is built on a number of sub-modules representing diffetent functionality of the software in various scale levels.
 ![Flowchart](Flowchart.png)
-

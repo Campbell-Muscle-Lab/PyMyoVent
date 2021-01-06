@@ -301,15 +301,15 @@
   },"50": {
     "doc": "Growth",
     "title": "Growth",
-    "content": "With this demo you can test how the growth module can capture any change in ventricular shape in response to altered ventricular loading. ",
-    "url": "http://localhost:4000/pages/demos/growth/growth.html",
-    "relUrl": "/pages/demos/growth/growth.html"
-  },"51": {
-    "doc": "Growth",
-    "title": "Growth",
     "content": " ",
     "url": "http://localhost:4000/pages/modules/growth/growth.html",
     "relUrl": "/pages/modules/growth/growth.html"
+  },"51": {
+    "doc": "Growth",
+    "title": "Growth",
+    "content": "With this demo you can test how the growth module can capture any change in ventricular shape in response to altered ventricular loading. ",
+    "url": "http://localhost:4000/pages/demos/growth/growth.html",
+    "relUrl": "/pages/demos/growth/growth.html"
   },"52": {
     "doc": "Growth Aortic Stenosis (pressure overload)",
     "title": "Growth Aortic Stenosis (pressure overload)",
@@ -491,78 +491,144 @@
     "url": "http://localhost:4000/pages/instruction_files/instruction_files.html#saving_to_spreadsheet",
     "relUrl": "/pages/instruction_files/instruction_files.html#saving_to_spreadsheet"
   },"82": {
+    "doc": "Model",
+    "title": "Model",
+    "content": ". | circulation | heart_rate | half_sarcomere | . Model file contains model parameters that are essential for each module. These parameters can either change (due to applied perturbation) or be constant throughout a simulation. The three essential block structures for each simulation are circulation, heart_rate, and half_sarcomere. So all model files SHOULD include these structures. Other supplementary block structures like baroreflex, or growth are optional and can be added or removed based on the purpose of the simulation. { \"circulation\":{ \"blood_volume\": 3.5, \"compartments\": [ { \"name\": \"aorta\", \"resistance\": 40, \"compliance\": 5e-4 }, { \"name\": \"arteries\", \"resistance\": 40, \"compliance\": 5e-4 }, { \"name\": \"arterioles\", \"resistance\": 800, \"compliance\": 1e-4 }, { \"name\": \"capillaries\", \"resistance\": 200, \"compliance\": 2e-4 }, { \"name\": \"venules\", \"resistance\": 30, \"compliance\": 0.05 }, { \"name\": \"veins\", \"resistance\": 30, \"compliance\": 0.3 }, { \"name\": \"ventricle\", \"resistance\": 20, \"wall_volume\": 0.1, \"slack_volume\": 0.03, \"wall_density\": 1055 } ] }, \"heart_rate\": { \"t_active_period\": 0.003, \"t_quiescent_period\": 0.854, \"t_first_activation\": 0.1 }, \"half_sarcomere\":{ \"initial_hs_length\": 900, \"reference_hs_length\": 1100, \"membranes\": { \"Ca_content\": 1e-3, \"k_leak\": 5e-4, \"k_act\": 1.5e-2, \"k_serca\": 10.0, \"t_open\": 0.1, \"implementation\":{ \"kinetic_scheme\": \"simple_2_compartment\" } }, \"myofilaments\":{ \"cb_number_density\": 6.9e16, \"k_1\": 2, \"k_force\": 1e-3, \"k_2\": 200, \"k_3\": 100, \"k_4_0\": 150, \"k_4_1\": 0.1, \"k_cb\": 0.001, \"x_ps\": 5, \"k_on\": 2e8, \"k_off\": 200, \"k_coop\": 5, \"passive_exp_sigma\": 200, \"passive_exp_L\": 70, \"passive_l_slack\": 900, \"implementation\": { \"kinetic_scheme\": \"3_state_with_SRX\", \"passive_mode\": \"exponential\", \"max_rate\": 5000, \"temperature\": 310, \"bin_min\": -10, \"bin_max\": 10, \"bin_width\": 1, \"filament_compliance_factor\": 0.5, \"thick_filament_length\": 815, \"thin_filament_length\": 1120, \"bare_zone_length\": 80 } } } } . ",
+    "url": "http://localhost:4000/pages/structures/model/model.html",
+    "relUrl": "/pages/structures/model/model.html"
+  },"83": {
+    "doc": "Model",
+    "title": "circulation",
+    "content": "This block contains the model parameters for systemic circulation module. | blood_volume : Total blood volume in the systemic circulatory system in liter. | compartments : List of included compartments with their relative resistance and compliance factors. | Note: For ventricle compartment, user needs to define wall_volume in liter, ventricle slack_volume in liter, and wall_density in g/liter. | . ",
+    "url": "http://localhost:4000/pages/structures/model/model.html#circulation",
+    "relUrl": "/pages/structures/model/model.html#circulation"
+  },"84": {
+    "doc": "Model",
+    "title": "heart_rate",
+    "content": "This block contains required model parameters for calculating heart rate. | t_active_period : Duration of activation pulse in seconds. | t_quiescent_period : Period of activation pulse in seconds. | t_first_activation : Activating time of the first pulse in seconds. | . ",
+    "url": "http://localhost:4000/pages/structures/model/model.html#heart_rate",
+    "relUrl": "/pages/structures/model/model.html#heart_rate"
+  },"85": {
+    "doc": "Model",
+    "title": "half_sarcomere",
+    "content": "This block contains model parameters for MyoSim model of contraction. | initial_hs_length : Initial length of a half-sarcomere. | reference_hs_length : Reference length of a half-sarcomere. | membranes : This sub-block contains model parameters for model of electrophysiology. | Ca_content : Total Ca content. | k_leak : Rate factor of Ca leak current from Sarcoplasmic Reticulum. | k_act : Rate factor of Ca activation current from Sarcoplasmic Reticulum. | k_serca : Rate factor of SERCA Ca current back to Sarcoplasmic Reticulum. | t_open : Time duration in which the RyR channel is open. | implementation : . | kinetic_scheme : Kinetic scheme for the electrophysiology model. | . | . | myofilaments: This sub-block contains model parameters for dynamically-coupled interaction of myofilaments. | cb_number_density : Number of myosin heads in a hypothetical cardiac half-sarcomere with a cross-sectional area of 1 m^2. | k_1 : Activation rate factor of myosin heads from SRX to DRX states. | k_force : Force dependant activation rate factor of myosin heads. | k_2 : Deactivation rate factor of myosin heads from DRX to SRX states. | k_3 : Attachment rate factor of myosin heads from SRX to Force Generating states. | k_4_0 : Detachment rate factor of myosin heads from Force Generating to SRX states. | k_4_1 : Strain dependant Detachment rate factor of myosin heads from Force Generating to SRX states. | k_cb : The cross-bridge stiffness factor. | x_ps : The power stroke of an attached cross-bridge. | k_on : The activation rate factor of binding sites on thin filaments. | k_off : The deactivation rate factor of binding sites on thin filaments. | k_coop : The cooperativity factor of thin filaments. | passive_exp_sigma : The sigma constant factor. | passive_exp_L : The constant factor that sets the curvature of the relationship. | passive_l_slack : Slack length of half-sarcomere. | implementation : . | kinetic_scheme : Kinetic scheme of myofilaments interaction. | passive_mode : Switch control for the passive behavior of half-sarcomeres. | max_rate : A float defining the maximum rate considered in the simulations. Rate values above this will be limited to max_rate. | temperature : The tempreture in Kelvin | bin_min : The minimum possible value of x in nm for the cross-bridge distribution. | bin_max : The maximum possible value of x in nm for the cross-bridge distribution. | bin_width : he width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate. | filament_compliance_factor : The compliance factor of myofilaments. | thick_filament_length : The length of thick myofilament in nm. | thin_filament_length : The length of thin myofilament in nm. | bare_zone_length : The length of bare zone. | . | . | . ",
+    "url": "http://localhost:4000/pages/structures/model/model.html#half_sarcomere",
+    "relUrl": "/pages/structures/model/model.html#half_sarcomere"
+  },"86": {
     "doc": "Modules",
     "title": "Modules",
     "content": "PyMyoVent is built on a number of sub-modules representing diffetent functionality of the software in various scale levels. ",
     "url": "http://localhost:4000/pages/modules/modules.html",
     "relUrl": "/pages/modules/modules.html"
-  },"83": {
+  },"87": {
+    "doc": "Output handler",
+    "title": "Output handler",
+    "content": ". | Output handler | . ",
+    "url": "http://localhost:4000/pages/structures/output_handler/output_handler.html",
+    "relUrl": "/pages/structures/output_handler/output_handler.html"
+  },"88": {
+    "doc": "Output handler",
+    "title": "Output handler",
+    "content": "Output-handler accounts for handling the output files from a simulation. The output data can be stored in a spread sheet with extension format of .csv or .excel by defining simulation_output_file_string in the output handler file. Also the output data can be visualized in a default format by defining summary_image_file_string as the pathway for saving the summary_image.png. User can define more user_defined figures in multipanel format by defining two parameters: . | template_file_string : Path to the directory where the template for multipanel format in JSON format is located. | output_file_string : Path to the directory where a user wants to save the user_defined figure in multipanel format. | . { \"simulation_output_file_string\": \"path_to_output_data.csv\", \"summary_image_file_string\": \"path_to_summary_figure.png\", \"user_defined_images\": { \"user_defined\": [ { \"template_file_string\": \"path_to_template_file.json\", \"output_file_string\": \"path_to_user_defined_figure.png\" } ] } } . ",
+    "url": "http://localhost:4000/pages/structures/output_handler/output_handler.html",
+    "relUrl": "/pages/structures/output_handler/output_handler.html"
+  },"89": {
     "doc": "Perturbation",
     "title": "Perturbation",
     "content": ". | Overview | Theory . | Parameters | . | . ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html",
     "relUrl": "/pages/modules/perturbation/perturbation.html"
-  },"84": {
+  },"90": {
     "doc": "Perturbation",
     "title": "Overview",
     "content": "This module is developed to control different types of perturbation and the way they are being applied to a simulation. ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html#overview",
     "relUrl": "/pages/modules/perturbation/perturbation.html#overview"
-  },"85": {
+  },"91": {
     "doc": "Perturbation",
     "title": "Theory",
     "content": ". | The Perturbation module can perturb a simulation from molecular level (e.g. the attachment rate constant of myosin heads to the binding sites in actin, k_3) to the organ level (e.g. blood volume perturbation and hemorrhage condition). | Each type of perturbation is defined with three parameters: . | start_index: Starting time index for the perturbation to be applied. | stop_index: Stopping time index for the perturbation to be applied. | increment: The inceremental value to be added at each time step during perturbation time. | . | . Parameters . \"perturbations\": { \"perturbation_activation\":[false], \"volume\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"valve\":{ \"aortic\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"mitral\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"compliance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"resistance\": { \"aorta\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"capillaries\": { \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"venous\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"ventricle\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"myosim\":{ \"k_1\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_2\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"k_4_0\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } }, \"ca_handling\":{ \"ca_uptake\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"ca_leak\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] }, \"g_cal\":{ \"start_index\": [], \"stop_index\": [], \"increment\": [0] } } }, . ",
     "url": "http://localhost:4000/pages/modules/perturbation/perturbation.html#theory",
     "relUrl": "/pages/modules/perturbation/perturbation.html#theory"
-  },"86": {
+  },"92": {
+    "doc": "Protocol",
+    "title": "Protocol",
+    "content": ". | Protocol | . ",
+    "url": "http://localhost:4000/pages/structures/protocol/protocol.html",
+    "relUrl": "/pages/structures/protocol/protocol.html"
+  },"93": {
+    "doc": "Protocol",
+    "title": "Protocol",
+    "content": "Protocol file handles how a simulation runs. In the simplest way the user needs to define the number of time steps, no_of_time_steps, and the resolution of simulation, time_step. Additionally, an individual user can define different types of perturbation (e.g. blood volume perturbation), or activation time slots for supplementary modules like baroreflex and/or growth. For example, the following protocol file enforces a simulation of 100 seconds with no_of_time_steps: 10000 and time_step: 0.001. Furthermore, this file contains a perturbation block that implies a perturbation of blood volume from starting time of t_start_s: 25 up to t_stop_s: 30 with total_change: 1 liter. The baroreflex block in this file accounts for activation time slot for the baroreflex module. An individual user can change the protocol file according to his/her research type. { \"protocol\":{ \"no_of_time_steps\": 100000, \"time_step\": 0.001 }, \"perturbations\": { \"perturbation\": [ { \"variable\": \"blood_volume\", \"t_start_s\": 25, \"t_stop_s\": 30, \"total_change\": 1 } ] }, \"baroreflex\": { \"activations\": [ { \"t_start_s\": 10, \"t_stop_s\": 100 } ] } } . ",
+    "url": "http://localhost:4000/pages/structures/protocol/protocol.html",
+    "relUrl": "/pages/structures/protocol/protocol.html"
+  },"94": {
     "doc": "Publications",
     "title": "Publications",
     "content": "Here are the list of peer reviewed articles built on PyMyoVent framework. Each sub-folder include the utilized demos and “Analyze” scripts for generating the published figures and tables. ",
     "url": "http://localhost:4000/pages/publications/publications.html",
     "relUrl": "/pages/publications/publications.html"
-  },"87": {
+  },"95": {
     "doc": "Single Ventricle",
     "title": "Single Ventricle",
     "content": ". | Overview | Theory | . ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html"
-  },"88": {
+  },"96": {
     "doc": "Single Ventricle",
     "title": "Overview",
     "content": "The Single Ventricle module is originally adopted by Campbell KB. et al. where they assumed a thin walled hemispherical geometry for the left ventricle. PyMyoVent uses similar assumption and considers the whole heart as a single hemispherical left ventricle. In this model the half-sarcomeres are assumed to be circumferentially oriented at the basal mid-wall of the hemisphere, i.e., the mid-transmural wall in the middle of the LV wall thickness. | Single ventricle geometry adopted from Campbell KB. et al. work. ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html#overview",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html#overview"
-  },"89": {
+  },"97": {
     "doc": "Single Ventricle",
     "title": "Theory",
     "content": "| . This module, in particular, governs two characteristics of the ventricle: . | The associated change in half-sarcomeres length due to the change in ventricular volume. | The associated mid-wall radius to the hemispherical volume, which is related to the LV cavity volume and half of the LV wall volume can be defined as follows: | . | Where: . | Vventricle is the cavity volume of the ventricle derived from the circulatory module. | Wvolume is the volume of ventricle wall. | . | The associated circumference of mid-wall at the basal level is defined with the following equation. The change in the mid-wall circumference enforces the change in the half-sarcomeres length. | . | And finally the ventricular wall thickness is determined with: | . | Where: . | ri is the internal radius of the left ventricle. | . | . | The ventricular pressure according to Laplace’s law. | Where: . | ri is the internal radius of the left ventricle. | Wthickness is the ventricular wall thickness. | Ftotal is the total stress in the half-sarcomeres. | . | . | . ",
     "url": "http://localhost:4000/pages/modules/single_ventricle/single_ventricle.html#theory",
     "relUrl": "/pages/modules/single_ventricle/single_ventricle.html#theory"
-  },"90": {
+  },"98": {
+    "doc": "Structures",
+    "title": "Structures",
+    "content": ". | Overview | Batch | . ",
+    "url": "http://localhost:4000/pages/structures/structures.html",
+    "relUrl": "/pages/structures/structures.html"
+  },"99": {
+    "doc": "Structures",
+    "title": "Overview",
+    "content": "PyMyoVent uses a bundle of text files in JSON format for handling different aspects of a single simulation. ",
+    "url": "http://localhost:4000/pages/structures/structures.html#overview",
+    "relUrl": "/pages/structures/structures.html#overview"
+  },"100": {
+    "doc": "Structures",
+    "title": "Batch",
+    "content": "In batch file, each single simulation is defined as a job that contains the pathways to three types of input text file in JSON format: . | Model file | Protocol file | Output handler file | . These files are explained in following of this page. For example, the following batch file includes one job. { \"PyMyoVent_batch\": { \"job\": [ { \"model_file_string\": \"path_to_model_file.json\", \"protocol_file_string\": \"path_to_protocol_file.json\", \"output_handler_file_string\": \"path_to_output_handler_file.json\" } ] } } . Or the following batch file includes multiple jobs: . { \"PyMyoVent_batch\": { \"job\": [ { \"model_file_string\": \"path_to_model_file_1.json\", \"protocol_file_string\": \"path_to_protocol_file_1.json\", \"output_handler_file_string\": \"path_to_output_handler_file_1.json\" }, { \"model_file_string\": \"path_to_model_file_2.json\", \"protocol_file_string\": \"path_to_protocol_file_2.json\", \"output_handler_file_string\": \"path_to_output_handler_file_2.json\" }, { \"model_file_string\": \"path_to_model_file_3.json\", \"protocol_file_string\": \"path_to_protocol_file_3.json\", \"output_handler_file_string\": \"path_to_output_handler_file_3.json\" } ] } } . ",
+    "url": "http://localhost:4000/pages/structures/structures.html#batch",
+    "relUrl": "/pages/structures/structures.html#batch"
+  },"101": {
     "doc": "How to submit an issue",
     "title": "How to submit an issue",
     "content": "Okay, something has gone wrong, you’ve worked through running demos, and you’ve come to the conclusion that there is a problem with the code. | Go to the PyMyoVent respository . | Click on the Issues tab . | Click on the Green “New issue” button . | . ",
     "url": "http://localhost:4000/pages/help/submit_an_issue.html",
     "relUrl": "/pages/help/submit_an_issue.html"
-  },"91": {
+  },"102": {
     "doc": "System Control",
     "title": "System Control",
     "content": ". | Overview | Theory . | Fixed heart rate . | Parameters | . | Simple baroreceptor . | Parameters | . | . | . ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html",
     "relUrl": "/pages/modules/system_control/system_control.html"
-  },"92": {
+  },"103": {
     "doc": "System Control",
     "title": "Overview",
     "content": "This module controls how a single simulation should be run and whether the simulation needs being controlled or not. So far, there are two approaches implemented into the System Control module, but any new approach can be easily added. ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html#overview",
     "relUrl": "/pages/modules/system_control/system_control.html#overview"
-  },"93": {
+  },"104": {
     "doc": "System Control",
     "title": "Theory",
     "content": "In general, System Control governs a simulation’s running time, resolution, and the stimulus puls. But based on the complexity level, an indiviual user can select between two approached implemented so far: . | Fixed heart rate approch | Simple baroreceptor approach | . Fixed heart rate . | This approach assumes a simulation runs with a constant heart rate. The activation pulse is defined based on a periodic square-wave waveform. | . | An individual user can define the signal period and also the signal stimulus duration (i.e. duty ratio) at each period. | The resolution of simulation is defined with time_step parameter. The finer the resolution, the more precise the results get, but it takes a longer simulation time. | . Parameters . \"fixed_heart_rate\":{ \"simulation\":{ \"no_of_time_points\": [5000], \"time_step\": [0.001], \"duty_ratio\": [0.3], \"basal_heart_period\": [1,\"s\"] } }, . | Despite the Simple Baroreceptor approach, this method does not regulate any parameter in the simulation due to any perturbation. Hence, the simulation | . Simple baroreceptor . Parameters . \"simple_baroreceptor\":{ \"simulation\":{ \"start_index\":[2000], \"memory\":[2,\"s\"], \"no_of_time_points\": [15000], \"time_step\": [0.001], \"duty_ratio\": [0.003], \"basal_heart_period\": [1,\"s\"] }, \"afferent\": { \"b_max\": [2], \"b_min\": [0], \"S\": [0.067,\"mmHg\"], \"P_n\": [90,\"mmHg\"] }, \"regulation\":{ \"heart_period\":{ \"G_T\": [0.03] }, \"k_1\":{ \"G_k1\": [-0.05] }, \"k_3\":{ \"G_k3\": [-0.0] }, \"k_on\":{ \"G_k_on\":[0.02] }, \"ca_uptake\":{ \"G_up\": [-0.02] }, \"g_cal\":{ \"G_gcal\": [-0.03] } } } . ",
     "url": "http://localhost:4000/pages/modules/system_control/system_control.html#theory",
     "relUrl": "/pages/modules/system_control/system_control.html#theory"
-  },"94": {
+  },"105": {
     "doc": "Team",
     "title": "Team",
     "content": "Key contributors to the PyMyoVent project include: . | Ken Campbell . | leads the overall project | developed the MyoSim model | wrote the first version of PyMyoVent | . | Stuart Campbell . | developed a prototype model | helped write the first publication | . | Jonathan Wenk . | directs current research at the University of Kentucky | . | Brianna Chrisman . | wrote the first prototype of the modeling software as an undergraduate student with Stuart Campbell. | . | Hossein Sharifi . | lead developer at the University of Kentucky | developed the baroreceptor and growth modules | . | . ",
