@@ -17,7 +17,7 @@ def PyMyoVent_main():
 
     # Switch depending on number of arguments
     if (no_of_arguments == 1):
-        run_batch('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/batch.json')
+        run_batch('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/batch_growth.json')
 
     if (no_of_arguments == 2):
         import output_handler.output_handler as oh
@@ -25,6 +25,11 @@ def PyMyoVent_main():
         sim_data = pd.read_csv('C:/ken/GitHub/CampbellMuscleLab/models/PyMyoVent/temp/output_ken.csv')
         oh.output_handler('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler.json',
                           sim_data)
+        
+    if (no_of_arguments == 3):
+        print(sys.argv)
+        if (sys.argv[1] == 'run_batch'):
+            run_batch(sys.argv[2])
 
 
 def run_batch(batch_json_file_string):
@@ -34,7 +39,7 @@ def run_batch(batch_json_file_string):
 
     with open(batch_json_file_string, 'r') as bf:
         batch_data = json.load(bf)
-        jobs = batch_data['PyMyoVent_batch']['job']
+        jobs = batch_data['job']
         for job in jobs:
             svc_object = svc.single_ventricle_circulation(job['model_file_string'])
             svc_object.run_simulation(

@@ -106,7 +106,7 @@ def multi_panel_from_flat_data(
     if 'ticks' not in x_display:
         x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
                  pandas_data[x_display['global_x_field']].iloc[-1])
-        x_display['global_x_ticks'] = \
+        x_display['ticks'] = \
             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
         x_ticks_defined=False
     else:

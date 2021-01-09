@@ -31,11 +31,10 @@ class output_handler():
             
         # Write sim_data to file
         if ('simulation_output_file_string' in self.oh_data.keys()):
-            output_file_string = self.oh_data['simulation_output_file_string']
-            if not os.path.isabs(output_file_string):
-                data_file_string = os.path.join(os.getcwd(),
-                                                output_file_string)
-            ext = data_file_string.split('.')[-1]
+            output_file_string = os.path.abspath(
+                self.oh_data['simulation_output_file_string'])
+            print(output_file_string)
+            ext = output_file_string.split('.')[-1]
             print('Writing sim_data to %s' % output_file_string)
             if (ext=='xlsx'):
                 sim_data.to_excel(output_file_string, index=False)
@@ -62,7 +61,7 @@ class output_handler():
             
         # User defined files
         if ('user_defined_images' in self.oh_data):
-            user_defined = self.oh_data['user_defined_images']['user_defined']
+            user_defined = self.oh_data['user_defined_images']
             for ud in user_defined:
                 self.create_image_from_template(
                     sim_data,

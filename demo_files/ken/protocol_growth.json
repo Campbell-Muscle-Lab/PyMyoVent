@@ -1,0 +1,38 @@
+{
+    "protocol":{
+        "no_of_time_steps": 80000,
+        "time_step": 0.0025
+    },
+    "perturbations":
+    {
+        "perturbation":
+        [
+            {
+                "variable": "baroreflex_setpoint",
+                "t_start_s": 2000,
+                "t_stop_s": 2100,
+                "total_change": 10
+            }
+        ]
+    },
+    "baroreflex":
+    {
+        "activations":
+        [
+            {
+                "t_start_s": 8,
+                "t_stop_s": 10000
+            }
+        ]
+    },
+    "growth":
+    {
+        "activations":
+        [
+            {
+                "t_start_s": 15,
+                "t_stop_s": 1000
+            }
+        ]
+    }
+}

@@ -78,14 +78,14 @@
             {
                 "panel": "all",
                 "type": "v_line",
-                "x_value": 25,
+                "x_value": 35,
                 "line_style": "k--",
                 "linewidth": 1
             },
             {
                 "panel": "all",
                 "type": "v_line",
-                "x_value": 30,
+                "x_value": 40,
                 "line_style": "k--",
                 "linewidth": 1
             }
@@ -417,6 +417,32 @@
                     }
                 ]
             }
-        }       
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Growth signal",
+                "series":
+                [
+                    {
+                        "field": "growth_eccentric_pas_force"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "n_hs",
+                "series":
+                [
+                    {
+                        "field": "n_hs"
+                    }
+                ]
+            }
+        }    
     ]
 }

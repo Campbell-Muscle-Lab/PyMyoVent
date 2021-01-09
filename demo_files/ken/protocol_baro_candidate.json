@@ -9,8 +9,8 @@
         [
             {
                 "variable": "baroreflex_setpoint",
-                "t_start_s": 25,
-                "t_stop_s": 30,
+                "t_start_s": 35,
+                "t_stop_s": 40,
                 "total_change": 0
             }
         ]

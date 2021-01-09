@@ -5,8 +5,8 @@
         "user_defined":
         [
             {
-                "template_file_string": "../demo_files/ken/template_baro_test_demo_2.json",
-                "output_file_string": "../temp/baro_test_demo.png"
+                "template_file_string": "../demo_files/ken/template_growth.json",
+                "output_file_string": "../temp/growth_demo.png"
             }
         ]
     }

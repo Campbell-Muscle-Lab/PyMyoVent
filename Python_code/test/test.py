@@ -13,6 +13,34 @@ from scipy.misc import derivative as dr
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+def test_pas():
+    no_of_rows = 2
+    fig = plt.figure(constrained_layout = True)
+    spec = gridspec.GridSpec(figure=fig,
+                             nrows = no_of_rows,
+                             ncols = 1)
+    ax=[]
+    
+    for i in np.arange(0,no_of_rows):
+        ax.append(fig.add_subplot(spec[i,0]))
+    
+    sigma = 200
+    x_slack = 900
+    L = 65
+    
+    x = np.linspace(800,1300,100)
+    f = 0 * x
+    for i, xi in enumerate(x):
+        if (xi>x_slack):
+            f[i] = sigma * (np.exp((xi-x_slack)/L)-1)
+        else:
+            f[i] = -sigma * (np.exp(np.fabs((xi-x_slack)/L))-1)
+    
+    ax[0].plot(x,f,'b-')
+    ax[0].set_ylim([-1e4,1e4])
+    ax[0].set_xlim([800,1300])
+        
+
 def test():
     
     no_of_rows = 4
@@ -101,4 +129,4 @@ def return_b(p):
     
 
 if __name__ == "__main__":
-    test()
+    test_pas()
