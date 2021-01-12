@@ -181,25 +181,25 @@
   },"30": {
     "doc": "Installation",
     "title": "Overview",
-    "content": "PyMyoVent is written in Python version 3 and uses a number of packages and libraries. We at the Campbell-Muscell-Lab, highly recommend every users to use Anaconda as the Python environment management. ",
+    "content": ". | PyMyoVent is written in Python version 3 and uses a number of packages and libraries. We at the Campbell-Muscell-Lab, highly recommend every users to use Anaconda as the Python environment management. | . ",
     "url": "http://localhost:4000/pages/environment/environment.html#overview",
     "relUrl": "/pages/environment/environment.html#overview"
   },"31": {
     "doc": "Installation",
     "title": "Setting up Python environement",
-    "content": "Python How Tos helps you to setup the required python environment and management usefule for running a simulation with PyMyoVent. ",
+    "content": ". | Python How Tos helps you to setup the required python environment and management usefule for running a simulation with PyMyoVent. | . ",
     "url": "http://localhost:4000/pages/environment/environment.html#setting-up-python-environement",
     "relUrl": "/pages/environment/environment.html#setting-up-python-environement"
   },"32": {
     "doc": "Installation",
     "title": "Using an Existing Environment",
-    "content": "You can also use an existing environment for running PyMyoVent framework. Similar to the other software repositories developed by Campbell-Muscell-Lab, there is an environment.yml file located at path_to_PyMyoVent_repo\\environment directory that includes all the required packages for running PyMyoVent project. An individual user can create a local environment using the exisiting file and activate it prior to running PyMyoVent framework. If this is your first time dealing with creating local environments for a project, you might need to check this link first. ",
+    "content": ". | You can also use an existing environment for running PyMyoVent framework. Similar to the other software repositories developed by Campbell-Muscell-Lab, there is an environment.yml file located at path_to_PyMyoVent_repo/environment directory that includes all the required packages for running PyMyoVent project. An individual user can create a local environment using the existing file and activate it prior to running PyMyoVent framework. | If this is your first time dealing with creating local environments for a project, you might need to check this link first. | . ",
     "url": "http://localhost:4000/pages/environment/environment.html#using-an-existing-environment",
     "relUrl": "/pages/environment/environment.html#using-an-existing-environment"
   },"33": {
     "doc": "Installation",
     "title": "Cloning PyMyoVent Repository",
-    "content": "PyMyoVent repository is hosted on Github website. The best way for cloning the repository and have the version control over the source code is using GitHub Desktop software. Please check Github Repos to get more familiar with how to clone a reposirtory from GitHub. ",
+    "content": ". | PyMyoVent repository](http://github.com/Campbell-Muscle-Lab/PyMyoVent) is hosted on Github website. The best way for cloning the repository and have the version control over the source code is using GitHub Desktop software. | Please check Github Repos to get more familiar with how to clone a repository from GitHub. | . ",
     "url": "http://localhost:4000/pages/environment/environment.html#cloning-pymyovent-repository",
     "relUrl": "/pages/environment/environment.html#cloning-pymyovent-repository"
   },"34": {
