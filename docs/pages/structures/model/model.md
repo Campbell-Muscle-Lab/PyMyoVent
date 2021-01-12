@@ -148,7 +148,7 @@ This block contains model parameters for MyoSim model of contraction.
         -  `kinetic_scheme` : Kinetic scheme for the electrophysiology model.
 
 - `myofilaments`: This sub-block contains model parameters for dynamically-coupled interaction of myofilaments.
-    - `cb_number_density` : Number of myosin heads in a hypothetical cardiac half-sarcomere with a cross-sectional area of 1 m^2.
+    - `cb_number_density` : Number of myosin heads in a hypothetical cardiac half-sarcomere with a cross-sectional area of 1 m<sup>2</sup>.
     - `k_1` : Activation rate factor of myosin heads from SRX to DRX states.
     - `k_force` : Force dependent activation rate factor of myosin heads.
     - `k_2` : Deactivation rate factor of myosin heads from DRX to SRX states.
