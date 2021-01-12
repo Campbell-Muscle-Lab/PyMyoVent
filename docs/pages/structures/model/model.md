@@ -11,14 +11,17 @@ parent: Structures
 {:toc}
 
 
-Model file contains model parameters that are essential for each  module. These parameters can either change (due to applied perturbation) or be constant throughout a simulation.
+- Model file contains the model parameters that are essential for each module. These parameters can either change (due to applied perturbation) or be constant throughout a simulation.
 
-The three essential block structures for each simulation are `circulation`, `heart_rate`, and `half_sarcomere`. So all model files **SHOULD** include these structures. Other supplementary block structures like `baroreflex`, or `growth` are optional and can be added or removed based on the purpose of the simulation.
+- The three essential block structures for each simulation are `circulation`, `heart_rate`, and `half_sarcomere`. So all model files **SHOULD** include these block structures. Other supplementary block structures like `baroreflex`, or `growth` are optional and can be added or removed based on the purpose of the simulation.
+
+- The following is an example of `model_file.json` including only the three main blocks. The user can change the parameter values optionally.
+- The parameters for each block are explained in the following of this page.
 
 ````
 {
     "circulation":{
-        "blood_volume": 3.5,
+        "blood_volume": 3.65,
         "compartments":
         [
             {
@@ -113,26 +116,30 @@ The three essential block structures for each simulation are `circulation`, `hea
 }
 ````
 
-
 ## circulation
 
-This block contains the model parameters for systemic circulation module.
-- `blood_volume` : Total blood volume in the systemic circulatory system in liter.
+This block contains the model parameters for the systemic circulation module.
+
+- `blood_volume` : Total blood volume in the systemic circulatory system in liters.
 - `compartments` : List of included compartments with their relative `resistance` and `compliance` factors.
-- Note: For `ventricle` compartment, user needs to define `wall_volume` in liter, ventricle `slack_volume` in liter, and `wall_density` in g/liter.
+- Note: For `ventricle` compartment, user needs to define `wall_volume` in liters, ventricle `slack_volume` in liters, and `wall_density` in g/liters.
 
 ## heart_rate
-This block contains required model parameters for calculating heart rate.
+
+This block contains the required parameters for calculating the heart rate.
+
 - `t_active_period` : Duration of activation pulse in seconds.
-- `t_quiescent_period` : Period of activation pulse in seconds.
-- `t_first_activation` : Activating time of the first pulse in seconds.
+- `t_quiescent_period` : Duration of non-activated phase of a cardiac cycle in seconds.
+- `t_first_activation` : Activating time of the initiative pulse in seconds.
 
 ## half_sarcomere
+
 This block contains model parameters for MyoSim model of contraction.
-- `initial_hs_length` : Initial length of a half-sarcomere.
+
+- `initial_hs_length` : Initial length of a half-sarcomere embedded in the circumference of the ventricle. .
 - `reference_hs_length` : Reference length of a half-sarcomere.
-- `membranes` : This sub-block contains model parameters for model of electrophysiology.
-    -  `Ca_content` : Total Ca content.
+- `membranes` : This sub-block contains model parameters for model of the membrane electrophysiology.
+    -  `Ca_content` : Total Ca content in the myocardial cell.
     -  `k_leak` : Rate factor of Ca leak current from Sarcoplasmic Reticulum.
     -  `k_act` : Rate factor of Ca activation current from Sarcoplasmic Reticulum.
     -  `k_serca` : Rate factor of SERCA Ca current back to Sarcoplasmic Reticulum.
@@ -143,11 +150,11 @@ This block contains model parameters for MyoSim model of contraction.
 - `myofilaments`: This sub-block contains model parameters for dynamically-coupled interaction of myofilaments.
     - `cb_number_density` : Number of myosin heads in a hypothetical cardiac half-sarcomere with a cross-sectional area of 1 m^2.
     - `k_1` : Activation rate factor of myosin heads from SRX to DRX states.
-    - `k_force` : Force dependant activation rate factor of myosin heads.
+    - `k_force` : Force dependent activation rate factor of myosin heads.
     - `k_2` : Deactivation rate factor of myosin heads from DRX to SRX states.
     - `k_3` : Attachment rate factor of myosin heads from SRX to Force Generating states.
     - `k_4_0` : Detachment rate factor of myosin heads from Force Generating to SRX states.
-    - `k_4_1` : Strain dependant Detachment rate factor of myosin heads from Force Generating to SRX states.
+    - `k_4_1` : Strain dependent detachment rate factor of myosin heads from Force Generating to SRX states.
     - `k_cb` : The cross-bridge stiffness factor.
     - `x_ps` : The power stroke of an attached cross-bridge.
     - `k_on` : The activation rate factor of binding sites on thin filaments.
@@ -160,10 +167,10 @@ This block contains model parameters for MyoSim model of contraction.
         - `kinetic_scheme` : Kinetic scheme of myofilaments interaction.
         - `passive_mode` : Switch control for the passive behavior of half-sarcomeres.
         - `max_rate` : A float defining the maximum rate considered in the simulations. Rate values above this will be limited to max_rate.
-        - `temperature` : The tempreture in Kelvin
+        - `temperature` : The temperature in Kelvin
         - `bin_min` : The minimum possible value of x in nm for the cross-bridge distribution.
         - `bin_max` : The maximum possible value of x in nm for the cross-bridge distribution.
-        - `bin_width` : he width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate.
+        - `bin_width` : The width of bins in the cross-bridge distribution. Smaller values of bin_width give cross-bridge distributions with finer resolution but take longer to calculate.
         - `filament_compliance_factor` : The compliance factor of myofilaments.
         - `thick_filament_length` : The length of thick myofilament in nm.
         - `thin_filament_length` : The length of thin myofilament in nm.
