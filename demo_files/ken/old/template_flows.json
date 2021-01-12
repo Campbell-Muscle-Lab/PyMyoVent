@@ -1,0 +1,119 @@
+{
+    "layout":
+    {
+        "fig_width": 7,
+        "top_margin": 0,
+        "left_margin": 0,
+        "right_margin": 0,
+        "panel_height": 1,
+        "grid_wspace": -0.5
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)"
+    },
+    "formatting":
+    {
+        "x_label_fontsize": 9,
+        "y_label_fontsize": 9,
+        "tick_fontsize": 9,
+        "legend_fontsize": 7,
+        "y_label_pad": 25,
+        "legend_bbox_to_anchor": [1.0, 1],
+        "patch_alpha": 0.3
+    },
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\nVentricle\nto\naorta",
+                "series":
+                [
+                    {
+                        "field": "flow_ventricle_to_aorta"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\naorta\nto\narteries",
+                "series":
+                [
+                    {
+                        "field": "flow_aorta_to_arteries"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\narteries\nto\narterioles",
+                "series":
+                [
+                    {
+                        "field": "flow_arteries_to_arterioles"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\narterioles\nto\ncapillaries",
+                "series":
+                [
+                    {
+                        "field": "flow_arterioles_to_capillaries"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\ncapillaries\nto\nvenules",
+                "series":
+                [
+                    {
+                        "field": "flow_capillaries_to_venules"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\nvenules\nto\nveins",
+                "series":
+                [
+                    {
+                        "field": "flow_venules_to_veins"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\nveins\nto\nventricle",
+                "series":
+                [
+                    {
+                        "field": "flow_veins_to_ventricle"
+                    }
+                ]
+            }
+        }
+    ]
+}

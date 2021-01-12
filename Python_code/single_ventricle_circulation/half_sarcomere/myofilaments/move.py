@@ -15,6 +15,7 @@ def move_cb_distributions(self, delta_hsl):
         before_heads = np.sum(self.y[bin_indices])
         self.y[bin_indices] = interpol.interp1d(self.x,
                                   self.y[bin_indices],
+                                  kind='quadratic',
                                   fill_value=0,
                                   bounds_error=False)(interp_positions)
 

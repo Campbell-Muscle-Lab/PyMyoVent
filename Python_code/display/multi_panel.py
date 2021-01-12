@@ -21,7 +21,7 @@ from matplotlib.collections import PatchCollection
 
 def default_formatting():
     formatting = dict()
-    formatting['data_linewidth'] = 1.5
+    formatting['data_linewidth'] = 1
     formatting['fontname'] = 'Arial'
     formatting['axis_linewidth'] = 1.5
     formatting['x_label_fontsize'] = 12
@@ -103,12 +103,25 @@ def multi_panel_from_flat_data(
     # Set plausible values if fields are missing
     if 'global_x_field' not in x_display:
         x_display['global_x_field'] = pandas_data.columns[0]
-    if 'ticks' not in x_display:
-        x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-                 pandas_data[x_display['global_x_field']].iloc[-1])
-        x_display['ticks'] = \
-            np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-        x_ticks_defined=False
+
+    if (('ticks' not in x_display) or ('ticks_rel_to_end' not in x_display)):
+        if ('ticks_rel_to_end' not in x_display):
+            # Set ticks to beginning and end of record
+            x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
+                     pandas_data[x_display['global_x_field']].iloc[-1])
+            x_display['ticks'] = \
+                np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
+            x_ticks_defined = False
+        else:
+            # Set ticks relative to end
+            x = pandas_data[x_display['global_x_field']].to_numpy()
+            x_end = x[-1]
+            x_lim = [x[x < (x_end + x_display['ticks_rel_to_end'][0])][-1],
+                     x[x < (x_end + x_display['ticks_rel_to_end'][-1])][-1]]
+            x_display['ticks'] = x_lim
+            print(x_display['ticks'])
+            x_ticks_defined = True
+
     else:
         x_ticks_defined=True    
     if 'label' not in x_display:

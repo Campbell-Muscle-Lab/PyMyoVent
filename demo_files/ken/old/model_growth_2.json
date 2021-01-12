@@ -1,50 +1,44 @@
 {
     "circulation":{
-        "blood_volume": 4.5,
+        "blood_volume": 3.56,
         "compartments":
         [
             {
                 "name": "aorta", 
-                "resistance": 20,
-                "compliance": 4e-4,
-                "slack_volume": 0.3
+                "resistance": 40,
+                "compliance": 5e-4
             },
             {
                 "name": "arteries",
-                "resistance": 20,
-                "compliance": 8e-4,
-                "slack_volume": 0.3
+                "resistance": 40,
+                "compliance": 5e-4
             },
             {
                 "name": "arterioles",
                 "resistance": 800,
-                "compliance": 1e-3,
-                "slack_volume": 0.1
+                "compliance": 1e-4
             },
             {
                 "name": "capillaries",
-                "resistance": 150,
-                "compliance": 1e-4,
-                "slack_volume": 0.25
+                "resistance": 200,
+                "compliance": 2e-4
             },
             {
                 "name": "venules",
-                "resistance": 50,
-                "compliance": 0.03,
-                "slack_volume": 0.5
+                "resistance": 30,
+                "compliance": 0.05
             },
             {
                 "name": "veins",
-                "resistance": 20,
-                "compliance": 0.08,
-                "slack_volume": 2.0
+                "resistance": 30,
+                "compliance": 0.35
             },
             {
                 "name": "ventricle",
-                "resistance": 5,
+                "resistance": 20,
                 "slack_volume": 0.07,
                 "wall_density": 1055,
-                "wall_volume": 0.1
+                "wall_volume": 0.07
             }
         ]
     },
@@ -68,12 +62,12 @@
         },
         "myofilaments":{
             "cb_number_density": 6.9e16,
-            "k_1": 3,
+            "k_1": 2,
             "k_force": 1e-3,
             "k_2": 200,
-            "k_3": 60,
-            "k_4_0": 45,
-            "k_4_1": 1,
+            "k_3": 130,
+            "k_4_0": 100,
+            "k_4_1": 0.1,
             "k_cb": 0.001,
             "x_ps": 5,
             "k_on": 2e8,
@@ -108,8 +102,8 @@
                 "signal": "pas_force",
                 "setpoint": 400,
                 "k_drive": 0.1,
-                "growth_factor": 0e-2,
-                "antigrowth_factor": 0e-2,
+                "growth_factor": -1e-2,
+                "antigrowth_factor": 1e-2,
                 "agrowth_factor": -1e-2,
                 "aantigrowth_factor": 1e-2
             },
@@ -119,8 +113,8 @@
                 "signal": "hs_force",
                 "setpoint": 9000,
                 "k_drive": 0.1,
-                "growth_factor": 0e-2,
-                "antigrowth_factor": 0e-2,
+                "growth_factor": 1e-2,
+                "antigrowth_factor": -1e-2,
                 "agrowth_factor": 1e-2,
                 "aantigrowth_factor": -1e-2
             }
@@ -130,7 +124,7 @@
     {
         "b_setpoint": 90,
         "b_slope": 0.02,
-        "k_drive": 0.1,
+        "k_drive": 1,
         "k_recov": 0.2,
         "controls":
         {
@@ -181,8 +175,8 @@
                 {
                     "level": "circulation",
                     "variable": "veins_compliance",
-                    "para_factor": 3.333,
-                    "symp_factor": 0.333
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
                 }
             ]
         }

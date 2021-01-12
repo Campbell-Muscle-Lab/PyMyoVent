@@ -9,7 +9,9 @@ from .baroreflex import baroreflex as br
 from .growth import growth as gr
 
 from protocol import protocol as prot
+from sim_options import sim_options as sim_opt
 from output_handler import output_handler as oh
+
 
 class single_ventricle_circulation():
 
@@ -18,18 +20,18 @@ class single_ventricle_circulation():
     def __init__(self, model_json_file_string):
 
         # Check for file
-        if (model_json_file_string==[]):
+        if (model_json_file_string == []):
             print('No model file specified. Cannot create model')
             return
 
         # Status
         print('Initialising single_ventricle_circulation from %s' %
               model_json_file_string)
-        
+
         # Load the model as a dict
-        with open(model_json_file_string,'r') as f:
+        with open(model_json_file_string, 'r') as f:
             sc_model = json.load(f)
-            
+
         # Create a model dict for things that do not change
         self.model = dict()
         # And a data dict for things that might
@@ -40,16 +42,16 @@ class single_ventricle_circulation():
 
         # Store the number of compartments
         self.model['no_of_compartments'] = len(circ_model['compartments'])
-        
+
         # Store blood volume
         self.data['blood_volume'] = circ_model['blood_volume']
-        
+
         vessels_list = []
         for comp in circ_model['compartments']:
             if not (comp['name'] == 'ventricle'):
                 n = comp['name']
                 vessels_list.append(comp['name'])
-                for t in ['resistance','compliance']:
+                for t in ['resistance', 'compliance', 'slack_volume']:
                     n = ('%s_%s') % (comp['name'], t)
                     self.data[n] = comp[t]
             else:
@@ -68,15 +70,18 @@ class single_ventricle_circulation():
         self.data['compliance'].append(0)
         # Convert to numpy array
         self.data['compliance'] = np.array(self.data['compliance'])
-        
+
         self.data['resistance'] = []
         vessels_list.append('ventricle')
-        self.model['compartment_list'] = vessels_list        
+        self.model['compartment_list'] = vessels_list
         for v in self.model['compartment_list']:
             r = self.data[('%s_resistance' % v)]
             self.data['resistance'].append(r)
         self.data['resistance'] = np.array(self.data['resistance'])
-        
+
+        # Add in mitral insuficient resistance
+        self.data['mitral_insufficiency_resistance'] = np.inf
+
         # Create a heart-rate object
         self.hr = hr.heart_rate(sc_model['heart_rate'])
 
@@ -84,32 +89,42 @@ class single_ventricle_circulation():
         self.hs = hs.half_sarcomere(sc_model['half_sarcomere'])
 
         # Deduce the hsl where force is zero and set the hsl to that length
-        self.hs.data['slack_hsl'] = self.hs.myof.return_hs_length_for_force(0.0)
+        self.hs.data['slack_hsl'] = \
+            self.hs.myof.return_hs_length_for_force(0.0)
         delta_hsl = self.hs.data['slack_hsl'] - self.hs.data['hs_length']
-        self.hs.update_simulation(0.0,delta_hsl, 0.0)
+        self.hs.update_simulation(0.0, delta_hsl, 0.0)
 
         # Deduce the slack circumference of the ventricle and deduce
         # the number of sarcomeres by dividing the slack_hsl
         self.data['ventricle_circumference'] = \
             self.return_lv_circumference(self.data['ventricle_slack_volume'])
-        self.data['n_hs'] = 1e9*self.data['ventricle_circumference'] / self.hs.data['slack_hsl']
-        
-        # Create the volume and pressure
+        self.data['n_hs'] = 1e9*self.data['ventricle_circumference'] / \
+            self.hs.data['slack_hsl']
+
+        # Create and fill arrays for the volume, slack_volume and pressure
         self.data['v'] = np.zeros(self.model['no_of_compartments'])
+        self.data['s'] = np.zeros(self.model['no_of_compartments'])
         # Put most of the blood in the veins
-        initial_ventricular_volume = 1.5 * self.data['ventricle_slack_volume']
-        self.data['v'][-2] = self.data['blood_volume'] - initial_ventricular_volume
-        self.data['v'][-1] = initial_ventricular_volume
-        
+        for i, c in enumerate(self.model['compartment_list']):
+            n = ('%s_slack_volume' % c)
+            self.data['s'][i] = self.data[n]
+            self.data['v'][i] = self.data[n]
+        self.data['total_slack_volume'] = sum(self.data['s'])
+        # Excess blood goes in veins
+        self.data['v'][-2] = self.data['v'][-2] + \
+            (self.data['blood_volume'] - self.data['total_slack_volume'])
+
         self.data['p'] = np.zeros(self.model['no_of_compartments'])
         for i in np.arange(0, self.model['no_of_compartments']-1):
-            self.data['p'][i] = self.data['v'][i] / self.data['compliance'][i]
+            self.data['p'][i] = (self.data['v'][i] - self.data['s'][i]) / \
+                self.data['compliance'][i]
         self.data['p'][-1] = self.return_lv_pressure(self.data['v'][-1])
 
-        # Allocate space for pressure and volume
-        for i,v in enumerate(self.model['compartment_list']):
+        # Allocate space for pressure, volume and slack_volume
+        for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
+            self.data['slack_volume_%s' % v] = self.data['s'][i]
 
         # Allocate space for flows
         self.data['f'] = np.zeros(self.model['no_of_compartments'])
@@ -145,6 +160,9 @@ class single_ventricle_circulation():
         else:
             self.gr = []
 
+        # Create a sim_options object
+        self.so = []
+
         # Add in a temp
         self.data['test'] = 0
 
@@ -165,18 +183,17 @@ class single_ventricle_circulation():
 
         self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
 
-
     def create_data_structure(self):
         """ creates a data frame from the data dicts of each component """
-        
+
         self.sim_data = pd.DataFrame()
         z = np.zeros(self.prot.data['no_of_time_steps'])
-        
+
         data_fields = list(self.data.keys()) + \
-                        list(self.hr.data.keys()) + \
-                        list(self.hs.data.keys()) + \
-                        list(self.hs.memb.data.keys()) + \
-                        list(self.hs.myof.data.keys())
+            list(self.hr.data.keys()) + \
+            list(self.hs.data.keys()) + \
+            list(self.hs.memb.data.keys()) + \
+            list(self.hs.myof.data.keys())
 
         # Add in fields from optional modules
         if (self.br):
@@ -184,14 +201,14 @@ class single_ventricle_circulation():
         if (self.gr):
             data_fields = data_fields + list(self.gr.data.keys())
 
-        for f in data_fields: 
+        for f in data_fields:
             s = pd.Series(data=z, name=f)
             self.sim_data = pd.concat([self.sim_data, s], axis=1)
 
-
     def run_simulation(self,
                        protocol_file_string=[],
-                       output_handler_file_string=[]):
+                       output_handler_file_string=[],
+                       sim_options_file_string=[]):
         """ Run the simulation """
 
         # Load the protocol
@@ -204,6 +221,12 @@ class single_ventricle_circulation():
         # create the data structure
         self.create_data_structure()
 
+        # Check for sim_options
+        if (sim_options_file_string):
+            self.so = sim_opt.sim_options(sim_options_file_string,
+                                          self.prot.data['time_step'],
+                                          self)
+
         # Step through the simulation
         self.t_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
@@ -213,9 +236,12 @@ class single_ventricle_circulation():
         if (output_handler_file_string == []):
             print("No output_structure_file_string. Exiting")
             return
+        cb_dump_file_string = []
+        if ('cb_dump_file_string' in self.so.data):
+            cb_dump_file_string = self.so.data['cb_dump_file_string']
         self.oh = oh.output_handler(output_handler_file_string,
-                                    self.sim_data)
-
+                                    self.sim_data,
+                                    cb_dump_file_string)
 
     def return_system_values(self, time_interval=3):
         d = dict()
@@ -225,22 +251,15 @@ class single_ventricle_circulation():
                     self.data['time']-time_interval, self.data['time'])]
             d['volume_ventricle_max'] = \
                 self.temp_data['volume_ventricle'].max()
-            d['volume_ventricle_min'] = \
-                self.temp_data['volume_ventricle'].min()
-            d['ventricle_circumference_max'] = \
-                self.temp_data['ventricle_circumference'].max()
-            d['ventricle_circumference_min'] = \
-                self.temp_data['ventricle_circumference'].min()                
             d['stroke_volume'] = d['volume_ventricle_max'] - \
-                d['volume_ventricle_min']
+                self.temp_data['volume_ventricle'].min()
             d['ejection_fraction'] = d['stroke_volume'] / \
                 d['volume_ventricle_max']
             d['heart_rate'] = self.data['heart_rate']
             d['cardiac_output'] = d['stroke_volume'] * d['heart_rate']
             d['hs_length_max'] = self.temp_data['hs_length'].max()
-            d['hs_length_min'] = self.temp_data['hs_length'].min()
-            d['delta_hs_length'] = d['hs_length_max'] - d['hs_length_min']
-            d['fractional_shortening'] = d['delta_hs_length'] / \
+            d['fractional_shortening'] = \
+                (d['hs_length_max'] - self.temp_data['hs_length'].min()) / \
                 d['hs_length_max']
             d['pressure_artery_max'] = \
                 self.temp_data['pressure_arteries'].max()
@@ -248,17 +267,15 @@ class single_ventricle_circulation():
                 self.temp_data['pressure_arteries'].min()
             d['pressure_veins_mean'] = \
                 self.temp_data['pressure_veins'].mean()
-            d['volume_veins_mean'] = \
-                self.temp_data['volume_veins'].mean()
             d['volume_veins_proportion'] = \
-                d['volume_veins_mean'] / self.data['blood_volume']
-            d['pas_force_max'] = self.temp_data['pas_force'].max()
-            d['pas_force_min'] = self.temp_data['pas_force'].min()
+                self.temp_data['volume_veins'].mean() / \
+                self.data['blood_volume']
             d['pas_force_mean'] = self.temp_data['pas_force'].mean()
             d['n_hs'] = self.data['n_hs']
+            d['mitral_insufficiency_resistance'] = \
+                self.data['mitral_insufficiency_resistance']
 
         return d
-
 
     def implement_time_step(self, time_step):
         """ Implements time step """
@@ -271,18 +288,24 @@ class single_ventricle_circulation():
                    100*self.t_counter/self.prot.data['no_of_time_steps']))
             system_values = self.return_system_values()
             print(json.dumps(system_values, indent=4))
-            print('growth_eccentric_g: %g  growth_eccentric_c: %g' %
-                  (self.gr.data['growth_eccentric_g'],
-                   self.gr.data['growth_eccentric_c']))
-            print('growth_concentric_g: %g  growth_concentric_c: %g' %
-                  (self.gr.data['growth_concentric_g'],
-                   self.gr.data['growth_concentric_c']))
+            if (self.gr):
+                print('growth_eccentric_g: %g  growth_eccentric_c: %g' %
+                      (self.gr.data['growth_eccentric_g'],
+                       self.gr.data['growth_eccentric_c']))
+                print('growth_concentric_g: %g  growth_concentric_c: %g' %
+                      (self.gr.data['growth_concentric_g'],
+                       self.gr.data['growth_concentric_c']))
 
         # Check and implement perturbations
         for p in self.prot.perturbations:
-            if ((self.t_counter >= p.data['t_start_ind']) and
-                (self.t_counter < p.data['t_stop_ind'])):
-                self.data[p.data['variable']] += p.data['increment']
+            # Implement step_change perturbations
+            if ('new_value' in p.data):
+                if (self.t_counter == p.data['t_start_ind']):
+                    self.data[p.data['variable']] = p.data['new_value']
+            else:
+                if((self.t_counter >= p.data['t_start_ind']) and
+                   (self.t_counter < p.data['t_stop_ind'])):
+                    self.data[p.data['variable']] += p.data['increment']
 
         self.rebuild_from_perturbations()
 
@@ -303,9 +326,9 @@ class single_ventricle_circulation():
             self.data['growth_active'] = 0
             for g in self.prot.growth_activations:
                 if ((self.t_counter >= g.data['t_start_ind']) and
-                    (self.t_counter < g.data['t_stop_ind'])):
+                        (self.t_counter < g.data['t_stop_ind'])):
                     self.data['growth_active'] = 1
-                    
+
             self.gr.implement_time_step(time_step,
                                         growth_active=self.data['growth_active'])
 
@@ -321,58 +344,31 @@ class single_ventricle_circulation():
         # Now evolve volumes
         self.evolve_volumes(time_step)
 
-        # if (self.data['growth_active']):
-        #      self.data['growth_dn'] = 1
-        # else:
-        #     self.data['growth_dn'] = 0
-
-        # # Update n_hs and wall volume
-        # fractional_change = self.data['growth_dn'] / self.data['n_hs']
-        # self.data['n_hs'] = (1.0+fractional_change) * self.data['n_hs']
-        # self.data['ventricle_wall_volume'] = (1.0+fractional_change) * \
-        #     self.data['ventricle_wall_volume']
-        
-        # Apply concentric growth
-        self.data['ventricle_wall_volume'] = self.data['ventricle_wall_volume'] + \
-            self.data['growth_dm']
-        # Correct for additional sarcomeres
-        # f = 1 + (self.data['growth_dn'] / self.data['n_hs'])
-        # self.data['ventricle_wall_volume'] = f * self.data['ventricle_wall_volume']
-        
-     
         # Apply the length change to the half-sarcomere
         new_circumference = self.return_lv_circumference(
                                 self.data['v'][-1])
         delta_circumference = new_circumference - \
             self.data['ventricle_circumference']
-        # delta_hsl = 1e9 * delta_circumference / self.data['n_hs']
         delta_hsl = ((1e9*delta_circumference) -
-                          (self.hs.data['hs_length'] *
-                              self.data['growth_dn'])) / \
-                    self.data['n_hs']
-        # print('circum: %g  delta circum: %g' %
-        # #       (new_circumference, delta_circumference))
-        self.data['test'] = self.data['growth_dn']
-        
+                     (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
+            self.data['n_hs']
 
-        self.data['n_hs'] = self.data['n_hs'] + self.data['growth_dn']
+        # Update model
         self.data['ventricle_circumference'] = new_circumference
-
-
-
-        # self.data['ventricle_circumference'] = \
-        #     self.return_lv_circumference(self.data['v'][-1])
-        # new_hs_length = 1e9 * self.data['ventricle_circumference'] / self.data['n_hs']
-        # delta_hsl = new_hs_length - self.hs.data['hs_length']
-
-        # print('circum ratio %g' % (new_circumference / self.data['ventricle_circumference']))
+        self.data['ventricle_wall_volume'] = \
+            self.data['ventricle_wall_volume'] + \
+            self.data['growth_dm'] + \
+            (self.data['ventricle_wall_volume'] *
+             self.data['growth_dn'] / self.data['n_hs'])
+        self.data['n_hs'] = self.data['n_hs'] + self.data['growth_dn']
 
         # Update the half-sarcomere with the new length
         self.hs.update_simulation(0, delta_hsl, 0)
 
         # Update the pressures
         for i in range(self.model['no_of_compartments']-1):
-            self.data['p'][i] = self.data['v'][i] / self.data['compliance'][i]
+            self.data['p'][i] = (self.data['v'][i] - self.data['s'][i]) / \
+                self.data['compliance'][i]
         self.data['p'][-1] = self.return_lv_pressure(self.data['v'][-1])
 
         # Update the objects' data
@@ -381,7 +377,7 @@ class single_ventricle_circulation():
 
         # Now update the sim_data
         for f in list(self.data.keys()):
-            if (f not in ['p','v','compliance','resistance','f']):
+            if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
                 self.sim_data.at[self.t_counter, f] = self.data[f]
         for f in list(self.hs.data.keys()):
             self.sim_data.at[self.t_counter, f] = self.hs.data[f]
@@ -396,9 +392,16 @@ class single_ventricle_circulation():
             for f in list(self.gr.data.keys()):
                 self.sim_data.at[self.t_counter, f] = self.gr.data[f]
 
+        # Dump cb distributions if required
+        if ('cb_dump_file_string' in self.so.data):
+            if ((self.t_counter >=
+                 self.so.data['cb_dump_t_start_ind']) and
+                (self.t_counter <
+                 self.so.data['cb_dump_t_stop_ind'])):
+                self.so.append_cb_distribution(self.data['time'])
+
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
-
 
     def update_data(self):
         # Update data for the simulation
@@ -414,7 +417,6 @@ class single_ventricle_circulation():
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
 
-
     def return_lv_pressure(self, chamber_volume):
         """ return pressure for a given volume """
         from scipy.constants import mmHg as mmHg_in_pascals
@@ -426,17 +428,18 @@ class single_ventricle_circulation():
         f = self.hs.myof.check_myofilament_forces(delta_hsl)
         total_force = f['total_force']
 
-        internal_r = self.return_internal_radius_for_chamber_volume(chamber_volume)
+        internal_r = self.return_internal_radius_for_chamber_volume(
+            chamber_volume)
 
         wall_thickness = self.return_wall_thickness(chamber_volume)
 
-        # Pressure from Laplaces lawNo documentation available 
+        # Pressure from Laplaces lawNo documentation available
         # https://www.annalsthoracicsurgery.org/action/showPdf?pii=S0003-4975%2810%2901981-8
         if (internal_r < 1e-6):
             P_in_pascals = 0
         else:
             P_in_pascals = ((total_force * wall_thickness *
-                                (2.0 + (wall_thickness / internal_r))) / 
+                             (2.0 + (wall_thickness / internal_r))) /
                             internal_r)
         P_in_mmHg = P_in_pascals / mmHg_in_pascals
 
@@ -451,7 +454,8 @@ class single_ventricle_circulation():
         internal_r = self.return_internal_radius_for_chamber_volume(
                         chamber_volume)
 
-        t  = np.power(0.001 * (chamber_volume + self.data['ventricle_wall_volume']) /
+        t  = np.power(0.001 * (chamber_volume +
+                               self.data['ventricle_wall_volume']) /
                       ((2.0 / 3.0) * np.pi), (1.0 / 3.0)) - \
                         internal_r
 
@@ -490,7 +494,7 @@ class single_ventricle_circulation():
         # Calculate pressure in each compartment
         p = np.zeros(self.model['no_of_compartments'])
         for i in np.arange(len(p)-1):
-            p[i] = v[i] / self.data['compliance'][i]
+            p[i] = (v[i]-self.data['s'][i]) / self.data['compliance'][i]
         p[-1] = self.return_lv_pressure(v[-1])
 
         f = np.zeros(self.model['no_of_compartments'])
@@ -504,7 +508,8 @@ class single_ventricle_circulation():
             f[0] = 0
         # Mitral
         if (p[-1] >= p[-2]):
-            f[-1] = 0
+            f[-1] = (p[-2]-p[-1]) / \
+                self.data['mitral_insufficiency_resistance']
 
         return f
 

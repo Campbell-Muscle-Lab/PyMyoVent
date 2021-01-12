@@ -1,0 +1,11 @@
+{
+    "job":
+    [
+        {
+            "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_model.json",
+            "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_protocol.json",
+            "sim_options_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_sim_options.json",
+            "output_handler_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_output_handler.json"
+        }
+    ]
+}

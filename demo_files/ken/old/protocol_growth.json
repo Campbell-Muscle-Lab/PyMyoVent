@@ -1,7 +1,7 @@
 {
     "protocol":{
-        "no_of_time_steps": 80000,
-        "time_step": 0.0025
+        "no_of_time_steps": 200000,
+        "time_step": 0.001
     },
     "perturbations":
     {
@@ -12,6 +12,11 @@
                 "t_start_s": 2000,
                 "t_stop_s": 2100,
                 "total_change": 10
+            },
+            {
+                "variable": "mitral_insufficiency_resistance",
+                "t_start_s": 100,
+                "new_value": 5000
             }
         ]
     },
@@ -20,7 +25,7 @@
         "activations":
         [
             {
-                "t_start_s": 8,
+                "t_start_s": 5,
                 "t_stop_s": 10000
             }
         ]
@@ -30,7 +35,7 @@
         "activations":
         [
             {
-                "t_start_s": 15,
+                "t_start_s": 20,
                 "t_stop_s": 1000
             }
         ]

@@ -1,0 +1,47 @@
+{
+    "simulation_output_file_string": "../temp/output_ken.csv",
+    "xdistribution_animation":
+    {
+        "output_file_string": "../temp/ken_test_animation.gif",
+        "skip_frames": 10
+    },
+    "templated_images":
+    [
+        {
+            "template_file_string": "../demo_files/ken/template_wiggers.json",
+            "output_file_string": "../temp/ken_test_wiggers.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_summary.json",
+            "output_file_string": "../temp/ken_test_demo.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_summary_zoom.json",
+            "output_file_string": "../temp/ken_test_demo_zoom.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_pv.json",
+            "output_file_string": "../temp/ken_test_pv.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_pressure.json",
+            "output_file_string": "../temp/ken_test_pressure.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_pressure_zoom.json",
+            "output_file_string": "../temp/ken_test_pressure_zoom.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_volume.json",
+            "output_file_string": "../temp/ken_test_volume.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_volume_zoom.json",
+            "output_file_string": "../temp/ken_test_volume_zoom.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_flows.json",
+            "output_file_string": "../temp/ken_test_flows.png"
+        }
+    ]
+}

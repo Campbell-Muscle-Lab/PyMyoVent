@@ -2,7 +2,7 @@
     "job":
     [
         {
-            "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model_growth.json",
+            "model_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/model_growth_2.json",
             "protocol_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/protocol_growth.json",
             "output_handler_file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler_growth.json"
         }

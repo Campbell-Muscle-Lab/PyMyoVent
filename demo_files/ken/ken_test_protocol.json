@@ -1,6 +1,43 @@
 {
-  "protocol":{
-    "no_of_time_points": 10000,
-    "time_step": 0.001
-  }
+    "protocol":{
+        "no_of_time_steps": 20000,
+        "time_step": 0.0005
+    },
+    "perturbations":
+    {
+        "perturbation":
+        [
+            {
+                "variable": "baroreflex_setpoint",
+                "t_start_s": 2000,
+                "t_stop_s": 2100,
+                "total_change": 10
+            },
+            {
+                "variable": "mitral_insufficiency_resistance",
+                "t_start_s": 100,
+                "new_value": 5000
+            }
+        ]
+    },
+    "baroreflex":
+    {
+        "activations":
+        [
+            {
+                "t_start_s": 500,
+                "t_stop_s": 10000
+            }
+        ]
+    },
+    "growth":
+    {
+        "activations":
+        [
+            {
+                "t_start_s": 200,
+                "t_stop_s": 1000
+            }
+        ]
+    }
 }

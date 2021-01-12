@@ -1,0 +1,18 @@
+{
+    "simulation_output_file_string": "../temp/output_ken.csv",
+    "user_defined_images":
+    [
+        {
+            "template_file_string": "../demo_files/ken/template_growth.json",
+            "output_file_string": "../temp/growth_demo.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_pv.json",
+            "output_file_string": "../temp/growth_pv.png"
+        },
+        {
+            "template_file_string": "../demo_files/ken/template_flows.json",
+            "output_file_string": "../temp/growth_flows.png"
+        }
+    ]
+}
