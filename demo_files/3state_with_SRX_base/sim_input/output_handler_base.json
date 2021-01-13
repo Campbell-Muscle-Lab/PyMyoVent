@@ -1,0 +1,15 @@
+{
+    "simulation_output_file_string": "../demo_files/3state_with_SRX_base/sim_output/sim_output.csv",
+    "distribution_animation":
+    {
+        "output_file_string": "../demo_files/3state_with_SRX_base/sim_output/cb_distribution_animation.gif",
+        "skip_frames": 20
+    },
+    "templated_images":
+    [
+        {
+            "template_file_string": "../demo_files/3state_with_SRX_base/template/template_wiggers.json",
+            "output_file_string": "../demo_files/3state_with_SRX_base/sim_output/wiggers.png"
+        }
+    ]
+}

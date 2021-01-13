@@ -272,8 +272,7 @@ class single_ventricle_circulation():
                 self.data['blood_volume']
             d['pas_force_mean'] = self.temp_data['pas_force'].mean()
             d['n_hs'] = self.data['n_hs']
-            d['mitral_insufficiency_resistance'] = \
-                self.data['mitral_insufficiency_resistance']
+            d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
 
         return d
 
@@ -288,13 +287,6 @@ class single_ventricle_circulation():
                    100*self.t_counter/self.prot.data['no_of_time_steps']))
             system_values = self.return_system_values()
             print(json.dumps(system_values, indent=4))
-            if (self.gr):
-                print('growth_eccentric_g: %g  growth_eccentric_c: %g' %
-                      (self.gr.data['growth_eccentric_g'],
-                       self.gr.data['growth_eccentric_c']))
-                print('growth_concentric_g: %g  growth_concentric_c: %g' %
-                      (self.gr.data['growth_concentric_g'],
-                       self.gr.data['growth_concentric_c']))
 
         # Check and implement perturbations
         for p in self.prot.perturbations:
@@ -342,7 +334,7 @@ class single_ventricle_circulation():
         self.hs.update_simulation(time_step, 0, activation)
 
         # Now evolve volumes
-        self.evolve_volumes(time_step)
+        self.data['v'] = self.evolve_volumes(time_step, self.data['v'])
 
         # Apply the length change to the half-sarcomere
         new_circumference = self.return_lv_circumference(
@@ -513,7 +505,7 @@ class single_ventricle_circulation():
 
         return f
 
-    def evolve_volumes(self, time_step):
+    def evolve_volumes(self, time_step, initial_v):
         """ Evolves volumes for a time-step """
         from scipy.integrate import solve_ivp
 
@@ -527,11 +519,11 @@ class single_ventricle_circulation():
                     dv[i] = flows[i] - flows[i+1]
             return dv
 
-        sol = solve_ivp(derivs, [0, time_step], self.data['v'])
+        sol = solve_ivp(derivs, [0, time_step], initial_v)
 
         # Tidy up negative values
         y = sol.y[:, -1]
         y[np.nonzero(y < 0)] = 0
         # Rest goes in veins
         y[-2] = y[-2] + (self.data['blood_volume'] - np.sum(y))
-        self.data['v'] = y
+        return y

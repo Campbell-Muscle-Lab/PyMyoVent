@@ -1,8 +1,0 @@
-{
-    "cross_bridge_dump":
-    {
-        "file_string": "c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_cb_dump.txt",
-        "t_start_s": 8.5,
-        "t_stop_s": 10
-    }
-}

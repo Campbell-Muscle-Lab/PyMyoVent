@@ -16,18 +16,12 @@ def PyMyoVent_main():
     no_of_arguments = len(sys.argv)
 
     # Switch depending on number of arguments
-    if (no_of_arguments == 1):
-        run_batch('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/ken_test_batch.json')
-
-    if (no_of_arguments == 2):
-        import output_handler.output_handler as oh
-        import pandas as pd
-        sim_data = pd.read_csv('C:/ken/GitHub/CampbellMuscleLab/models/PyMyoVent/temp/output_ken.csv')
-        oh.output_handler('c:/ken/github/campbellmusclelab/models/pymyovent/demo_files/ken/output_handler.json',
-                          sim_data)
-        
     if (no_of_arguments == 3):
-        print(sys.argv)
+        # Demos
+        if (sys.argv[1] == 'demo'):
+            if (sys.argv[2] == '3state_with_SRX_base'):
+                run_batch('../demo_files/3state_with_SRX_base/batch.json')
+
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
 
@@ -51,7 +45,6 @@ def run_batch(batch_json_file_string):
                 protocol_file_string=job['protocol_file_string'],
                 output_handler_file_string=job['output_handler_file_string'],
                 sim_options_file_string=sim_options_file_string)
-
 
 if __name__ == "__main__":
     PyMyoVent_main()

@@ -43,7 +43,7 @@ class output_handler():
             if (ext=='xlsx'):
                 sim_data.to_excel(output_file_string, index=False)
             else:
-                sim_data.to_csv(output_file_string)
+                sim_data.to_csv(output_file_string, index=False)
                 
         # Write summary image file
         if ('summary_image_file_string' in self.oh_data.keys()):
@@ -126,19 +126,21 @@ class output_handler():
                 as writer:
             for i in np.arange(0, np.shape(cb_distribs)[0],
                                skip_frames):
-                print('Frame: %.0f' % i)
+                print(('Frame: %.0f' % i), end=' ', flush=True)
                 self.draw_cb_distribution(x, cb_distribs[i, :],
                                           t[i], 1.2*max_pop,
                                           temp_image_file_string)
                 image = imageio.imread(temp_image_file_string, format='png')
                 writer.append_data(image)
-        os.remove(temp_image_file_string)
+            print('Animation built')
+            print('Animation written to %s' % output_image_file_string)
+        # os.remove(temp_image_file_string)
 
     def draw_cb_distribution(self, x, y, t, max_y,
                              output_image_file_string):
         """ Draws a single cb distribution """
 
-        fig = plt.figure(constrained_layout=False)
+        fig = plt.figure(constrained_layout=True)
         fig.set_size_inches([3.5, 3.5])
         spec = gridspec.GridSpec(nrows=1, ncols=1, figure=fig)
         ax = []
@@ -147,7 +149,7 @@ class output_handler():
         ax[0].plot(x, y, 'b-')
         ax[0].set_xlim([np.amin(x), np.amax(x)])
         ax[0].set_ylim([0, max_y])
-        ax[0].text(np.amin(x), max_y, ('Time %.3f s' %  t),
+        ax[0].text(np.amin(x), max_y, ('Time %.3f s' % t),
                    verticalalignment='top')
         ax[0].set_ylabel('Proportion\nof attached\ncross-bridges')
         ax[0].set_xlabel('Cross-bridge displacement (nm)')

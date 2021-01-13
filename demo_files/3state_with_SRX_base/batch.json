@@ -1,0 +1,11 @@
+{
+    "job":
+    [
+        {
+            "model_file_string": "../demo_files/3state_with_SRX_base/sim_input/model_3state_with_SRX_base.json",
+            "protocol_file_string": "../demo_files/3state_with_SRX_base/sim_input/protocol_base.json",
+            "sim_options_file_string": "../demo_files/3state_with_SRX_base/sim_input/options_base.json",
+            "output_handler_file_string": "../demo_files/3state_with_SRX_base/sim_input/output_handler_base.json"
+        }
+    ]
+}
