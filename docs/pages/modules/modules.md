@@ -10,5 +10,5 @@ has_children: True
 
 * TOC
 {:toc}
-**PyMyoVent** is built on a number of sub-modules representing diffetent functionality of the software in various scale levels.
+**PyMyoVent** is built on a number of sub-modules representing different functionality of the software in various scale levels.
 ![Flowchart](Flowchart.png)
