@@ -19,32 +19,36 @@ from display.multi_panel import multi_panel_from_flat_data
 
 class output_handler():
     ### Class for handling simulation output ###
-    
+
     def __init__(self, output_handler_file_string,
                  sim_data=[],
                  cb_dump_file_string=[]):
-        
+
         # Check for file
         if (output_handler_file_string==[]):
             print('No output handler file specified. Cannot write output')
             return
-        
+
         # Load the structure as a dict
         with open(output_handler_file_string,'r') as f:
             self.oh_data = json.load(f)
-            
+
         # Write sim_data to file
         if ('simulation_output_file_string' in self.oh_data.keys()):
             output_file_string = os.path.abspath(
                 self.oh_data['simulation_output_file_string'])
-            print(output_file_string)
+            # Check if the directory exists
+            dir_path = os.path.dirname(output_file_string)
+            if not os.path.isdir(dir_path):
+                os.makedirs(dir_path)
+
             ext = output_file_string.split('.')[-1]
             print('Writing sim_data to %s' % output_file_string)
             if (ext=='xlsx'):
                 sim_data.to_excel(output_file_string, index=False)
             else:
                 sim_data.to_csv(output_file_string, index=False)
-                
+
         # Write summary image file
         if ('summary_image_file_string' in self.oh_data.keys()):
             # Deduce the output file string

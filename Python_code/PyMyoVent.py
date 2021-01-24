@@ -21,7 +21,10 @@ def PyMyoVent_main():
         if (sys.argv[1] == 'demo'):
             if (sys.argv[2] == '3state_with_SRX_base'):
                 run_batch('../demo_files/3state_with_SRX_base/batch.json')
-                print('test')
+
+            elif (sys.argv[2] == 'test'):
+                run_batch('../demo_files/test/batch.json')
+                
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
 

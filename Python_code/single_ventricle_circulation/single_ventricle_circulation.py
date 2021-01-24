@@ -237,8 +237,9 @@ class single_ventricle_circulation():
             print("No output_structure_file_string. Exiting")
             return
         cb_dump_file_string = []
-        if ('cb_dump_file_string' in self.so.data):
-            cb_dump_file_string = self.so.data['cb_dump_file_string']
+        if self.so:
+            if ('cb_dump_file_string' in self.so.data):
+                cb_dump_file_string = self.so.data['cb_dump_file_string']
         self.oh = oh.output_handler(output_handler_file_string,
                                     self.sim_data,
                                     cb_dump_file_string)
@@ -385,12 +386,13 @@ class single_ventricle_circulation():
                 self.sim_data.at[self.t_counter, f] = self.gr.data[f]
 
         # Dump cb distributions if required
-        if ('cb_dump_file_string' in self.so.data):
-            if ((self.t_counter >=
-                 self.so.data['cb_dump_t_start_ind']) and
-                (self.t_counter <
-                 self.so.data['cb_dump_t_stop_ind'])):
-                self.so.append_cb_distribution(self.data['time'])
+        if self.so:
+            if ('cb_dump_file_string' in self.so.data):
+                if ((self.t_counter >=
+                     self.so.data['cb_dump_t_start_ind']) and
+                    (self.t_counter <
+                     self.so.data['cb_dump_t_stop_ind'])):
+                     self.so.append_cb_distribution(self.data['time'])
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
@@ -460,7 +462,7 @@ class single_ventricle_circulation():
 
         if (chamber_volume < 0.0):
             chamber_volume = 0
-            
+
         wall_thickness = self.return_wall_thickness(chamber_volume)
 
         lv_circum = (2.0 * np.pi *
