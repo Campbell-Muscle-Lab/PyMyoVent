@@ -1,0 +1,317 @@
+{
+    "layout":
+    {
+        "fig_width": 12,
+        "top_margin": 0,
+        "left_margin": 0,
+        "right_margin": 0,
+        "panel_height": 1.25,
+        "grid_wspace": -0.5
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)"
+    },
+    "formatting":
+    {
+        "x_label_fontsize": 12,
+        "y_label_fontsize": 12,
+        "tick_fontsize": 12,
+        "legend_fontsize": 10,
+        "y_label_pad": 40,
+        "legend_bbox_to_anchor": [1.0, 1],
+        "patch_alpha": 0.3
+    },
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Myofilament\n[$\\mathregular{Ca^{2+}}$]\n($\\mathregular{\\mu}$M)",
+                "series":
+                [
+                    {
+                        "field": "Ca_cytosol",
+                        "scaling_factor": 1e6
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Half-sarcomere\nlength\n(nm)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "hs_length"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Half-sarcomere\nstress\n(kN $\\mathregular{m^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "hs_force",
+                        "field_label": "Total",
+                        "scaling_factor": 1e-3
+
+                    },
+                    {
+                        "field": "cb_force",
+                        "field_label": "Cross-bridge",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "pas_force",
+                        "field_label": "Passive",
+                        "scaling_factor": 1e-3
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Thin\nfilament",
+                "series":
+                [
+                    {
+                        "field": "n_off",
+                        "field_label": "N$\\mathregular{_on}$"
+
+                    },
+                    {
+                        "field": "n_on",
+                        "field_label": "N$\\mathregular{_off}$"
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Thick\nfilament",
+                "series":
+                [
+                    {
+                        "field": "M_SRX",
+                        "field_label": "M$\\mathregular{_{SRX}}$"
+
+                    },
+                    {
+                        "field": "M_DRX",
+                        "field_label": "M$\\mathregular{_{DRX}}$"
+                    },
+                    {
+                        "field": "M_FG",
+                        "field_label":  "M$\\mathregular{_{FG}}$"
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Venous\nvolume\n(liters)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "volume_veins"
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Ventricular\nvolume\n(liters)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "volume_ventricle"
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Venous\npressure\n(mm Hg)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "pressure_veins"
+                    }
+
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "Arterial\npressure\n(mm Hg)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "pressure_arteries",
+                        "field_label": "P$\\mathregular{_{arteries}}$"
+                    },
+                    {
+                        "field": "baro_b_setpoint",
+                        "field_label": "P$\\mathregular{_{set}}$"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "Baroreceptor\nsignal",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "baro_b"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "Baroreceptor\ncontroller",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "baro_c"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "Heart\nrate\n(BPM)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "heart_rate"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k_ativation\n(unit)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "k_act"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k_SERCA\n(unit)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "k_serca"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_1}$\n(unit)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "k_1"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_3}$\n(unit)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "k_3"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "R$\\mathregular{_{arteriolar}}$\n(mm Hg $\\mathregular{L^{-1}}$)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "arterioles_resistance"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "C$\\mathregular{_{veins}}$\n([mm Hg]$\\mathregular{^{-1}}$ L)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "veins_compliance"
+                    }
+                ]
+            }
+        }
+    ]
+}
