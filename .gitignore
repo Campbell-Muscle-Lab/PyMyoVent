@@ -6,3 +6,4 @@ __pycache__/
 # Anything in a temp folder
 
 **/temp
+**/sim_output

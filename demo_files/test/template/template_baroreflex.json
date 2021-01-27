@@ -1,11 +1,11 @@
 {
     "layout":
     {
-        "fig_width": 12,
+        "fig_width": 14,
         "top_margin": 0,
         "left_margin": 0,
         "right_margin": 0,
-        "panel_height": 1.25,
+        "panel_height": 1,
         "grid_wspace": -0.5
     },
     "x_display":{
@@ -309,6 +309,165 @@
                 [
                     {
                         "field": "veins_compliance"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Half-sarcomere\nactive\nstress\n(kN $\\mathregular{m^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "cb_force",
+                        "field_label": "S$\\mathregular{_{total}}$",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "growth_concentric_set",
+                        "field_label": "S$\\mathregular{_{set}}$",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Half-sarcomere\nactive\nstress\n(kN $\\mathregular{m^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "mean_cb_force",
+                        "field_label": "S$\\mathregular{_{total}}$",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "growth_concentric_set",
+                        "field_label": "S$\\mathregular{_{set}}$",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Concentric g",
+                "series":
+                [
+                    {
+                        "field": "growth_concentric_g"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Concentric c",
+                "series":
+                [
+                    {
+                        "field": "growth_concentric_c"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Ventricular\nwall\nvolume\n(liters)",
+                "series":
+                [
+                    {
+                        "field": "ventricle_wall_volume"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Half-sarcomere\npassive\nstress\n(kN $\\mathregular{m^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "pas_force",
+                        "field_label": "S$\\mathregular{_{passive}}$",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "growth_eccentric_set",
+                        "field_label": "S$\\mathregular{_{set}}$",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Half-sarcomere\npassive\nstress\n(kN $\\mathregular{m^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "mean_pas_force",
+                        "field_label": "S$\\mathregular{_{passive}}$",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "growth_eccentric_set",
+                        "field_label": "S$\\mathregular{_{set}}$",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Ecceentric g",
+                "series":
+                [
+                    {
+                        "field": "growth_eccentric_g"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Eccentric c",
+                "series":
+                [
+                    {
+                        "field": "growth_eccentric_c"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Number\nof\nhalf-sarcomeres\naround\ncircumference\n(thousands)",
+                "series":
+                [
+                    {
+                        "field": "n_hs",
+                        "scaling_factor": 1e-3
                     }
                 ]
             }

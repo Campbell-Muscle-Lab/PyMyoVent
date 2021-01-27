@@ -17,7 +17,7 @@ class growth():
 
         # Set the parent circulation
         self.parent_circulation = parent_circulation
-        
+
         # Create a data dictionary
         self.data = dict()
 
@@ -33,23 +33,31 @@ class growth():
                 if (g_obj.data['type'] == 'eccentric'):
                     self.data['growth_eccentric_g'] = g_obj.data['growth_g']
                     self.data['growth_eccentric_c'] = g_obj.data['growth_c']
+                    self.data['gr_eccentric_set'] = g_obj.data['setpoint']
                 else:
                     self.data['growth_concentric_g'] = g_obj.data['growth_g']
                     self.data['growth_concentric_c'] = g_obj.data['growth_c']
+                    self.data['gr_concentric_set'] = g_obj.data['setpoint']
 
 
     def implement_time_step(self, time_step, growth_active=False):
 
         if (growth_active):
             for gc in self.components:
+                #HOSSEIN EDITS
+
                 gc.implement_time_step(time_step, True)
                 # Update the data holders for reporting
                 if (gc.data['type'] == 'eccentric'):
                     self.data['growth_eccentric_g'] = gc.data['growth_g']
                     self.data['growth_eccentric_c'] = gc.data['growth_c']
+                    self.data['setpoint'] = self.data['gr_eccentric_set']
+
                 else:
                     self.data['growth_concentric_g'] = gc.data['growth_g']
                     self.data['growth_concentric_c'] = gc.data['growth_c']
+                    self.data['setpoint'] = self.data['gr_concentric_set']
+
 
 
 class growth_component():
@@ -109,7 +117,6 @@ class growth_component():
                         g
 
         return dgdt
-
 
     def return_growth_c(self, g):
 

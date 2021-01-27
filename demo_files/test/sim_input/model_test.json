@@ -4,7 +4,7 @@
         "compartments":
         [
             {
-                "name": "aorta", 
+                "name": "aorta",
                 "resistance": 20,
                 "compliance": 4e-4,
                 "slack_volume": 0.3
@@ -53,7 +53,7 @@
         "t_quiescent_period": 0.854,
         "t_first_activation": 0.1
     },
-    "half_sarcomere":{        
+    "half_sarcomere":{
         "initial_hs_length": 900,
         "reference_hs_length": 1100,
         "membranes": {
@@ -106,21 +106,21 @@
                 "type": "eccentric",
                 "level": "half_sarcomere",
                 "signal": "pas_force",
-                "setpoint": 400,
+                "setpoint": 250,
                 "k_drive": 0.1,
-                "growth_factor": 0e-2,
-                "antigrowth_factor": 0e-2,
+                "growth_factor": 1e-2,
+                "antigrowth_factor": -1e-2,
                 "agrowth_factor": -1e-2,
                 "aantigrowth_factor": 1e-2
             },
             {
                 "type": "concentric",
                 "level": "half_sarcomere",
-                "signal": "hs_force",
+                "signal": "cb_force",
                 "setpoint": 9000,
                 "k_drive": 0.1,
-                "growth_factor": 0e-2,
-                "antigrowth_factor": 0e-2,
+                "growth_factor": 1e-2,
+                "antigrowth_factor": -1e-2,
                 "agrowth_factor": 1e-2,
                 "aantigrowth_factor": -1e-2
             }
@@ -130,7 +130,7 @@
     {
         "b_setpoint": 90,
         "b_slope": 0.02,
-        "k_drive": 0.1,
+        "k_drive": 0.5,
         "k_recov": 0.2,
         "controls":
         {

@@ -56,7 +56,10 @@ class output_handler():
             if not os.path.isabs(output_file_string):
                 output_file_string = os.path.join(os.getcwd(),
                                                 output_file_string)
-
+            # Check if the directory exists
+            dir_path = os.path.dirname(output_file_string)
+            if not os.path.isdir(dir_path):
+                os.makedirs(dir_path)
             # Now deduce the template file string
             this_dir = os.path.dirname(os.path.realpath(__file__))
             template_file_string = os.path.join(

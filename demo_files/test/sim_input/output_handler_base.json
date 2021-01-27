@@ -1,3 +1,15 @@
 {
-    "simulation_output_file_string": "../demo_files/test/sim_output/sim_output.csv"
+    "summary_image_file_string": "../demo_files/test/sim_output/summary.png",
+
+    "templated_images":
+    [
+        {
+            "template_file_string": "../demo_files/test/template/template_pressure_volume.json",
+            "output_file_string": "../demo_files/test/sim_output/PV_loop.png"
+        },
+        {
+            "template_file_string": "../demo_files/test/template/template_baroreflex.json",
+            "output_file_string": "../demo_files/test/sim_output/user_defined_baroreflex.png"
+        }
+    ]
 }

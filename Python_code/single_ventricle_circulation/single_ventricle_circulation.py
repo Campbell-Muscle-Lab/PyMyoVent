@@ -155,8 +155,12 @@ class single_ventricle_circulation():
         self.data['growth_active'] = 0
         self.data['growth_dn'] = 0
         self.data['growth_dm'] = 0
+        self.data['growth_concentric_set'] = 0
+        self.data['growth_eccentric_set'] = 0
         if ('growth' in sc_model):
             self.gr = gr.growth(sc_model['growth'], self)
+            self.data['growth_concentric_set'] = self.gr.data['gr_concentric_set']
+            self.data['growth_eccentric_set'] = self.gr.data['gr_eccentric_set']
         else:
             self.gr = []
 
@@ -182,6 +186,11 @@ class single_ventricle_circulation():
                 self.data['compliance'][i] = c
 
         self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
+
+        #HOSSEIN EDITS
+        # apply the the perturbed set-points for growth module here
+        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
+        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
     def create_data_structure(self):
         """ creates a data frame from the data dicts of each component """
@@ -216,6 +225,11 @@ class single_ventricle_circulation():
             print("No protocol_file_string. Exiting")
             return
         self.prot = prot.protocol(protocol_file_string)
+
+        # HOSSEIN EDITS
+        # Building array for mean force per cardiac cylce
+        #self.define_mean_cb_force()
+        self.define_mean_forces()
 
         # Now that you know how many time-points there are,
         # create the data structure
@@ -273,7 +287,12 @@ class single_ventricle_circulation():
                 self.data['blood_volume']
             d['pas_force_mean'] = self.temp_data['pas_force'].mean()
             d['n_hs'] = self.data['n_hs']
+            d['dn'] =self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
+            d['dm'] = self.data['growth_dm']
+            d['cb_mean'] = self.data['mean_cb_force']
+            #d['gr_con_set'] = \
+            #    self.temp_data['growth_concentric_set'].mean()#loc[self.temp_data['time']==self.data['time']]
 
         return d
 
@@ -327,6 +346,8 @@ class single_ventricle_circulation():
 
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)
+
+
         for f in list(self.hr.data.keys()):
             self.sim_data.at[self.t_counter, f] = self.hr.data[f]
 
@@ -348,15 +369,23 @@ class single_ventricle_circulation():
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
-        self.data['ventricle_wall_volume'] = \
-            self.data['ventricle_wall_volume'] + \
-            self.data['growth_dm'] + \
-            (self.data['ventricle_wall_volume'] *
-             self.data['growth_dn'] / self.data['n_hs'])
+
+        # HOSSEIN EDITS
+        self.data['ventricle_wall_volume'] +=  self.data['growth_dm']
+
+
+        #self.data['ventricle_wall_volume'] = \
+        #    self.data['ventricle_wall_volume'] + \
+        #    self.data['growth_dm'] + \
+        #    (self.data['ventricle_wall_volume'] *
+        #     self.data['growth_dn'] / self.data['n_hs'])
         self.data['n_hs'] = self.data['n_hs'] + self.data['growth_dn']
 
         # Update the half-sarcomere with the new length
         self.hs.update_simulation(0, delta_hsl, 0)
+#       #HOSSEIN EDITS
+        #self.update_mean_cb_force()
+        self.update_mean_forces()
 
         # Update the pressures
         for i in range(self.model['no_of_compartments']-1):
@@ -432,8 +461,7 @@ class single_ventricle_circulation():
         if (internal_r < 1e-6):
             P_in_pascals = 0
         else:
-            P_in_pascals = ((total_force * wall_thickness *
-                             (2.0 + (wall_thickness / internal_r))) /
+            P_in_pascals = ((total_force * wall_thickness *(2.0 + (wall_thickness / internal_r))) /
                             internal_r)
         P_in_mmHg = P_in_pascals / mmHg_in_pascals
 
@@ -529,3 +557,25 @@ class single_ventricle_circulation():
         # Rest goes in veins
         y[-2] = y[-2] + (self.data['blood_volume'] - np.sum(y))
         return y
+
+    def define_mean_forces(self):
+        self.force_types= ['cb_force','pas_force']
+        for f in self.force_types:
+            self.model['mean_%s_array'%f] = np.array([])
+            #self.mean_cb_force_array = np.array([])
+            #self.mean_pas_force_array = np.array([])
+            self.data['mean_%s'%f] = 0
+        self.mean_force_counter = \
+            int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
+
+    def update_mean_forces(self):
+        self.mean_force_counter -= 1
+        if self. mean_force_counter <= int(self.hr.data['t_active_period']/self.prot.data['time_step']):
+            for f in self.force_types:
+                self.data['mean_%s'%f] = self.model['mean_%s_array'%f].mean()
+                self.model['mean_%s_array'%f] = np.array([])
+            self.mean_force_counter = \
+                int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
+
+        for f in self.force_types:
+            self.model['mean_%s_array'%f] = np.append(self.model['mean_%s_array'%f],self.hs.data[f])

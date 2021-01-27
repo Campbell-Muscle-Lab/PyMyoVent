@@ -24,7 +24,7 @@ def PyMyoVent_main():
 
             elif (sys.argv[2] == 'test'):
                 run_batch('../demo_files/test/batch.json')
-                
+
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
 
@@ -42,6 +42,13 @@ def run_batch(batch_json_file_string):
                 sim_options_file_string = job['sim_options_file_string']
             else:
                 sim_options_file_string = []
+
+            # HOSSEIN EDITS
+            # Make a copy of model json file into the output directory
+            #with open(job['output_handler_file_string'] as o):
+            #    output_data = json.load(o)
+
+            #output_temp =
             svc_object = svc.single_ventricle_circulation(
                 job['model_file_string'])
             svc_object.run_simulation(
