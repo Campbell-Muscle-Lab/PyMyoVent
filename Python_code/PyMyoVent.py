@@ -9,6 +9,7 @@ import sys
 import json
 
 from single_ventricle_circulation import single_ventricle_circulation as svc
+from output_handler import output_handler as oh
 
 
 def PyMyoVent_main():
@@ -21,9 +22,16 @@ def PyMyoVent_main():
         if (sys.argv[1] == 'demo'):
             if (sys.argv[2] == '3state_with_SRX_base'):
                 run_batch('../demo_files/3state_with_SRX_base/batch.json')
+            if (sys.argv[2] == '3state_with_SRX_growth'):
+                run_batch('../demo_files/3state_with_SRX_growth/batch.json')
 
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
+
+    if (no_of_arguments == 4):
+        if (sys.argv[1] == 'create_figures'):
+            oh.output_handler(sys.argv[2],
+                              sim_results_file_string=sys.argv[3])
 
 
 def run_batch(batch_json_file_string):
@@ -35,6 +43,7 @@ def run_batch(batch_json_file_string):
         batch_data = json.load(bf)
         jobs = batch_data['job']
         for job in jobs:
+            j = job
             if ('sim_options_file_string' in job):
                 sim_options_file_string = job['sim_options_file_string']
             else:
@@ -44,7 +53,9 @@ def run_batch(batch_json_file_string):
             svc_object.run_simulation(
                 protocol_file_string=job['protocol_file_string'],
                 output_handler_file_string=job['output_handler_file_string'],
-                sim_options_file_string=sim_options_file_string)
+                sim_options_file_string=sim_options_file_string,
+                sim_results_file_string=job['sim_results_file_string'])
+
 
 if __name__ == "__main__":
     PyMyoVent_main()

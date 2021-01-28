@@ -1,0 +1,21 @@
+{
+    "templated_images":
+    [
+        {
+            "template_file_string": "../demo_files/3state_with_SRX_growth/template/template_wiggers.json",
+            "output_file_string": "temp/3state_with_SRX_growth/sim_output/wiggers.png"
+        },
+        {
+            "template_file_string": "../demo_files/3state_with_SRX_growth/template/template_summary.json",
+            "output_file_string": "temp/3state_with_SRX_growth/sim_output/summary.png"
+        },
+        {
+            "template_file_string": "../demo_files/3state_with_SRX_growth/template/template_baroreflex.json",
+            "output_file_string": "temp/3state_with_SRX_growth/sim_output/baroreflex.png"
+        },
+        {
+            "template_file_string": "../demo_files/3state_with_SRX_growth/template/template_growth.json",
+            "output_file_string": "temp/3state_with_SRX_growth/sim_output/growth.png"
+        }
+    ]
+}

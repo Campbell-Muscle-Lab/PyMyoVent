@@ -1,4 +1,4 @@
-
+import os
 import json
 import numpy as np
 import pandas as pd
@@ -42,6 +42,9 @@ class single_ventricle_circulation():
 
         # Store the number of compartments
         self.model['no_of_compartments'] = len(circ_model['compartments'])
+
+        # Initialise the time
+        self.data['time'] = 0
 
         # Store blood volume
         self.data['blood_volume'] = circ_model['blood_volume']
@@ -126,13 +129,20 @@ class single_ventricle_circulation():
             self.data['volume_%s' % v] = self.data['v'][i]
             self.data['slack_volume_%s' % v] = self.data['s'][i]
 
+        # Add in the wall thickness
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
+            self.data['volume_ventricle'])
+
         # Allocate space for flows
         self.data['f'] = np.zeros(self.model['no_of_compartments'])
         if (self.model['no_of_compartments'] == 7):
             self.model['flow_list'] = \
-                ['flow_ventricle_to_aorta', 'flow_aorta_to_arteries',
-                 'flow_arteries_to_arterioles', 'flow_arterioles_to_capillaries',
-                 'flow_capillaries_to_venules', 'flow_venules_to_veins',
+                ['flow_ventricle_to_aorta',
+                 'flow_aorta_to_arteries',
+                 'flow_arteries_to_arterioles',
+                 'flow_arterioles_to_capillaries',
+                 'flow_capillaries_to_venules',
+                 'flow_venules_to_veins',
                  'flow_veins_to_ventricle']
             for f in self.model['flow_list']:
                 self.data[f] = 0
@@ -165,9 +175,6 @@ class single_ventricle_circulation():
 
         # Add in a temp
         self.data['test'] = 0
-
-        # Set the time
-        self.data['time'] = 0
 
     def rebuild_from_perturbations(self):
         """ builds reistance array"""
@@ -208,7 +215,8 @@ class single_ventricle_circulation():
     def run_simulation(self,
                        protocol_file_string=[],
                        output_handler_file_string=[],
-                       sim_options_file_string=[]):
+                       sim_options_file_string=[],
+                       sim_results_file_string=[]):
         """ Run the simulation """
 
         # Load the protocol
@@ -231,17 +239,36 @@ class single_ventricle_circulation():
         self.t_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
+            
+        print(self.sim_data)
+
+        # Save the simulation results to file
+        if ('sim_results_file_string'):
+            output_file_string = os.path.abspath(sim_results_file_string)
+            ext = output_file_string.split('.')[-1]
+            # Make sure the path exists
+            output_dir = os.path.dirname(output_file_string)
+            print('output_dir %s' % output_dir)
+            if not os.path.isdir(output_dir):
+                print('Making output dir')
+                os.makedirs(output_dir)
+            print('Writing sim_data to %s' % output_file_string)
+            if (ext == 'xlsx'):
+                self.sim_data.to_excel(output_file_string, index=False)
+            else:
+                self.sim_data.to_csv(output_file_string, index=False)
 
         # Load the output_handler and process
         if (output_handler_file_string == []):
             print("No output_structure_file_string. Exiting")
             return
+
         cb_dump_file_string = []
         if ('cb_dump_file_string' in self.so.data):
             cb_dump_file_string = self.so.data['cb_dump_file_string']
         self.oh = oh.output_handler(output_handler_file_string,
-                                    self.sim_data,
-                                    cb_dump_file_string)
+                                    sim_data=self.sim_data,
+                                    cb_dump_file_string=cb_dump_file_string)
 
     def return_system_values(self, time_interval=3):
         d = dict()
@@ -366,6 +393,10 @@ class single_ventricle_circulation():
         # Update the objects' data
         self.update_data()
         self.hs.update_data()
+
+        # Now that ventricular volume is calculated, update the wall thickness
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
+            self.data['volume_ventricle'])
 
         # Now update the sim_data
         for f in list(self.data.keys()):
