@@ -6,3 +6,6 @@ __pycache__/
 # Anything in a temp folder
 
 **/temp
+*.csv
+*.xls
+*.png

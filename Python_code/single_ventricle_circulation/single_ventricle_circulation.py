@@ -113,6 +113,7 @@ class single_ventricle_circulation():
             self.data['s'][i] = self.data[n]
             self.data['v'][i] = self.data[n]
         self.data['total_slack_volume'] = sum(self.data['s'])
+
         # Excess blood goes in veins
         self.data['v'][-2] = self.data['v'][-2] + \
             (self.data['blood_volume'] - self.data['total_slack_volume'])
@@ -165,8 +166,12 @@ class single_ventricle_circulation():
         self.data['growth_active'] = 0
         self.data['growth_dn'] = 0
         self.data['growth_dm'] = 0
+        self.data['growth_concentric_set'] = 0
+        self.data['growth_eccentric_set'] = 0
         if ('growth' in sc_model):
             self.gr = gr.growth(sc_model['growth'], self)
+            self.data['growth_concentric_set'] = self.gr.data['gr_concentric_set']
+            self.data['growth_eccentric_set'] = self.gr.data['gr_eccentric_set']
         else:
             self.gr = []
 
@@ -188,7 +193,12 @@ class single_ventricle_circulation():
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i] = c
 
+        # apply changes to baroreceptor
         self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
+
+        # apply the the perturbed set-points for growth module here
+        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
+        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
     def create_data_structure(self):
         """ creates a data frame from the data dicts of each component """
@@ -239,8 +249,6 @@ class single_ventricle_circulation():
         self.t_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
-            
-        print(self.sim_data)
 
         # Save the simulation results to file
         if ('sim_results_file_string'):
@@ -264,8 +272,9 @@ class single_ventricle_circulation():
             return
 
         cb_dump_file_string = []
-        if ('cb_dump_file_string' in self.so.data):
-            cb_dump_file_string = self.so.data['cb_dump_file_string']
+        if self.so:
+            if ('cb_dump_file_string' in self.so.data):
+                cb_dump_file_string = self.so.data['cb_dump_file_string']
         self.oh = oh.output_handler(output_handler_file_string,
                                     sim_data=self.sim_data,
                                     cb_dump_file_string=cb_dump_file_string)
@@ -297,9 +306,12 @@ class single_ventricle_circulation():
             d['volume_veins_proportion'] = \
                 self.temp_data['volume_veins'].mean() / \
                 self.data['blood_volume']
-            d['pas_force_mean'] = self.temp_data['pas_force'].mean()
+            d['pas_force_mean'] = self.data['mean_pas_force']
             d['n_hs'] = self.data['n_hs']
+            d['dn'] =self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
+            d['dm'] = self.data['growth_dm']
+            d['cb_mean'] = self.data['mean_cb_force']
 
         return d
 
@@ -461,8 +473,7 @@ class single_ventricle_circulation():
         if (internal_r < 1e-6):
             P_in_pascals = 0
         else:
-            P_in_pascals = ((total_force * wall_thickness *
-                             (2.0 + (wall_thickness / internal_r))) /
+            P_in_pascals = ((total_force * wall_thickness *(2.0 + (wall_thickness / internal_r))) /
                             internal_r)
         P_in_mmHg = P_in_pascals / mmHg_in_pascals
 
@@ -491,7 +502,7 @@ class single_ventricle_circulation():
 
         if (chamber_volume < 0.0):
             chamber_volume = 0
-            
+
         wall_thickness = self.return_wall_thickness(chamber_volume)
 
         lv_circum = (2.0 * np.pi *

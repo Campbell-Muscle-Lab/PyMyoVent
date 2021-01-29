@@ -6,6 +6,7 @@ Created on Tue Jan 12 09:43:40 2021
 """
 
 import json
+import os
 
 import numpy as np
 
@@ -41,6 +42,12 @@ class sim_options():
                     time_step)
 
             # Open the dump file and write the header
+
+            # First check if the directory exists
+            dir_path = os.path.dirname(self.data['cb_dump_file_string'])
+            if not os.path.isdir(dir_path):
+                os.makedirs(dir_path)
+
             self.cb_dump_file = open(
                 self.data['cb_dump_file_string'], 'w')
             self.cb_dump_file.write('Time_s\t')

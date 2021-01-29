@@ -1,0 +1,15 @@
+{
+    "job":
+    [
+        {
+            "model_file_string": "../demo_files/MR/sim_input/model_MR.json",
+            "protocol_file_string": "../demo_files/MR/sim_input/protocol_base.json",
+            "output_handler_file_string": "../demo_files/MR/sim_input/output_handler_base.json"
+        },
+        {
+            "model_file_string": "../demo_files/ecc_set/sim_input/model_ecc_set.json",
+            "protocol_file_string": "../demo_files/ecc_set/sim_input/protocol_base.json",
+            "output_handler_file_string": "../demo_files/ecc_set/sim_input/output_handler_base.json"
+        }
+    ]
+}
