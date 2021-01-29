@@ -184,6 +184,21 @@
             }
         },
         {
+            "column": 1,
+            "y_info":
+            {
+                "label":"Aortic\nresistance",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "aorta_resistance"
+                    }
+
+                ]
+            }
+        },
+        {
             "column": 2,
             "y_info":
             {

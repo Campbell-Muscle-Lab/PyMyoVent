@@ -1,0 +1,125 @@
+{
+    "layout":
+    {
+        "fig_width": 3.5,
+        "top_margin": 0,
+        "left_margin": 0,
+        "right_margin": 0,
+        "panel_height": 1,
+        "grid_wspace": -0.5
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)",
+        "ticks_rel_to_end": [-1.5, 0]
+    },
+    "formatting":
+    {
+        "x_label_fontsize": 9,
+        "y_label_fontsize": 9,
+        "tick_fontsize": 9,
+        "legend_fontsize": 7,
+        "y_label_pad": 25,
+        "legend_bbox_to_anchor": [1.0, 1],
+        "patch_alpha": 0.3
+    },
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Pressure\n(mm Hg)",
+                "series":
+                [
+                    {
+                        "field": "pressure_aorta",
+                        "field_label": "Aorta"
+                    },
+                    {
+                        "field": "pressure_arteries",
+                        "field_label": "Arteries"
+                    },
+                    {
+                        "field": "pressure_veins",
+                        "field_label": "Veins"
+                    },
+                    {
+                        "field": "pressure_ventricle",
+                        "field_label": "Ventricle"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Volume\n(liters)",
+                "series":
+                [
+                    {
+                        "field": "volume_ventricle",
+                        "field_label": "Ventricle"
+                    },
+                    {
+                        "field": "volume_aorta",
+                        "field_label": "Aorta"
+                    },
+                    {
+                        "field": "volume_arteries",
+                        "field_label": "Arteries"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Force\nper area\n(km $\\mathregular{^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "hs_force",
+                        "field_label": "Total",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "cb_force",
+                        "field_label": "Active",
+                        "scaling_factor": 1e-3
+                    },
+                    {
+                        "field": "pas_force",
+                        "field_label": "Passive",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Flow\n(liters s$\\mathregular{^{-1}}$)",
+                "series":
+                [
+                    {
+                        "field": "flow_ventricle_to_aorta",
+                        "field_label": "Ventricle to aorta"
+                    },
+                    {
+                        "field": "flow_aorta_to_arteries",
+                        "field_label": "Aorta to arteries"
+                    },
+                    {
+                        "field": "flow_veins_to_ventricle",
+                        "field_label": "Veins to ventricle"
+                    }
+                ]
+            }
+        }
+
+    ]
+}

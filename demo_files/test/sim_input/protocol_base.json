@@ -1,6 +1,6 @@
 {
     "protocol":{
-        "no_of_time_steps": 60000,
+        "no_of_time_steps": 1600000,
         "time_step": 0.0005
     },
     "perturbations":
@@ -20,15 +20,15 @@
             },
             {
                 "variable": "aorta_resistance",
-                "t_start_s": 300,
-                "t_stop_s": 310,
+                "t_start_s": 3000,
+                "t_stop_s": 3100,
                 "total_change": 80
             },
             {
                 "variable": "growth_concentric_set",
-                "t_start_s": 20,
-                "t_stop_s": 21,
-                "total_change": 1000
+                "t_start_s": 400,
+                "t_stop_s": 410,
+                "total_change": 2000
             }
         ]
     },
@@ -47,7 +47,7 @@
         "activations":
         [
             {
-                "t_start_s": 10,
+                "t_start_s": 50,
                 "t_stop_s": 1000
             }
         ]

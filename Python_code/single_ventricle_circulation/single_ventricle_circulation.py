@@ -110,6 +110,7 @@ class single_ventricle_circulation():
             self.data['s'][i] = self.data[n]
             self.data['v'][i] = self.data[n]
         self.data['total_slack_volume'] = sum(self.data['s'])
+
         # Excess blood goes in veins
         self.data['v'][-2] = self.data['v'][-2] + \
             (self.data['blood_volume'] - self.data['total_slack_volume'])
@@ -125,7 +126,8 @@ class single_ventricle_circulation():
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
             self.data['slack_volume_%s' % v] = self.data['s'][i]
-
+        #HOSSEIN EDITS
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(self.data['v'][-1])
         # Allocate space for flows
         self.data['f'] = np.zeros(self.model['no_of_compartments'])
         if (self.model['no_of_compartments'] == 7):
@@ -228,7 +230,6 @@ class single_ventricle_circulation():
 
         # HOSSEIN EDITS
         # Building array for mean force per cardiac cylce
-        #self.define_mean_cb_force()
         self.define_mean_forces()
 
         # Now that you know how many time-points there are,
@@ -285,14 +286,12 @@ class single_ventricle_circulation():
             d['volume_veins_proportion'] = \
                 self.temp_data['volume_veins'].mean() / \
                 self.data['blood_volume']
-            d['pas_force_mean'] = self.temp_data['pas_force'].mean()
+            d['pas_force_mean'] = self.data['mean_pas_force']
             d['n_hs'] = self.data['n_hs']
             d['dn'] =self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
             d['cb_mean'] = self.data['mean_cb_force']
-            #d['gr_con_set'] = \
-            #    self.temp_data['growth_concentric_set'].mean()#loc[self.temp_data['time']==self.data['time']]
 
         return d
 
@@ -372,6 +371,7 @@ class single_ventricle_circulation():
 
         # HOSSEIN EDITS
         self.data['ventricle_wall_volume'] +=  self.data['growth_dm']
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(self.data['v'][-1])
 
 
         #self.data['ventricle_wall_volume'] = \
@@ -557,13 +557,11 @@ class single_ventricle_circulation():
         # Rest goes in veins
         y[-2] = y[-2] + (self.data['blood_volume'] - np.sum(y))
         return y
-
+    #HOSSEIN EDITS    
     def define_mean_forces(self):
         self.force_types= ['cb_force','pas_force']
         for f in self.force_types:
             self.model['mean_%s_array'%f] = np.array([])
-            #self.mean_cb_force_array = np.array([])
-            #self.mean_pas_force_array = np.array([])
             self.data['mean_%s'%f] = 0
         self.mean_force_counter = \
             int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
@@ -576,6 +574,5 @@ class single_ventricle_circulation():
                 self.model['mean_%s_array'%f] = np.array([])
             self.mean_force_counter = \
                 int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
-
         for f in self.force_types:
             self.model['mean_%s_array'%f] = np.append(self.model['mean_%s_array'%f],self.hs.data[f])

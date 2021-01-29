@@ -37,6 +37,7 @@ class output_handler():
         if ('simulation_output_file_string' in self.oh_data.keys()):
             output_file_string = os.path.abspath(
                 self.oh_data['simulation_output_file_string'])
+            #HOSSEIN EDITS
             # Check if the directory exists
             dir_path = os.path.dirname(output_file_string)
             if not os.path.isdir(dir_path):
@@ -56,6 +57,7 @@ class output_handler():
             if not os.path.isabs(output_file_string):
                 output_file_string = os.path.join(os.getcwd(),
                                                 output_file_string)
+            #HOSSEIN EDITS
             # Check if the directory exists
             dir_path = os.path.dirname(output_file_string)
             if not os.path.isdir(dir_path):

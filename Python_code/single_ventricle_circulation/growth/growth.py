@@ -51,12 +51,12 @@ class growth():
                 if (gc.data['type'] == 'eccentric'):
                     self.data['growth_eccentric_g'] = gc.data['growth_g']
                     self.data['growth_eccentric_c'] = gc.data['growth_c']
-                    self.data['setpoint'] = self.data['gr_eccentric_set']
+                    gc.data['setpoint'] = self.data['gr_eccentric_set']
 
                 else:
                     self.data['growth_concentric_g'] = gc.data['growth_g']
                     self.data['growth_concentric_c'] = gc.data['growth_c']
-                    self.data['setpoint'] = self.data['gr_concentric_set']
+                    gc.data['setpoint'] = self.data['gr_concentric_set']
 
 
 
