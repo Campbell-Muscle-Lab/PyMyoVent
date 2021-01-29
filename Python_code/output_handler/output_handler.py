@@ -18,59 +18,27 @@ from display.multi_panel import multi_panel_from_flat_data
 
 
 class output_handler():
-    ### Class for handling simulation output ###
+    """ Class for handling simulation output """
 
     def __init__(self, output_handler_file_string,
                  sim_data=[],
+                 sim_results_file_string=[],
                  cb_dump_file_string=[]):
 
-        # Check for file
-        if (output_handler_file_string==[]):
+        # Check for output_handler file
+        if (output_handler_file_string == []):
             print('No output handler file specified. Cannot write output')
             return
 
-        # Load the structure as a dict
-        with open(output_handler_file_string,'r') as f:
+        # Check for a sim_results file, overwriting sim data that may
+        # have been passed in
+        if (sim_results_file_string):
+            print('Loading sim data from %s' % sim_results_file_string)
+            sim_data = pd.read_csv(sim_results_file_string)
+
+        # Load the output handler structure as a dict
+        with open(output_handler_file_string, 'r') as f:
             self.oh_data = json.load(f)
-
-        # Write sim_data to file
-        if ('simulation_output_file_string' in self.oh_data.keys()):
-            output_file_string = os.path.abspath(
-                self.oh_data['simulation_output_file_string'])
-            #HOSSEIN EDITS
-            # Check if the directory exists
-            dir_path = os.path.dirname(output_file_string)
-            if not os.path.isdir(dir_path):
-                os.makedirs(dir_path)
-
-            ext = output_file_string.split('.')[-1]
-            print('Writing sim_data to %s' % output_file_string)
-            if (ext=='xlsx'):
-                sim_data.to_excel(output_file_string, index=False)
-            else:
-                sim_data.to_csv(output_file_string, index=False)
-
-        # Write summary image file
-        if ('summary_image_file_string' in self.oh_data.keys()):
-            # Deduce the output file string
-            output_file_string = self.oh_data['summary_image_file_string']
-            if not os.path.isabs(output_file_string):
-                output_file_string = os.path.join(os.getcwd(),
-                                                output_file_string)
-            #HOSSEIN EDITS
-            # Check if the directory exists
-            dir_path = os.path.dirname(output_file_string)
-            if not os.path.isdir(dir_path):
-                os.makedirs(dir_path)
-            # Now deduce the template file string
-            this_dir = os.path.dirname(os.path.realpath(__file__))
-            template_file_string = os.path.join(
-                this_dir, 'templates/summary_template.json')
-
-            self.create_image_from_template(
-                        sim_data,
-                        template_file_string=template_file_string,
-                        output_image_file_string=output_file_string)
 
         # Animation
         if ('distribution_animation' in self.oh_data):
@@ -143,7 +111,7 @@ class output_handler():
                 writer.append_data(image)
             print('Animation built')
             print('Animation written to %s' % output_image_file_string)
-        # os.remove(temp_image_file_string)
+        os.remove(temp_image_file_string)
 
     def draw_cb_distribution(self, x, y, t, max_y,
                              output_image_file_string):

@@ -1,0 +1,12 @@
+{
+    "job":
+    [
+        {
+            "model_file_string": "../demo_files/3state_with_SRX_growth/sim_input/model_3state_with_SRX_growth.json",
+            "protocol_file_string": "../demo_files/3state_with_SRX_growth/sim_input/protocol_growth.json",
+            "sim_options_file_string": "../demo_files/3state_with_SRX_growth/sim_input/options_growth.json",
+            "sim_results_file_string": "temp/3state_with_SRX_growth/sim_output/sim_output.csv",
+            "output_handler_file_string": "../demo_files/3state_with_SRX_growth/sim_input/output_handler_growth.json"
+        }
+    ]
+}

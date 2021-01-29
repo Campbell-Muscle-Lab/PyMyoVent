@@ -1,4 +1,4 @@
-
+import os
 import json
 import numpy as np
 import pandas as pd
@@ -42,6 +42,9 @@ class single_ventricle_circulation():
 
         # Store the number of compartments
         self.model['no_of_compartments'] = len(circ_model['compartments'])
+
+        # Initialise the time
+        self.data['time'] = 0
 
         # Store blood volume
         self.data['blood_volume'] = circ_model['blood_volume']
@@ -126,15 +129,21 @@ class single_ventricle_circulation():
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
             self.data['slack_volume_%s' % v] = self.data['s'][i]
-        #HOSSEIN EDITS
-        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(self.data['v'][-1])
+
+        # Add in the wall thickness
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
+            self.data['volume_ventricle'])
+
         # Allocate space for flows
         self.data['f'] = np.zeros(self.model['no_of_compartments'])
         if (self.model['no_of_compartments'] == 7):
             self.model['flow_list'] = \
-                ['flow_ventricle_to_aorta', 'flow_aorta_to_arteries',
-                 'flow_arteries_to_arterioles', 'flow_arterioles_to_capillaries',
-                 'flow_capillaries_to_venules', 'flow_venules_to_veins',
+                ['flow_ventricle_to_aorta',
+                 'flow_aorta_to_arteries',
+                 'flow_arteries_to_arterioles',
+                 'flow_arterioles_to_capillaries',
+                 'flow_capillaries_to_venules',
+                 'flow_venules_to_veins',
                  'flow_veins_to_ventricle']
             for f in self.model['flow_list']:
                 self.data[f] = 0
@@ -172,9 +181,6 @@ class single_ventricle_circulation():
         # Add in a temp
         self.data['test'] = 0
 
-        # Set the time
-        self.data['time'] = 0
-
     def rebuild_from_perturbations(self):
         """ builds reistance array"""
 
@@ -187,9 +193,9 @@ class single_ventricle_circulation():
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i] = c
 
+        # apply changes to baroreceptor
         self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
 
-        #HOSSEIN EDITS
         # apply the the perturbed set-points for growth module here
         self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
         self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
@@ -219,7 +225,8 @@ class single_ventricle_circulation():
     def run_simulation(self,
                        protocol_file_string=[],
                        output_handler_file_string=[],
-                       sim_options_file_string=[]):
+                       sim_options_file_string=[],
+                       sim_results_file_string=[]):
         """ Run the simulation """
 
         # Load the protocol
@@ -227,10 +234,6 @@ class single_ventricle_circulation():
             print("No protocol_file_string. Exiting")
             return
         self.prot = prot.protocol(protocol_file_string)
-
-        # HOSSEIN EDITS
-        # Building array for mean force per cardiac cylce
-        self.define_mean_forces()
 
         # Now that you know how many time-points there are,
         # create the data structure
@@ -247,17 +250,34 @@ class single_ventricle_circulation():
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
 
+        # Save the simulation results to file
+        if ('sim_results_file_string'):
+            output_file_string = os.path.abspath(sim_results_file_string)
+            ext = output_file_string.split('.')[-1]
+            # Make sure the path exists
+            output_dir = os.path.dirname(output_file_string)
+            print('output_dir %s' % output_dir)
+            if not os.path.isdir(output_dir):
+                print('Making output dir')
+                os.makedirs(output_dir)
+            print('Writing sim_data to %s' % output_file_string)
+            if (ext == 'xlsx'):
+                self.sim_data.to_excel(output_file_string, index=False)
+            else:
+                self.sim_data.to_csv(output_file_string, index=False)
+
         # Load the output_handler and process
         if (output_handler_file_string == []):
             print("No output_structure_file_string. Exiting")
             return
+
         cb_dump_file_string = []
         if self.so:
             if ('cb_dump_file_string' in self.so.data):
                 cb_dump_file_string = self.so.data['cb_dump_file_string']
         self.oh = oh.output_handler(output_handler_file_string,
-                                    self.sim_data,
-                                    cb_dump_file_string)
+                                    sim_data=self.sim_data,
+                                    cb_dump_file_string=cb_dump_file_string)
 
     def return_system_values(self, time_interval=3):
         d = dict()
@@ -345,8 +365,6 @@ class single_ventricle_circulation():
 
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)
-
-
         for f in list(self.hr.data.keys()):
             self.sim_data.at[self.t_counter, f] = self.hr.data[f]
 
@@ -368,24 +386,15 @@ class single_ventricle_circulation():
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
-
-        # HOSSEIN EDITS
-        self.data['ventricle_wall_volume'] +=  self.data['growth_dm']
-        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(self.data['v'][-1])
-
-
-        #self.data['ventricle_wall_volume'] = \
-        #    self.data['ventricle_wall_volume'] + \
-        #    self.data['growth_dm'] + \
-        #    (self.data['ventricle_wall_volume'] *
-        #     self.data['growth_dn'] / self.data['n_hs'])
+        self.data['ventricle_wall_volume'] = \
+            self.data['ventricle_wall_volume'] + \
+            self.data['growth_dm'] + \
+            (self.data['ventricle_wall_volume'] *
+             self.data['growth_dn'] / self.data['n_hs'])
         self.data['n_hs'] = self.data['n_hs'] + self.data['growth_dn']
 
         # Update the half-sarcomere with the new length
         self.hs.update_simulation(0, delta_hsl, 0)
-#       #HOSSEIN EDITS
-        #self.update_mean_cb_force()
-        self.update_mean_forces()
 
         # Update the pressures
         for i in range(self.model['no_of_compartments']-1):
@@ -396,6 +405,10 @@ class single_ventricle_circulation():
         # Update the objects' data
         self.update_data()
         self.hs.update_data()
+
+        # Now that ventricular volume is calculated, update the wall thickness
+        self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
+            self.data['volume_ventricle'])
 
         # Now update the sim_data
         for f in list(self.data.keys()):
@@ -415,13 +428,12 @@ class single_ventricle_circulation():
                 self.sim_data.at[self.t_counter, f] = self.gr.data[f]
 
         # Dump cb distributions if required
-        if self.so:
-            if ('cb_dump_file_string' in self.so.data):
-                if ((self.t_counter >=
-                     self.so.data['cb_dump_t_start_ind']) and
-                    (self.t_counter <
-                     self.so.data['cb_dump_t_stop_ind'])):
-                     self.so.append_cb_distribution(self.data['time'])
+        if ('cb_dump_file_string' in self.so.data):
+            if ((self.t_counter >=
+                 self.so.data['cb_dump_t_start_ind']) and
+                (self.t_counter <
+                 self.so.data['cb_dump_t_stop_ind'])):
+                self.so.append_cb_distribution(self.data['time'])
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
@@ -557,22 +569,3 @@ class single_ventricle_circulation():
         # Rest goes in veins
         y[-2] = y[-2] + (self.data['blood_volume'] - np.sum(y))
         return y
-    #HOSSEIN EDITS    
-    def define_mean_forces(self):
-        self.force_types= ['cb_force','pas_force']
-        for f in self.force_types:
-            self.model['mean_%s_array'%f] = np.array([])
-            self.data['mean_%s'%f] = 0
-        self.mean_force_counter = \
-            int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
-
-    def update_mean_forces(self):
-        self.mean_force_counter -= 1
-        if self. mean_force_counter <= int(self.hr.data['t_active_period']/self.prot.data['time_step']):
-            for f in self.force_types:
-                self.data['mean_%s'%f] = self.model['mean_%s_array'%f].mean()
-                self.model['mean_%s_array'%f] = np.array([])
-            self.mean_force_counter = \
-                int(self.hr.data['t_quiescent_period']/self.prot.data['time_step'])
-        for f in self.force_types:
-            self.model['mean_%s_array'%f] = np.append(self.model['mean_%s_array'%f],self.hs.data[f])
