@@ -57,7 +57,6 @@ def run_batch(batch_json_file_string):
             #with open(job['output_handler_file_string'] as o):
             #    output_data = json.load(o)
 
-            #output_temp =
             svc_object = svc.single_ventricle_circulation(
                 job['model_file_string'])
             svc_object.run_simulation(
