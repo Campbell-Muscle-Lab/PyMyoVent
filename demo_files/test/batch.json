@@ -4,7 +4,8 @@
         {
             "model_file_string": "../demo_files/test/sim_input/model_test.json",
             "protocol_file_string": "../demo_files/test/sim_input/protocol_base.json",
-            "output_handler_file_string": "../demo_files/test/sim_input/output_handler_base.json"
+            "output_handler_file_string": "../demo_files/test/sim_input/output_handler_base.json",
+            "sim_results_file_string" : "../demo_files/test/sim_output/sim_output.csv"
         }
     ]
 }

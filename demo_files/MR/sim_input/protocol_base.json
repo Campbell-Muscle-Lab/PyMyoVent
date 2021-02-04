@@ -1,6 +1,6 @@
 {
     "protocol":{
-        "no_of_time_steps": 1200000,
+        "no_of_time_steps": 1600000,
         "time_step": 0.0005
     },
     "perturbations":
@@ -9,8 +9,13 @@
         [
             {
                 "variable": "mitral_insufficiency_resistance",
-                "t_start_s": 400,
+                "t_start_s": 300,
                 "new_value": 2000
+            },
+            {
+                "variable": "mitral_insufficiency_resistance",
+                "t_start_s": 600,
+                "new_value": Infinity
             }
         ]
     },

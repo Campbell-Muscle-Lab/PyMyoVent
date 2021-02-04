@@ -109,9 +109,7 @@
                 "setpoint": 250,
                 "k_drive": 0.1,
                 "growth_factor": 1e-2,
-                "antigrowth_factor": -1e-2,
-                "agrowth_factor": -1e-2,
-                "aantigrowth_factor": 1e-2
+                "antigrowth_factor": -1e-2
             },
             {
                 "type": "concentric",
@@ -120,9 +118,7 @@
                 "setpoint": 9000,
                 "k_drive": 0.1,
                 "growth_factor": 1e-2,
-                "antigrowth_factor": -1e-2,
-                "agrowth_factor": 1e-2,
-                "aantigrowth_factor": -1e-2
+                "antigrowth_factor": -1e-2
             }
         ]
     },

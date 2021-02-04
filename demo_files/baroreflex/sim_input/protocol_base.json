@@ -1,6 +1,6 @@
 {
     "protocol":{
-        "no_of_time_steps": 1000000,
+        "no_of_time_steps": 160000,
         "time_step": 0.0005
     },
     "perturbations":
@@ -9,15 +9,15 @@
         [
             {
                 "variable": "aorta_resistance",
-                "t_start_s": 300,
-                "t_stop_s": 310,
+                "t_start_s": 3000,
+                "t_stop_s": 3500,
                 "total_change": 40
             },
             {
-                "variable": "aorta_resistance",
-                "t_start_s": 6000,
-                "t_stop_s": 6010,
-                "total_change": -40
+                "variable": "baroreflex_setpoint",
+                "t_start_s": 40,
+                "t_stop_s": 45,
+                "total_change": 30
             }
         ]
     },
@@ -36,7 +36,7 @@
         "activations":
         [
             {
-                "t_start_s": 50,
+                "t_start_s": 500,
                 "t_stop_s": 2000
             }
         ]

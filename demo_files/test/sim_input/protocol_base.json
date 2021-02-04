@@ -1,6 +1,6 @@
 {
     "protocol":{
-        "no_of_time_steps": 1600000,
+        "no_of_time_steps": 20000,
         "time_step": 0.0005
     },
     "perturbations":
@@ -37,7 +37,7 @@
         "activations":
         [
             {
-                "t_start_s": 5,
+                "t_start_s": 50,
                 "t_stop_s": 1000
             }
         ]
@@ -47,7 +47,7 @@
         "activations":
         [
             {
-                "t_start_s": 50,
+                "t_start_s": 500,
                 "t_stop_s": 1000
             }
         ]

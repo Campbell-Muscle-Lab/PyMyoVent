@@ -247,6 +247,9 @@ class single_ventricle_circulation():
 
         # Step through the simulation
         self.t_counter = 0
+        self.cardiac_counter = \
+            int(self.hr.data['t_quiescent_period']/\
+            self.prot.data['time_step'])
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
 
@@ -306,12 +309,12 @@ class single_ventricle_circulation():
             d['volume_veins_proportion'] = \
                 self.temp_data['volume_veins'].mean() / \
                 self.data['blood_volume']
-            d['pas_force_mean'] = self.data['mean_pas_force']
+            #d['pas_force_mean'] = self.data['mean_pas_force']
             d['n_hs'] = self.data['n_hs']
             d['dn'] =self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
-            d['cb_mean'] = self.data['mean_cb_force']
+            #d['cb_mean'] = self.data['mean_cb_force']
 
         return d
 
@@ -386,6 +389,7 @@ class single_ventricle_circulation():
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
+        #self.data['ventricle_wall_volume'] += self.data['growth_dm']
         self.data['ventricle_wall_volume'] = \
             self.data['ventricle_wall_volume'] + \
             self.data['growth_dm'] + \
@@ -428,15 +432,17 @@ class single_ventricle_circulation():
                 self.sim_data.at[self.t_counter, f] = self.gr.data[f]
 
         # Dump cb distributions if required
-        if ('cb_dump_file_string' in self.so.data):
-            if ((self.t_counter >=
-                 self.so.data['cb_dump_t_start_ind']) and
-                (self.t_counter <
-                 self.so.data['cb_dump_t_stop_ind'])):
-                self.so.append_cb_distribution(self.data['time'])
+        if self.so:
+            if ('cb_dump_file_string' in self.so.data):
+                if ((self.t_counter >=
+                     self.so.data['cb_dump_t_start_ind']) and
+                    (self.t_counter <
+                     self.so.data['cb_dump_t_stop_ind'])):
+                    self.so.append_cb_distribution(self.data['time'])
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
+        self.cardiac_counter -= 1
 
     def update_data(self):
         # Update data for the simulation

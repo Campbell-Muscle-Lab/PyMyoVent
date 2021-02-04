@@ -10,6 +10,10 @@
         {
             "template_file_string": "../demo_files/test/template/template_baroreflex.json",
             "output_file_string": "../demo_files/test/sim_output/user_defined_baroreflex.png"
+        },
+        {
+            "template_file_string": "../demo_files/test/template/template_activation.json",
+            "output_file_string": "../demo_files/test/sim_output/user_defined_activation.png"
         }
     ]
 }

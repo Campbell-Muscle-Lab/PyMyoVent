@@ -5,13 +5,13 @@
         "top_margin": 0,
         "left_margin": 0,
         "right_margin": 0,
-        "panel_height": 5,
+        "panel_height": 2,
         "grid_wspace": -0.5
     },
     "x_display":{
-        "global_x_field": "volume_ventricle",
-        "label": "Volume (liters)",
-        "ticks" :[0,0.2],
+        "global_x_field": "time",
+        "label": "Time (s)",
+        "ticks" :[30,70],
         "ticks_rel_to_end":[0,0]
     },
     "formatting":
@@ -30,12 +30,26 @@
             "column": 1,
             "y_info":
             {
-                "label": "Pressure\n(mm Hg)",
+                "label": "Activation pulse",
                 "series":
                 [
                     {
-                        "field": "pressure_ventricle",
-                        "field_label": "Ventricle"
+                        "field": "membrane_activation",
+                        "field_label": "Activation pulse"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Myofilament\n[$\\mathregular{Ca^{2+}}$]\n($\\mathregular{\\mu}$M)",
+                "series":
+                [
+                    {
+                        "field": "Ca_cytosol",
+                        "scaling_factor": 1e6
                     }
                 ]
             }

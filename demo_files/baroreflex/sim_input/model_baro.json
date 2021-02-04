@@ -108,10 +108,8 @@
                 "signal": "pas_force",
                 "setpoint": 250,
                 "k_drive": 0.1,
-                "growth_factor": 1e-2,
-                "antigrowth_factor": -1e-2,
-                "agrowth_factor": -1e-2,
-                "aantigrowth_factor": 1e-2
+                "growth_factor": 5e-2,
+                "antigrowth_factor": -5e-2
             },
             {
                 "type": "concentric",
@@ -119,17 +117,15 @@
                 "signal": "cb_force",
                 "setpoint": 9000,
                 "k_drive": 0.1,
-                "growth_factor": 1e-2,
-                "antigrowth_factor": -1e-2,
-                "agrowth_factor": 1e-2,
-                "aantigrowth_factor": -1e-2
+                "growth_factor": 5e-2,
+                "antigrowth_factor": -5e-2
             }
         ]
     },
     "baroreflex":
     {
         "b_setpoint": 90,
-        "b_slope": 0.02,
+        "b_slope": 0.01,
         "k_drive": 0.5,
         "k_recov": 0.2,
         "controls":

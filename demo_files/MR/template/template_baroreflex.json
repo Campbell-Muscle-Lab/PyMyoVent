@@ -88,12 +88,12 @@
                 [
                     {
                         "field": "n_off",
-                        "field_label": "N$\\mathregular{_on}$"
+                        "field_label": "N$\\mathregular{_{on}}$"
 
                     },
                     {
                         "field": "n_on",
-                        "field_label": "N$\\mathregular{_off}$"
+                        "field_label": "N$\\mathregular{_{off}}$"
                     }
 
                 ]
@@ -367,26 +367,6 @@
             "column": 3,
             "y_info":
             {
-                "label": "Half-sarcomere\nactive\nstress\n(kN $\\mathregular{m^{-2}}$)",
-                "series":
-                [
-                    {
-                        "field": "mean_cb_force",
-                        "field_label": "S$\\mathregular{_{total}}$",
-                        "scaling_factor": 1e-3
-                    },
-                    {
-                        "field": "growth_concentric_set",
-                        "field_label": "S$\\mathregular{_{set}}$",
-                        "scaling_factor": 1e-3
-                    }
-                ]
-            }
-        },
-        {
-            "column": 3,
-            "y_info":
-            {
                 "label": "Concentric g",
                 "series":
                 [
@@ -431,26 +411,6 @@
                 [
                     {
                         "field": "pas_force",
-                        "field_label": "S$\\mathregular{_{passive}}$",
-                        "scaling_factor": 1e-3
-                    },
-                    {
-                        "field": "growth_eccentric_set",
-                        "field_label": "S$\\mathregular{_{set}}$",
-                        "scaling_factor": 1e-3
-                    }
-                ]
-            }
-        },
-        {
-            "column": 3,
-            "y_info":
-            {
-                "label": "Half-sarcomere\npassive\nstress\n(kN $\\mathregular{m^{-2}}$)",
-                "series":
-                [
-                    {
-                        "field": "mean_pas_force",
                         "field_label": "S$\\mathregular{_{passive}}$",
                         "scaling_factor": 1e-3
                     },
