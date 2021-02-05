@@ -8,7 +8,7 @@
     "burst_output":
     {
         "complete_span_s": 2,
-        "complete_repeat_s": 20,
+        "complete_repeat_s": 4,
         "envelope_span_s": 10000
     }
 }

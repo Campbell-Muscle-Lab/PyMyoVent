@@ -40,7 +40,6 @@ class baroreflex():
                         reflex_control(bc,
                                        self.parent_circulation))
 
-
     def implement_time_step(self, pressure, time_step,
                             reflex_active=0):
         """ implements time-step """
@@ -56,20 +55,18 @@ class baroreflex():
         for bc in self.controls:
             y = bc.return_output(self.data['baro_c'])
             # Now implement the change
-            if (bc.data['level']=='heart_rate'):
-                if self.parent_circulation.cardiac_counter <= \
-                        -int(self.parent_circulation.hr.data['t_active_period']/\
-                        self.parent_circulation.prot.data['time_step']):
-                    self.parent_circulation.cardiac_counter = \
-                        int(self.parent_circulation.hr.data['t_quiescent_period']/\
-                            self.parent_circulation.prot.data['time_step'])
+            if (bc.data['level'] == 'heart_rate'):
+                # Heart rate can only update once per cycle
+                if (self.parent_circulation.hr.data['t_RR'] ==
+                    (self.parent_circulation.hr.data['t_active_period'] +
+                     self.parent_circulation.hr.data['t_quiescent_period'])):
                     self.parent_circulation.hr.data[bc.data['variable']] = y
 
-            if (bc.data['level']=='membranes'):
+            if (bc.data['level'] == 'membranes'):
                 self.parent_circulation.hs.memb.data[bc.data['variable']] = y
-            if (bc.data['level']=='myofilaments'):
+            if (bc.data['level'] == 'myofilaments'):
                 self.parent_circulation.hs.myof.data[bc.data['variable']] = y
-            if (bc.data['level']=='circulation'):
+            if (bc.data['level'] == 'circulation'):
                 self.parent_circulation.data[bc.data['variable']] = y
 
 

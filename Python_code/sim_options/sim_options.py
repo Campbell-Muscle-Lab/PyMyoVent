@@ -90,7 +90,7 @@ class sim_options():
             and 0 for don't save """
 
         t_remain = t % self.data['complete_repeat_s']
-        if (t_remain <= self.data['complete_span_s']):
+        if (t_remain < self.data['complete_span_s']):
             return (1, 'complete')
         else:
             if ((t_remain % self.data['envelope_span_s']) <

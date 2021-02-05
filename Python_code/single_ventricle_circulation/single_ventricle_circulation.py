@@ -251,7 +251,7 @@ class single_ventricle_circulation():
         if ('n_burst_points' in self.so.data):
             no_of_output_points = self.so.data['n_burst_points']
         else:
-            no_of_output_points = self.prot_data['no_of_time_steps']
+            no_of_output_points = self.prot.data['no_of_time_steps']
 
         # Now that you know how many time-points there are,
         # create the data structure
@@ -260,9 +260,6 @@ class single_ventricle_circulation():
         # Step through the simulation
         self.t_counter = 0
         self.write_counter = 0
-        self.cardiac_counter = \
-            int(self.hr.data['t_quiescent_period'] /
-                self.prot.data['time_step'])
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
 
@@ -379,8 +376,6 @@ class single_ventricle_circulation():
 
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)
-        for f in list(self.hr.data.keys()):
-            self.sim_data.at[self.t_counter, f] = self.hr.data[f]
 
         # Advance half_sarcomere forward in time
         # First update the kinetic steps
@@ -437,6 +432,8 @@ class single_ventricle_circulation():
             for f in list(self.data.keys()):
                 if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
                     self.sim_data.at[self.write_counter, f] = self.data[f]
+            for f in list(self.hr.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hr.data[f]
             for f in list(self.hs.data.keys()):
                 self.sim_data.at[self.write_counter, f] = self.hs.data[f]
             for f in list(self.hs.memb.data.keys()):
@@ -463,7 +460,6 @@ class single_ventricle_circulation():
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
-        self.cardiac_counter -= 1
 
     def update_data(self):
         # Update data for the simulation
