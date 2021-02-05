@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 .DS_Store
 
-# Anything in a temp folder
-
+# Anything in a temp or sim_output folder
 **/temp
-*.csv
-*.xls
-*.png
+**/sim_output
