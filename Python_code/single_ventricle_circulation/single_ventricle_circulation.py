@@ -200,17 +200,18 @@ class single_ventricle_circulation():
         self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
         self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
-    def create_data_structure(self):
+    def create_data_structure(self, no_of_output_points):
         """ creates a data frame from the data dicts of each component """
 
         self.sim_data = pd.DataFrame()
-        z = np.zeros(self.prot.data['no_of_time_steps'])
+        z = np.zeros(no_of_output_points)
 
         data_fields = list(self.data.keys()) + \
             list(self.hr.data.keys()) + \
             list(self.hs.data.keys()) + \
             list(self.hs.memb.data.keys()) + \
-            list(self.hs.myof.data.keys())
+            list(self.hs.myof.data.keys()) + \
+            ['output_mode']
 
         # Add in fields from optional modules
         if (self.br):
@@ -235,21 +236,33 @@ class single_ventricle_circulation():
             return
         self.prot = prot.protocol(protocol_file_string)
 
-        # Now that you know how many time-points there are,
-        # create the data structure
-        self.create_data_structure()
-
         # Check for sim_options
         if (sim_options_file_string):
             self.so = sim_opt.sim_options(sim_options_file_string,
                                           self.prot.data['time_step'],
                                           self)
+        else:
+            self.so = []
+
+        # Determine the number of data points in the output file
+        # If burst mode has been set in the sim_options, use a value
+        # calculated in sim_options constructor. Otherwise, it is the number
+        # of time-points in the simulation
+        if ('n_burst_points' in self.so.data):
+            no_of_output_points = self.so.data['n_burst_points']
+        else:
+            no_of_output_points = self.prot_data['no_of_time_steps']
+
+        # Now that you know how many time-points there are,
+        # create the data structure
+        self.create_data_structure(no_of_output_points)
 
         # Step through the simulation
         self.t_counter = 0
+        self.write_counter = 0
         self.cardiac_counter = \
-            int(self.hr.data['t_quiescent_period']/\
-            self.prot.data['time_step'])
+            int(self.hr.data['t_quiescent_period'] /
+                self.prot.data['time_step'])
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
 
@@ -309,12 +322,10 @@ class single_ventricle_circulation():
             d['volume_veins_proportion'] = \
                 self.temp_data['volume_veins'].mean() / \
                 self.data['blood_volume']
-            #d['pas_force_mean'] = self.data['mean_pas_force']
             d['n_hs'] = self.data['n_hs']
-            d['dn'] =self.data['growth_dn']
+            d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
-            #d['cb_mean'] = self.data['mean_cb_force']
 
         return d
 
@@ -352,8 +363,8 @@ class single_ventricle_circulation():
                     self.data['baroreflex_active'] = 1
 
             self.br.implement_time_step(self.data['pressure_arteries'],
-                                        time_step,
-                                        reflex_active=self.data['baroreflex_active'])
+                                time_step,
+                                reflex_active=self.data['baroreflex_active'])
 
         # Check for growth module and implement
         if (self.gr):
@@ -389,7 +400,6 @@ class single_ventricle_circulation():
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
-        #self.data['ventricle_wall_volume'] += self.data['growth_dm']
         self.data['ventricle_wall_volume'] = \
             self.data['ventricle_wall_volume'] + \
             self.data['growth_dm'] + \
@@ -414,22 +424,33 @@ class single_ventricle_circulation():
         self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
             self.data['volume_ventricle'])
 
-        # Now update the sim_data
-        for f in list(self.data.keys()):
-            if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
-                self.sim_data.at[self.t_counter, f] = self.data[f]
-        for f in list(self.hs.data.keys()):
-            self.sim_data.at[self.t_counter, f] = self.hs.data[f]
-        for f in list(self.hs.memb.data.keys()):
-            self.sim_data.at[self.t_counter, f] = self.hs.memb.data[f]
-        for f in list(self.hs.myof.data.keys()):
-            self.sim_data.at[self.t_counter, f] = self.hs.myof.data[f]
-        if (self.br):
-            for f in list(self.br.data.keys()):
-                self.sim_data.at[self.t_counter, f] = self.br.data[f]
-        if (self.gr):
-            for f in list(self.gr.data.keys()):
-                self.sim_data.at[self.t_counter, f] = self.gr.data[f]
+        # Now update the sim_data if appropriate
+        # This requires checking if we are in burst mode and if so,
+        # what write mode we are in
+        save_mode = 1
+        burst_mode = 'complete'
+        if ('n_burst_points' in self.so.data):
+            (save_mode, burst_mode) = \
+                self.so.return_save_status(self.data['time'])
+        if (save_mode > 0):
+            # Time to write
+            for f in list(self.data.keys()):
+                if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
+                    self.sim_data.at[self.write_counter, f] = self.data[f]
+            for f in list(self.hs.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hs.data[f]
+            for f in list(self.hs.memb.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
+            for f in list(self.hs.myof.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
+            if (self.br):
+                for f in list(self.br.data.keys()):
+                    self.sim_data.at[self.write_counter, f] = self.br.data[f]
+            if (self.gr):
+                for f in list(self.gr.data.keys()):
+                    self.sim_data.at[self.write_counter, f] = self.gr.data[f]
+            self.sim_data.at[self.write_counter, 'write_mode'] = burst_mode
+            self.write_counter = self.write_counter + 1
 
         # Dump cb distributions if required
         if self.so:
