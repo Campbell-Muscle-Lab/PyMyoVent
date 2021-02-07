@@ -107,7 +107,7 @@
                 "level": "half_sarcomere",
                 "signal": "pas_force",
                 "setpoint": 250,
-                "k_drive": 0.1,
+                "k_drive": 0.01,
                 "growth_factor": 1e-2,
                 "antigrowth_factor": -1e-2
             },
@@ -116,7 +116,7 @@
                 "level": "half_sarcomere",
                 "signal": "cb_force",
                 "setpoint": 9000,
-                "k_drive": 0.1,
+                "k_drive": 0.01,
                 "growth_factor": 1e-2,
                 "antigrowth_factor": -1e-2
             }
