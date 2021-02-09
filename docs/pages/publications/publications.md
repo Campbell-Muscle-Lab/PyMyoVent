@@ -1,6 +1,6 @@
 ---
 Title: Publications
-nav_order: 7
+nav_order: 6
 has_children: True
 ---
 
@@ -12,4 +12,5 @@ has_children: True
 {:toc}
 
 
-Here are the list of peer reviewed articles built on **PyMyoVent** framework. Each sub-folder include the utilized demos and "Analyze" scripts for generating the published figures and tables.
+Here are the list of peer reviewed articles built on **PyMyoVent** framework. Each sub-folder include the utilized demos and "Analyze" scripts for generating the published figures and tables. 
+

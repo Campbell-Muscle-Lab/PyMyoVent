@@ -1,15 +1,8 @@
 ---
 Title: Instruction File
-nav_order: 5
+nav_order: 4
 has_children: False
 ---
-
-<span style="color:red; font-family:Papyrus; font-size:2em;">
-THIS PAGE WILL BE REMOVED!!!
-</span>
-
-
-
 # Instruction File
 {:.no_toc}
 

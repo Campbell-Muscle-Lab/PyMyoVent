@@ -5,64 +5,68 @@ has_children: False
 parent: Demos
 ---
 # Getting Started
-{:.no_toc}
 
-- Run the following steps to be able to run this demo.
+## Overview
 
-* TOC
-{:toc}
-## Instruction
+This page explains how to run a simple simulation. The other demos build from this example so this page is the best place to start if you want to learn how to use PyMyoVent for your own work.
 
-1. First open the **PyMyoVent** repository folder on your local machine.
+## Assumptions
 
-2. Navigate to **demo_files** folder.
+We assume that you have
++ installed Anaconda
+  + see [howtos Anaconda](https://campbell-muscle-lab.github.io/howtos_Python/pages/anaconda/anaconda.html) if you need help
++ have pulled the latest version of the [PyMyoVent repository](https://github.com/Campbell-Muscle-Lab/PyMyoVent) from GitHub
+  + see [howtos GitHub](https://campbell-muscle-lab.github.io/howtos_GitHub/pages/github_repos/github_repos.html)
++ activated the PyMyoVent environment
+  + see [howtos using an existing environment](https://campbell-muscle-lab.github.io/howtos_Python/pages/anaconda/anaconda.html#using-an-existing-environment)
++ have opened a command prompt for the environment
+  + see [howtos via command line](https://campbell-muscle-lab.github.io/howtos_Python/pages/anaconda/anaconda.html#via-command-line)
 
-3. Open `batch.json` file with your favorite text editor software. If you want to get more familiar with
-`batch.json` visit this [link](../../structures/structures.html).
+If you have followed these instructions, you should see a window that looks like this. (Note that your path will be different but it should start `(PyMyoVent)`).
 
-4. In `batch.json` file, you need to define a job representing the **getting_started** demo. To do that,
-you need to properly change the pathway string to the main three input files as follows:
+![clean_command_window](images/clean_command_prompt.png)
 
-````
-{
-    "job":
-    [
-        {
-            "model_file_string": "../demo_files/getting_started/getting_started_model.json",
-            "protocol_file_string": "../demo_files/getting_started/getting_started_protocol.json",
-            "output_handler_file_string": "../demo_files/getting_started/getting_started_output_handler.json"
-        }
-    ]
-}
-````
+## Running the demo
 
-5. Save the above changes.
++ Change your directory to `<repo>/Python_code` where `<repo>` is the top-level directory for the files that you pulled from GitHub.
+  + In this example, we type `cd c:/ken/github/campbellmusclelab/models/pymyovent`
 
-6. Lunch [Anaconda](http://anaconda.org) prompt if you are using a machine with [windos OS](http://en.wikipedia.org/wiki/Microsoft_Windows). Otherwise, just open the terminal on macintosh or linux OS systems.
+![command_prompt_at_correct_directory](images/command_prompt_at_correct_directory.png)
 
-7. Navigate to **Python_code** folder in PyMyoVent's repository directory using the below command:
-    * `$ cd path_to_PyMyoVent_repo/Python_code`
++ Type `python pymyovent.py demo 3state_with_SRX_base`
++ After a few seconds you should see some text printing to the screen
 
-8. Use the following command to run the `Getting_started` demo.
-    * `$ python PyMyoVent.py`
-    * After a few minutes, the simulation will be completed.
+![working](images/working.png)
 
-## Notes
++ After a minute or so, the code will finish leaving you back at the command prompt
 
-- This demo :
+![finished](images/finished.png)
 
-  * Runs with a fixed heart rate of 70 BPM with no baroreflex control loop.
+## Finding the results
 
-  * Uses a simple two compartment model as the electrophysiological model.
++ Use File explorer or similar to look at `<repo>/demo_files/3state_with_SRX_base/sim_output`
 
+![results_folder](images/results_folder.png)
 
-## Outputs
+You should find some new files including:
 
-- After finishing the simulation, if you go to **temp** folder in **PyMyoVent** repository, you will see a folder
- named **getting_started** is created and it contains two files:
-  1. `output_data.csv`
-  2. `summary_image.png`
++ `sim_output.csv` - this is a Comma Separated Value (a type of text file you can open in Excel or a text editor). It includes all of the information from the simulation.
 
-- The `summary_image.png` file should look like the below figure.  
+Here is the top left corner.
 
-![summary_image](summary_image.png)
+![sim_output](images/sim_output.png)
+
++ `wiggers.png` - this is an image file showing the last few seconds of the simulation as a Wiggers diagram
+
+![wiggers](images/wiggers.png)
+
++ `cb_distribution_animation.gif` - this is an animation of the data written to `cb_distribution_dump.txt` which shows the number of myosin heads attached with different displacements as a function of time during the cardiac cycle.
+
+![cb_animation](images/cb_distribution_animation.gif)
+
+That's it. You've run a simulation and created a figure of a Wiggers diagram that summarizes cardiovascular function.
+
+The rest of this page explains what the code did.
+
+## What the code did
+

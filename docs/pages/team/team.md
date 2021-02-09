@@ -1,7 +1,7 @@
 ---
 title: Team
 has_children: false
-nav_order: 9
+nav_order: 8
 ---
 
 # Team
