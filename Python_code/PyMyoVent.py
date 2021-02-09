@@ -31,6 +31,9 @@ def PyMyoVent_main():
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
 
+        if (sys.argv[1] == 'run_batch_with_multiprocesses'):
+            run_batch_with_multiprocesses(sys.argv[2])
+
     if (no_of_arguments == 4):
         if (sys.argv[1] == 'create_figures'):
             oh.output_handler(sys.argv[2],
@@ -45,17 +48,12 @@ def run_batch(batch_json_file_string):
     with open(batch_json_file_string, 'r') as bf:
         batch_data = json.load(bf)
         jobs = batch_data['job']
+
         for job in jobs:
-            j = job
             if ('sim_options_file_string' in job):
                 sim_options_file_string = job['sim_options_file_string']
             else:
                 sim_options_file_string = []
-
-            # HOSSEIN EDITS
-            # Make a copy of model json file into the output directory
-            #with open(job['output_handler_file_string'] as o):
-            #    output_data = json.load(o)
 
             svc_object = svc.single_ventricle_circulation(
                 job['model_file_string'])
@@ -65,6 +63,38 @@ def run_batch(batch_json_file_string):
                 sim_options_file_string=sim_options_file_string,
                 sim_results_file_string=job['sim_results_file_string'])
 
+def run_batch_with_multiprocesses(batch_json_file_string):
+    from multiprocessing import Process
+
+    if (batch_json_file_string == []):
+        print('No batch file specified. Exiting')
+        return
+    with open(batch_json_file_string, 'r') as bf:
+        batch_data = json.load(bf)
+        jobs = batch_data['job']
+
+    # Define a function for running a single object
+    def run_objects(job):
+        if ('sim_options_file_string' in job):
+            sim_options_file_string = job['sim_options_file_string']
+        else:
+            sim_options_file_string = []
+        svc_object = svc.single_ventricle_circulation(
+            job['model_file_string'])
+        svc_object.run_simulation(
+            protocol_file_string=job['protocol_file_string'],
+            output_handler_file_string=job['output_handler_file_string'],
+            sim_options_file_string=sim_options_file_string,
+            sim_results_file_string=job['sim_results_file_string'])
+
+
+    # Now run the objects with multhi processes
+    processes = []
+    for job in jobs:
+        process = Process(target=run_objects,args=(job,))
+        processes.append(process)
+        process.start()
+    process.join()
 
 if __name__ == "__main__":
     PyMyoVent_main()

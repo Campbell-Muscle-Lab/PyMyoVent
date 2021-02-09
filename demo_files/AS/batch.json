@@ -4,7 +4,6 @@
       {
           "model_file_string": "../demo_files/AS/sim_input/model_AS.json",
           "protocol_file_string": "../demo_files/AS/sim_input/protocol_base.json",
-          "sim_options_file_string": "../demo_files/AS/sim_input/options_base_full.json",
           "output_handler_file_string": "../demo_files/AS/sim_input/output_handler_base.json",
           "sim_results_file_string" : "../demo_files/AS/sim_output/sim_output_slow.csv"
       }

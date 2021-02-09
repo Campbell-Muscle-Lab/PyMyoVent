@@ -8,14 +8,10 @@
         "perturbation":
         [
             {
-                "variable": "mitral_insufficiency_resistance",
+                "variable": "mitral_insufficiency_conductance",
                 "t_start_s": 300,
-                "new_value": 2000
-            },
-            {
-                "variable": "mitral_insufficiency_resistance",
-                "t_start_s": 600,
-                "new_value": Infinity
+                "t_stop_s": 400,
+                "total_change": 0.0005
             }
         ]
     },

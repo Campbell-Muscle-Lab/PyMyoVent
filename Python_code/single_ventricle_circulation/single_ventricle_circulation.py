@@ -82,8 +82,8 @@ class single_ventricle_circulation():
             self.data['resistance'].append(r)
         self.data['resistance'] = np.array(self.data['resistance'])
 
-        # Add in mitral insuficient resistance
-        self.data['mitral_insufficiency_resistance'] = np.inf
+        # Add in mitral insuficient conductance
+        self.data['mitral_insufficiency_conductance'] = 0
 
         # Create a heart-rate object
         self.hr = hr.heart_rate(sc_model['heart_rate'])
@@ -248,8 +248,9 @@ class single_ventricle_circulation():
         # If burst mode has been set in the sim_options, use a value
         # calculated in sim_options constructor. Otherwise, it is the number
         # of time-points in the simulation
-        if ('n_burst_points' in self.so.data):
-            no_of_output_points = self.so.data['n_burst_points']
+        if self.so:
+            if ('n_burst_points' in self.so.data):
+                no_of_output_points = self.so.data['n_burst_points']
         else:
             no_of_output_points = self.prot.data['no_of_time_steps']
 
@@ -424,9 +425,10 @@ class single_ventricle_circulation():
         # what write mode we are in
         save_mode = 1
         burst_mode = 'complete'
-        if ('n_burst_points' in self.so.data):
-            (save_mode, burst_mode) = \
-                self.so.return_save_status(self.data['time'])
+        if self.so:
+            if ('n_burst_points' in self.so.data):
+                (save_mode, burst_mode) = \
+                    self.so.return_save_status(self.data['time'])
         if (save_mode > 0):
             # Time to write
             for f in list(self.data.keys()):
@@ -565,8 +567,8 @@ class single_ventricle_circulation():
             f[0] = 0
         # Mitral
         if (p[-1] >= p[-2]):
-            f[-1] = (p[-2]-p[-1]) / \
-                self.data['mitral_insufficiency_resistance']
+            f[-1] = \
+            (p[-2]-p[-1]) * self.data['mitral_insufficiency_conductance']
 
         return f
 
