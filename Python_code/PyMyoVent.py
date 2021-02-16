@@ -62,6 +62,20 @@ def run_batch(batch_json_file_string):
                 output_handler_file_string=job['output_handler_file_string'],
                 sim_options_file_string=sim_options_file_string,
                 sim_results_file_string=job['sim_results_file_string'])
+                
+# Define a function for running a single object
+def run_objects(job):
+    if ('sim_options_file_string' in job):
+        sim_options_file_string = job['sim_options_file_string']
+    else:
+        sim_options_file_string = []
+    svc_object = svc.single_ventricle_circulation(
+        job['model_file_string'])
+    svc_object.run_simulation(
+        protocol_file_string=job['protocol_file_string'],
+        output_handler_file_string=job['output_handler_file_string'],
+        sim_options_file_string=sim_options_file_string,
+        sim_results_file_string=job['sim_results_file_string'])
 
 def run_batch_with_multiprocesses(batch_json_file_string):
     from multiprocessing import Process
@@ -72,21 +86,6 @@ def run_batch_with_multiprocesses(batch_json_file_string):
     with open(batch_json_file_string, 'r') as bf:
         batch_data = json.load(bf)
         jobs = batch_data['job']
-
-    # Define a function for running a single object
-    def run_objects(job):
-        if ('sim_options_file_string' in job):
-            sim_options_file_string = job['sim_options_file_string']
-        else:
-            sim_options_file_string = []
-        svc_object = svc.single_ventricle_circulation(
-            job['model_file_string'])
-        svc_object.run_simulation(
-            protocol_file_string=job['protocol_file_string'],
-            output_handler_file_string=job['output_handler_file_string'],
-            sim_options_file_string=sim_options_file_string,
-            sim_results_file_string=job['sim_results_file_string'])
-
 
     # Now run the objects with multhi processes
     processes = []

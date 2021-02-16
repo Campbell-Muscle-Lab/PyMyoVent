@@ -1,0 +1,186 @@
+{
+    "circulation":{
+        "blood_volume": 4.5,
+        "compartments":
+        [
+            {
+                "name": "aorta",
+                "resistance": 20,
+                "compliance": 4e-4,
+                "slack_volume": 0.3
+            },
+            {
+                "name": "arteries",
+                "resistance": 20,
+                "compliance": 8e-4,
+                "slack_volume": 0.3
+            },
+            {
+                "name": "arterioles",
+                "resistance": 800,
+                "compliance": 1e-3,
+                "slack_volume": 0.1
+            },
+            {
+                "name": "capillaries",
+                "resistance": 150,
+                "compliance": 1e-4,
+                "slack_volume": 0.25
+            },
+            {
+                "name": "venules",
+                "resistance": 50,
+                "compliance": 0.03,
+                "slack_volume": 0.5
+            },
+            {
+                "name": "veins",
+                "resistance": 20,
+                "compliance": 0.08,
+                "slack_volume": 2.0
+            },
+            {
+                "name": "ventricle",
+                "resistance": 5,
+                "slack_volume": 0.065,
+                "wall_density": 1055,
+                "wall_volume": 0.1
+            }
+        ]
+    },
+    "heart_rate": {
+        "t_active_period": 0.003,
+        "t_quiescent_period": 0.854,
+        "t_first_activation": 0.1
+    },
+    "half_sarcomere":{
+        "initial_hs_length": 900,
+        "reference_hs_length": 1100,
+        "membranes": {
+            "Ca_content": 1e-3,
+            "k_leak": 6e-4,
+            "k_act": 8.2e-2,
+            "k_serca": 8.0,
+            "t_open": 0.01,
+            "implementation":{
+                "kinetic_scheme": "simple_2_compartment"
+            }
+        },
+        "myofilaments":{
+            "cb_number_density": 6.9e16,
+            "k_1": 3,
+            "k_force": 1e-3,
+            "k_2": 200,
+            "k_3": 55,
+            "k_4_0": 40,
+            "k_4_1": 1,
+            "k_cb": 0.001,
+            "x_ps": 5,
+            "k_on": 2e8,
+            "k_off": 200,
+            "k_coop": 5,
+            "passive_exp_sigma": 100,
+            "passive_exp_L": 70,
+            "passive_l_slack": 900,
+            "implementation":
+            {
+                "kinetic_scheme": "3_state_with_SRX",
+                "passive_mode": "exponential",
+                "max_rate": 2000,
+                "temperature": 310,
+                "bin_min": -10,
+                "bin_max": 10,
+                "bin_width": 1,
+                "filament_compliance_factor": 0.5,
+                "thick_filament_length": 815,
+                "thin_filament_length": 1120,
+                "bare_zone_length": 80
+            }
+        }
+    },
+    "growth":
+    {
+        "components":
+        [
+            {
+                "type": "eccentric",
+                "level": "half_sarcomere",
+                "signal": "pas_force",
+                "setpoint": 250,
+                "k_drive": 0.1,
+                "growth_factor": 1e-2,
+                "antigrowth_factor": -1e-2
+            },
+            {
+                "type": "concentric",
+                "level": "half_sarcomere",
+                "signal": "cb_force",
+                "setpoint": 9000,
+                "k_drive": 0.1,
+                "growth_factor": 1e-2,
+                "antigrowth_factor": -1e-2
+            }
+        ]
+    },
+    "baroreflex":
+    {
+        "b_setpoint": 90,
+        "b_slope": 0.02,
+        "k_drive": 0.5,
+        "k_recov": 0.2,
+        "controls":
+        {
+            "control":
+            [
+                {
+                    "level": "heart_rate",
+                    "variable": "t_quiescent_period",
+                    "para_factor": 1.753497,
+                    "symp_factor": 0.386
+                },
+                {
+                    "level": "membranes",
+                    "variable": "k_act",
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
+                },
+                {
+                    "level": "membranes",
+                    "variable": "k_serca",
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
+                },
+                {
+                    "level": "myofilaments",
+                    "variable": "k_1",
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
+                },
+                {
+                    "level": "myofilaments",
+                    "variable": "k_3",
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
+                },
+                {
+                    "level": "myofilaments",
+                    "variable": "k_on",
+                    "para_factor": 3.333,
+                    "symp_factor": 0.333
+                },
+                {
+                    "level": "circulation",
+                    "variable": "arterioles_resistance",
+                    "para_factor": 0.333,
+                    "symp_factor": 3.333
+                },
+                {
+                    "level": "circulation",
+                    "variable": "veins_compliance",
+                    "para_factor": 3.333,
+                    "symp_factor": 0.333
+                }
+            ]
+        }
+    }
+}

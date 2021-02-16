@@ -20,8 +20,8 @@
         "activations":
         [
             {
-                "t_start_s": 5,
-                "t_stop_s": 2000
+                "t_start_s": 5000,
+                "t_stop_s": 5000
             }
         ]
     },
