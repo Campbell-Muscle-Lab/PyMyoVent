@@ -194,11 +194,13 @@ class single_ventricle_circulation():
                 self.data['compliance'][i] = c
 
         # apply changes to baroreceptor
-        self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
+        if self.br:
+            self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
 
         # apply the the perturbed set-points for growth module here
-        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
-        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
+        if self.gr:
+            self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
+            self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
     def create_data_structure(self, no_of_output_points):
         """ creates a data frame from the data dicts of each component """
