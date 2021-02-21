@@ -7,10 +7,11 @@ def move_cb_distributions(self, delta_hsl):
 
     delta_x = delta_hsl * self.implementation['filament_compliance_factor']
 
-    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+        self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_J4'):
         interp_positions = self.x - delta_x
         bin_indices = 2 + np.arange(0, self.no_of_x_bins)
-        
+
         # Count bridges before
         before_heads = np.sum(self.y[bin_indices])
         self.y[bin_indices] = interpol.interp1d(self.x,
