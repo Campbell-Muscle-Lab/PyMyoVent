@@ -346,11 +346,25 @@ class single_ventricle_circulation():
             # Implement step_change perturbations
             if ('new_value' in p.data):
                 if (self.t_counter == p.data['t_start_ind']):
-                    self.data[p.data['variable']] = p.data['new_value']
+                    if p.data['variable'] in self.hs.data:
+                        self.hs.data[p.data['variable']] = p.data['new_value']
+                    elif p.data['variable'] in self.hs.myof.data:
+                        self.hs.myof.data[p.data['variable']] = p.data['new_value']
+                    elif p.data['variable'] in self.hs.memb.data:
+                        self.hs.memb.data[p.data['variable']] = p.data['new_value']
+                    else:
+                        self.data[p.data['variable']] = p.data['new_value']
             else:
                 if((self.t_counter >= p.data['t_start_ind']) and
                    (self.t_counter < p.data['t_stop_ind'])):
-                    self.data[p.data['variable']] += p.data['increment']
+                   if p.data['variable'] in self.hs.data:
+                       self.hs.data[p.data['variable']] += p.data['increment']
+                   elif p.data['variable'] in self.hs.myof.data:
+                       self.hs.myof.data[p.data['variable']] += p.data['increment']
+                   elif p.data['variable'] in self.hs.memb.data:
+                        self.hs.memb.data[p.data['variable']] += p.data['increment']
+                   else:
+                       self.data[p.data['variable']] += p.data['increment']
 
         self.rebuild_from_perturbations()
 
