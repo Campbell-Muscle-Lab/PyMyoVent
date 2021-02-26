@@ -84,17 +84,16 @@ def run_batch(batch_json_file_string):
             thread_jobs.append(job)
 
     # Now that we have parsed the job data, run the batch
-    # using multiprocessing
+    # using multiprocessing and all cores but 1
     num_processes = multiprocessing.cpu_count()
-
     print("num_processes: %i" % num_processes)
 
-    sims = []
+    pool = multiprocessing.Pool(processes=(num_processes-1))
     for i in range(len(thread_jobs)):
-        p = multiprocessing.Process(target=worker, args=[thread_jobs[i]])
-        sims.append(p)
-        p.start()
-    
+        pool.appl_async(worker, args=[thread_jobs[i]])
+    pool.close()
+    pool.join()
+
     # while threads or my_list:
     #     if (len(threads) < (num_processes-1)) and my_list:
     #         t = threading.Thread(target=worker, args=[my_list.pop()])
