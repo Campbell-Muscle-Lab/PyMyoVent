@@ -80,13 +80,19 @@ class sim_options():
                 t = t + time_step
                 (s, write_mode) = self.return_save_status(t)
                 if (s != 0):
-                    n = n + 1
+                    n = n + s
+            # Set the number of points in the main sim output
             self.data['n_burst_points'] = int(n)
-            print('Max sim time (s): %.0f   Output points: %i' %
-                  (t, self.data['n_burst_points']))
+            # Set the number of points in the rolling window for
+            # the envelope data
+            self.data['n_envelope_points'] = int(
+                self.data['envelope_span_s'] / time_step)
+            print('Max sim time (s): %f' % t)
+            print('Output points: %i' % self.data['n_burst_points'])
+            print('Envelope_points: %i' % self.data['n_envelope_points'])
 
     def return_save_status(self, t):
-        """ Given a time in s, return 1 for full save, -1 for envelope save
+        """ Given a time in s, return 1 for full save, 2 for envelope save
             and 0 for don't save """
 
         t_remain = t % self.data['complete_repeat_s']
@@ -95,7 +101,7 @@ class sim_options():
         else:
             if ((t_remain % self.data['envelope_span_s']) <
                     self.data['time_step']):
-                return (1, 'envelope')
+                return (2, 'envelope')
             else:
                 return (0, 'none')
 

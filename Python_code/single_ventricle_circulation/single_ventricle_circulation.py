@@ -7,6 +7,7 @@ from .half_sarcomere import half_sarcomere as hs
 from .heart_rate import heart_rate as hr
 from .baroreflex import baroreflex as br
 from .growth import growth as gr
+from .vad import vad as va
 
 from protocol import protocol as prot
 from sim_options import sim_options as sim_opt
@@ -14,8 +15,12 @@ from output_handler import output_handler as oh
 
 
 class single_ventricle_circulation():
-
     """Class for a single ventricle circulation"""
+
+    from .implement import \
+        write_complete_data_to_sim_data, \
+        write_complete_data_to_envelope_data, \
+        write_envelope_data_to_sim_data
 
     def __init__(self, model_json_file_string):
 
@@ -32,7 +37,7 @@ class single_ventricle_circulation():
         with open(model_json_file_string, 'r') as f:
             sc_model = json.load(f)
 
-        # Create a model dict for things that do not change
+        # Create a model dict for things that do not change during a simulation
         self.model = dict()
         # And a data dict for things that might
         self.data = dict()
@@ -82,8 +87,9 @@ class single_ventricle_circulation():
             self.data['resistance'].append(r)
         self.data['resistance'] = np.array(self.data['resistance'])
 
-        # Add in mitral insuficient resistance
-        self.data['mitral_insufficiency_resistance'] = np.inf
+        # Add in conductances for valves
+        self.data['mitral_insufficiency_conductance'] = 0
+        self.data['aortic_insufficiency_conductance'] = 0
 
         # Create a heart-rate object
         self.hr = hr.heart_rate(sc_model['heart_rate'])
@@ -144,9 +150,13 @@ class single_ventricle_circulation():
                  'flow_arterioles_to_capillaries',
                  'flow_capillaries_to_venules',
                  'flow_venules_to_veins',
-                 'flow_veins_to_ventricle']
+                 'flow_veins_to_ventricle',
+                 'flow_VAD']
             for f in self.model['flow_list']:
                 self.data[f] = 0
+        else:
+            print('Initialisation: Flows need to be rebuilt for model')
+            exit(1)
 
         # Set the heart rate
         self.data['heart_rate'] = self.hr.return_heart_rate()
@@ -170,41 +180,27 @@ class single_ventricle_circulation():
         self.data['growth_eccentric_set'] = 0
         if ('growth' in sc_model):
             self.gr = gr.growth(sc_model['growth'], self)
-            self.data['growth_concentric_set'] = self.gr.data['gr_concentric_set']
-            self.data['growth_eccentric_set'] = self.gr.data['gr_eccentric_set']
+            self.data['growth_concentric_set'] = \
+                self.gr.data['gr_concentric_set']
+            self.data['growth_eccentric_set'] = \
+                self.gr.data['gr_eccentric_set']
         else:
             self.gr = []
+
+        # If required create a VAD
+        if ('VAD' in sc_model):
+            self.va = va.VAD(sc_model['VAD'], self)
+        else:
+            self.va = []
 
         # Create a sim_options object
         self.so = []
 
-        # Add in a temp
-        self.data['test'] = 0
+    def create_data_structure(self, no_of_data_points):
+        """ returns a data frame from the data dicts of each component """
 
-    def rebuild_from_perturbations(self):
-        """ builds reistance array"""
-
-        for i, v in enumerate(self.model['compartment_list']):
-            r = self.data[('%s_resistance' % v)]
-            self.data['resistance'][i] = r
-
-        for i, v in enumerate(self.model['compartment_list']):
-            if (i < (self.model['no_of_compartments']-1)):
-                c = self.data[('%s_compliance' % v)]
-                self.data['compliance'][i] = c
-
-        # apply changes to baroreceptor
-        self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
-
-        # apply the the perturbed set-points for growth module here
-        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
-        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
-
-    def create_data_structure(self, no_of_output_points):
-        """ creates a data frame from the data dicts of each component """
-
-        self.sim_data = pd.DataFrame()
-        z = np.zeros(no_of_output_points)
+        sim_data = pd.DataFrame()
+        z = np.zeros(no_of_data_points)
 
         data_fields = list(self.data.keys()) + \
             list(self.hr.data.keys()) + \
@@ -218,10 +214,14 @@ class single_ventricle_circulation():
             data_fields = data_fields + list(self.br.data.keys())
         if (self.gr):
             data_fields = data_fields + list(self.gr.data.keys())
+        if (self.va):
+            data_fields = data_fields + list(self.va.data.keys())
 
         for f in data_fields:
             s = pd.Series(data=z, name=f)
-            self.sim_data = pd.concat([self.sim_data, s], axis=1)
+            sim_data = pd.concat([sim_data, s], axis=1)
+
+        return sim_data
 
     def run_simulation(self,
                        protocol_file_string=[],
@@ -245,21 +245,25 @@ class single_ventricle_circulation():
             self.so = []
 
         # Determine the number of data points in the output file
-        # If burst mode has been set in the sim_options, use a value
-        # calculated in sim_options constructor. Otherwise, it is the number
-        # of time-points in the simulation
+        # If burst mode has been set in the sim_options, we need to create
+        # two data structures - one for the main data, and the other that
+        # can be used to calculate the min and max values in a given time
+        # envelope
+        # Otherwise, we just need one structure with a row for every
+        # time-point in the simulation
         if ('n_burst_points' in self.so.data):
-            no_of_output_points = self.so.data['n_burst_points']
+            self.sim_data = \
+                self.create_data_structure(self.so.data['n_burst_points'])
+            self.envelope_data = \
+                self.create_data_structure(self.so.data['n_envelope_points'])
         else:
-            no_of_output_points = self.prot.data['no_of_time_steps']
-
-        # Now that you know how many time-points there are,
-        # create the data structure
-        self.create_data_structure(no_of_output_points)
+            self.sim_data = \
+                self.create_data_structure(self.prot.data['no_of_time_steps'])
 
         # Step through the simulation
         self.t_counter = 0
         self.write_counter = 0
+        self.envelope_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
             self.implement_time_step(self.prot.data['time_step'])
 
@@ -347,7 +351,19 @@ class single_ventricle_circulation():
             else:
                 if((self.t_counter >= p.data['t_start_ind']) and
                    (self.t_counter < p.data['t_stop_ind'])):
-                    self.data[p.data['variable']] += p.data['increment']
+                    handled = 0
+                    if (p.data['variable'].startswith("myo_")):
+                        v = p.data['variable']
+                        v = v[4::]
+                        self.hs.myof.data[v] += p.data['increment']
+                        handled = 1
+                    if (p.data['variable'].startswith("vad_")):
+                        v = p.data['variable']
+                        v = v[4::]
+                        self.va.data[v] += p.data['increment']
+                        handled = 1
+                    if (handled == 0):
+                        self.data[p.data['variable']] += p.data['increment']
 
         self.rebuild_from_perturbations()
 
@@ -360,8 +376,9 @@ class single_ventricle_circulation():
                     self.data['baroreflex_active'] = 1
 
             self.br.implement_time_step(self.data['pressure_arteries'],
-                                time_step,
-                                reflex_active=self.data['baroreflex_active'])
+                                        time_step,
+                                        reflex_active=
+                                        self.data['baroreflex_active'])
 
         # Check for growth module and implement
         if (self.gr):
@@ -372,7 +389,8 @@ class single_ventricle_circulation():
                     self.data['growth_active'] = 1
 
             self.gr.implement_time_step(time_step,
-                                        growth_active=self.data['growth_active'])
+                                        growth_active=
+                                        self.data['growth_active'])
 
         # Run the hr module
         activation = self.hr.implement_time_step(time_step)
@@ -425,29 +443,18 @@ class single_ventricle_circulation():
         save_mode = 1
         burst_mode = 'complete'
         if ('n_burst_points' in self.so.data):
+            # Work out what we want to write to file
             (save_mode, burst_mode) = \
                 self.so.return_save_status(self.data['time'])
-        if (save_mode > 0):
-            # Time to write
-            for f in list(self.data.keys()):
-                if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
-                    self.sim_data.at[self.write_counter, f] = self.data[f]
-            for f in list(self.hr.data.keys()):
-                self.sim_data.at[self.write_counter, f] = self.hr.data[f]
-            for f in list(self.hs.data.keys()):
-                self.sim_data.at[self.write_counter, f] = self.hs.data[f]
-            for f in list(self.hs.memb.data.keys()):
-                self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
-            for f in list(self.hs.myof.data.keys()):
-                self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
-            if (self.br):
-                for f in list(self.br.data.keys()):
-                    self.sim_data.at[self.write_counter, f] = self.br.data[f]
-            if (self.gr):
-                for f in list(self.gr.data.keys()):
-                    self.sim_data.at[self.write_counter, f] = self.gr.data[f]
-            self.sim_data.at[self.write_counter, 'write_mode'] = burst_mode
-            self.write_counter = self.write_counter + 1
+            # Update the envelope data
+            self.write_complete_data_to_envelope_data(self.envelope_counter)
+
+        if (save_mode == 1):
+            # Write full data to sim_data
+            self.write_complete_data_to_sim_data(self.write_counter)
+        if (save_mode == 2):
+            # Write envelope data to sim_data
+            self.write_envelope_data_to_sim_data(self.write_counter)
 
         # Dump cb distributions if required
         if self.so:
@@ -461,8 +468,34 @@ class single_ventricle_circulation():
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
 
+    def return_min_max(self, data_frame):
+        """ returns list of min and max values from a data frame """
+        min_value = data_frame.min()
+        max_value = data_frame.max()
+
+        return min_value, max_value
+
+    def rebuild_from_perturbations(self):
+        """ builds system arrays that could change during simulation """
+
+        for i, v in enumerate(self.model['compartment_list']):
+            r = self.data[('%s_resistance' % v)]
+            self.data['resistance'][i] = r
+
+        for i, v in enumerate(self.model['compartment_list']):
+            if (i < (self.model['no_of_compartments']-1)):
+                c = self.data[('%s_compliance' % v)]
+                self.data['compliance'][i] = c
+
+        # apply changes to baroreceptor
+        self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
+
+        # apply the the perturbed set-points for growth module here
+        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
+        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
+
     def update_data(self):
-        # Update data for the simulation
+        """ Update data after a time step """
 
         # Update data for the heart-rate
         self.data['heart_rate'] = self.hr.return_heart_rate()
@@ -554,19 +587,26 @@ class single_ventricle_circulation():
             p[i] = (v[i]-self.data['s'][i]) / self.data['compliance'][i]
         p[-1] = self.return_lv_pressure(v[-1])
 
-        f = np.zeros(self.model['no_of_compartments'])
+        # Add 1 for VAD
+        f = np.zeros(self.model['no_of_compartments']+1)
         r = self.data['resistance']
         for i in np.arange(len(p)):
             f[i] = (p[i-1]-p[i]) / r[i]
 
+        # Check for VAD
+        if (self.va):
+            f[-1] = self.va.data['max_flow'] +\
+                (p[-1] - p[0]) * self.va.data['pump_slope']
+
         # Add in the valves
         # Aortic
         if (p[-1] <= p[0]):
-            f[0] = 0
+            f[0] = (p[-1] - p[0]) * \
+                self.data['aortic_insufficiency_conductance']
         # Mitral
         if (p[-1] >= p[-2]):
-            f[-1] = (p[-2]-p[-1]) / \
-                self.data['mitral_insufficiency_resistance']
+            f[-2] = (p[-2]-p[-1]) * \
+                self.data['mitral_insufficiency_conductance']
 
         return f
 
@@ -579,7 +619,7 @@ class single_ventricle_circulation():
             flows = self.return_flows(v)
             for i in np.arange(self.model['no_of_compartments']):
                 if (i == (self.model['no_of_compartments']-1)):
-                    dv[i] = flows[i] - flows[0]
+                    dv[i] = flows[i] - flows[0] + flows[-1]
                 else:
                     dv[i] = flows[i] - flows[i+1]
             return dv

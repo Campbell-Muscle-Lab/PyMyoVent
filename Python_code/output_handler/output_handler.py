@@ -11,6 +11,8 @@ import os
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -50,9 +52,18 @@ class output_handler():
                     skip_frames=da['skip_frames'])
 
         # User defined files
+        base_directory = Path(output_handler_file_string).parent.absolute()
         if ('templated_images' in self.oh_data):
             user_defined = self.oh_data['templated_images']
             for ud in user_defined:
+                # Adjust for relative path
+                if ('relative_path' in ud):
+                    if (ud['relative_path']):
+                        ud['template_file_string'] = os.path.join(
+                            base_directory, ud['template_file_string'])
+                        ud['output_file_string'] = os.path.join(
+                            base_directory, ud['output_file_string'])
+
                 self.create_image_from_template(
                     sim_data,
                     ud['template_file_string'],

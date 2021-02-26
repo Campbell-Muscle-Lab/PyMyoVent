@@ -9,6 +9,6 @@
     {
         "complete_span_s": 2,
         "complete_repeat_s": 20,
-        "envelope_span_s": 10000
+        "envelope_span_s": 2
     }
 }

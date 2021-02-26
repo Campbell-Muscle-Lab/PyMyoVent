@@ -1,6 +1,6 @@
 {
     "protocol":{
-        "no_of_time_steps": 3000000,
+        "no_of_time_steps": 5000,
         "time_step": 0.0005
     },
     "perturbations":

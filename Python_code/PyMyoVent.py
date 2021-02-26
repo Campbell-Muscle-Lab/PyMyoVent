@@ -5,11 +5,17 @@ Created on Sun Oct 20 15:04:38 2019
 @author: kscamp3
 """
 
+import os
 import sys
 import json
 
+import multiprocessing
+
+from pathlib import Path
+
 from single_ventricle_circulation import single_ventricle_circulation as svc
 from output_handler import output_handler as oh
+from display.display import create_summary
 
 
 def PyMyoVent_main():
@@ -36,34 +42,81 @@ def PyMyoVent_main():
             oh.output_handler(sys.argv[2],
                               sim_results_file_string=sys.argv[3])
 
+        if (sys.argv[1] == 'create_summary'):
+            create_summary(sys.argv[2],
+                           output_file_string=sys.argv[3])
+
 
 def run_batch(batch_json_file_string):
     if (batch_json_file_string == []):
         print('No batch file specified. Exiting')
         return
 
+    # Create thread_jobs to hold job information that
+    # will be passed to worker thread
+    thread_jobs = []
+
     with open(batch_json_file_string, 'r') as bf:
         batch_data = json.load(bf)
         jobs = batch_data['job']
         for job in jobs:
-            j = job
-            if ('sim_options_file_string' in job):
-                sim_options_file_string = job['sim_options_file_string']
-            else:
-                sim_options_file_string = []
+            if ('sim_options_file_string' not in job):
+                job['sim_options_file_string'] = []
 
-            # HOSSEIN EDITS
-            # Make a copy of model json file into the output directory
-            #with open(job['output_handler_file_string'] as o):
-            #    output_data = json.load(o)
+            # Adapt for relative paths
+            if ('relative_path' in job):
+                if (job['relative_path']):
+                    base_directory = \
+                        Path(batch_json_file_string).parent.absolute()
+                    for k in ['model_file_string', 'protocol_file_string',
+                              'output_handler_file_string',
+                              'sim_options_file_string',
+                              'sim_results_file_string']:
+                        if (k == 'sim_options_file_string'):
+                            if ('sim_options_file_string' not in job):
+                                job['sim_options_file_string'] = []
+                            else:
+                                job[k] = os.path.join(base_directory, job[k])
+                        else:
+                            job[k] = os.path.join(base_directory, job[k])
 
-            svc_object = svc.single_ventricle_circulation(
-                job['model_file_string'])
-            svc_object.run_simulation(
-                protocol_file_string=job['protocol_file_string'],
-                output_handler_file_string=job['output_handler_file_string'],
-                sim_options_file_string=sim_options_file_string,
-                sim_results_file_string=job['sim_results_file_string'])
+            # Append to thread_jobs
+            thread_jobs.append(job)
+
+    # Now that we have parsed the job data, run the batch
+    # using multiprocessing
+    num_processes = multiprocessing.cpu_count()
+
+    print("num_processes: %i" % num_processes)
+
+    sims = []
+    for i in range(len(thread_jobs)):
+        p = multiprocessing.Process(target=worker, args=[thread_jobs[i]])
+        sims.append(p)
+        p.start()
+    
+    # while threads or my_list:
+    #     if (len(threads) < (num_processes-1)) and my_list:
+    #         t = threading.Thread(target=worker, args=[my_list.pop()])
+    #         t.setDaemon(True)
+    #         t.start()
+    #         threads.append(t)
+    #     else:
+    #         for thread in threads:
+    #             if not thread.isAlive():
+    #                 threads.remove(thread)
+
+
+def worker(job):
+    """ Runs a job in a batch """
+
+    svc_object = svc.single_ventricle_circulation(
+        job['model_file_string'])
+    svc_object.run_simulation(
+        protocol_file_string=job['protocol_file_string'],
+        output_handler_file_string=job['output_handler_file_string'],
+        sim_options_file_string=job['sim_options_file_string'],
+        sim_results_file_string=job['sim_results_file_string'])
 
 
 if __name__ == "__main__":

@@ -12,6 +12,61 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+from .multi_panel import multi_panel_from_flat_data
+
+def create_summary(data_file_string, output_file_string=[]):
+    """ Creates a figure showing every panel in the sim output file """
+
+    # Load data file
+    sim_data = pd.read_csv(data_file_string)
+
+    # Get columns
+    field_names = list(sim_data.columns)
+    print(field_names)
+    field_names.remove('time')
+    field_names.remove('write_mode')
+    
+        
+    # Calculate the layout
+    no_of_columns = 4
+    rows_per_column = np.ceil(len(field_names) / no_of_columns)
+
+    panels = []
+    column_number = 1
+    for i, f in enumerate(field_names):
+        p=dict()
+        yi = dict()
+        s = []
+        p['column'] = column_number
+        yi['label'] = field_names[i]
+        sd = dict()
+        sd['field'] = field_names[i]
+        s.append(sd)
+        yi['series'] = s
+        p['y_info'] = yi
+        panels.append(p)
+        
+        if ((i % rows_per_column) == (rows_per_column-1)):
+            column_number += 1
+
+    d = dict()
+    la = dict()
+    la['fig_width'] = 50
+    d['layout'] = la
+    d['panels'] = panels
+    
+    temp_file_string = ' temp.json'
+    with open(temp_file_string, 'w') as template_file:
+        json.dump(d, template_file, indent=4)
+        
+    fig, ax = multi_panel_from_flat_data(
+        pandas_data = sim_data,
+        template_file_string = temp_file_string,
+        output_image_file_string = output_file_string)
+    
+    # Write this to file
+    
+
 
 def create_summary_figure_from_json_template(json_template_file_string='c:/temp/test_layout.json'):
     
@@ -59,7 +114,8 @@ def create_summary_figure_from_json_template(json_template_file_string='c:/temp/
         if "ticks" in p_data['y_info']:
             ax.set_ylim(p_data['y_info']['ticks'][0], p_data['y_info']['ticks'][-1])
         ax.legend(loc='upper right',fontsize=7)
-        
+
+
 if __name__ == "__main__":
     create_summary_figure_from_json_template()       
     
