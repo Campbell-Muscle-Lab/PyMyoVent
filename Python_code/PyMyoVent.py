@@ -90,27 +90,16 @@ def run_batch(batch_json_file_string):
 
     pool = multiprocessing.Pool(processes=(num_processes-1))
     for i in range(len(thread_jobs)):
-        pool.appl_async(worker, args=[thread_jobs[i]])
+        pool.apply_async(worker, args=(thread_jobs[i], i))
     pool.close()
     pool.join()
 
-    # while threads or my_list:
-    #     if (len(threads) < (num_processes-1)) and my_list:
-    #         t = threading.Thread(target=worker, args=[my_list.pop()])
-    #         t.setDaemon(True)
-    #         t.start()
-    #         threads.append(t)
-    #     else:
-    #         for thread in threads:
-    #             if not thread.isAlive():
-    #                 threads.remove(thread)
 
-
-def worker(job):
+def worker(job, thread_id=[]):
     """ Runs a job in a batch """
 
     svc_object = svc.single_ventricle_circulation(
-        job['model_file_string'])
+        job['model_file_string'], thread_id)
     svc_object.run_simulation(
         protocol_file_string=job['protocol_file_string'],
         output_handler_file_string=job['output_handler_file_string'],

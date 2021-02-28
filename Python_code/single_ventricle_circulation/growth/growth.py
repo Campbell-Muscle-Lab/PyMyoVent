@@ -44,9 +44,9 @@ class growth():
 
         if (growth_active):
             for gc in self.components:
-                #HOSSEIN EDITS
 
                 gc.implement_time_step(time_step, True)
+
                 # Update the data holders for reporting
                 if (gc.data['type'] == 'eccentric'):
                     self.data['growth_eccentric_g'] = gc.data['growth_g']
@@ -57,7 +57,6 @@ class growth():
                     self.data['growth_concentric_g'] = gc.data['growth_g']
                     self.data['growth_concentric_c'] = gc.data['growth_c']
                     gc.data['setpoint'] = self.data['gr_concentric_set']
-
 
 
 class growth_component():
