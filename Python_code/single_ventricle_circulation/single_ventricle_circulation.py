@@ -22,16 +22,19 @@ class single_ventricle_circulation():
         write_complete_data_to_envelope_data, \
         write_envelope_data_to_sim_data
 
-    def __init__(self, model_json_file_string):
+    def __init__(self, model_json_file_string, thread_id=[]):
 
         # Check for file
         if (model_json_file_string == []):
             print('No model file specified. Cannot create model')
             return
 
+        # Set thread id
+        self.thread_id = thread_id
+
         # Status
-        print('Initialising single_ventricle_circulation from %s' %
-              model_json_file_string)
+        print('Initialising single_ventricle_circulation from %s on thread_id %i'
+              % (model_json_file_string, self.thread_id))
 
         # Load the model as a dict
         with open(model_json_file_string, 'r') as f:
@@ -59,7 +62,8 @@ class single_ventricle_circulation():
             if not (comp['name'] == 'ventricle'):
                 n = comp['name']
                 vessels_list.append(comp['name'])
-                for t in ['resistance', 'compliance', 'slack_volume']:
+                for t in ['resistance', 'compliance', 'slack_volume',
+                          'inertance']:
                     n = ('%s_%s') % (comp['name'], t)
                     self.data[n] = comp[t]
             else:
@@ -68,8 +72,9 @@ class single_ventricle_circulation():
                 self.data['ventricle_slack_volume'] = comp['slack_volume']
                 self.data['ventricle_wall_volume'] = comp['wall_volume']
                 self.model['ventricle_wall_density'] = comp['wall_density']
+                self.model['ventricle_inertance'] = comp['inertance']
 
-        # Build the compliance and resistance arrays
+        # Build the compliance, inertance, and resistance arrays
         self.data['compliance'] = []
         for v in vessels_list:
             c = self.data[('%s_compliance' % v)]
@@ -78,6 +83,15 @@ class single_ventricle_circulation():
         self.data['compliance'].append(0)
         # Convert to numpy array
         self.data['compliance'] = np.array(self.data['compliance'])
+
+        self.data['inertance'] = []
+        for v in vessels_list:
+            i = self.data[('%s_inertance' % v)]
+            self.data['inertance'].append(i)
+        # Add in 0 for ventricular inertance
+        self.data['inertance'].append(0)
+        # Convert to numpy array
+        self.data['inertance'] = np.array(self.data['inertance'])
 
         self.data['resistance'] = []
         vessels_list.append('ventricle')
@@ -336,8 +350,8 @@ class single_ventricle_circulation():
 
         # Display progress
         if (self.t_counter % 1000 == 0):
-            print('Sim time (s): %.0f  %.0f%% complete' %
-                  (self.data['time'],
+            print('Thread_id[%i]: Sim time (s): %.0f  %.0f%% complete' %
+                  (self.thread_id, self.data['time'],
                    100*self.t_counter/self.prot.data['no_of_time_steps']))
             system_values = self.return_system_values()
             print(json.dumps(system_values, indent=4))
@@ -430,7 +444,7 @@ class single_ventricle_circulation():
         self.data['p'][-1] = self.return_lv_pressure(self.data['v'][-1])
 
         # Update the objects' data
-        self.update_data()
+        self.update_data(time_step)
         self.hs.update_data()
 
         # Now that ventricular volume is calculated, update the wall thickness
@@ -494,15 +508,15 @@ class single_ventricle_circulation():
         self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
         self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
-    def update_data(self):
+    def update_data(self, time_step):
         """ Update data after a time step """
 
         # Update data for the heart-rate
         self.data['heart_rate'] = self.hr.return_heart_rate()
 
-        flows = self.return_flows(self.data['v'])
+        self.data['f'] = self.return_flows(self.data['v'], time_step)
         for i, f in enumerate(self.model['flow_list']):
-            self.data[f] = flows[i]
+            self.data[f] = self.data['f'][i]
 
         for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
@@ -578,7 +592,7 @@ class single_ventricle_circulation():
 
         return r
 
-    def return_flows(self, v):
+    def return_flows(self, v, time_step):
         """ return flows between compartments """
 
         # Calculate pressure in each compartment
@@ -590,8 +604,12 @@ class single_ventricle_circulation():
         # Add 1 for VAD
         f = np.zeros(self.model['no_of_compartments']+1)
         r = self.data['resistance']
+        inert = self.data['inertance']
+        last_f = self.data['f']
+        
         for i in np.arange(len(p)):
-            f[i] = (p[i-1]-p[i]) / r[i]
+            f[i] = (1.0 / (r[i] + inert[i]/time_step)) * \
+                (p[i-1] - p[i] + (inert[i] * last_f[i] / time_step))
 
         # Check for VAD
         if (self.va):
@@ -616,7 +634,7 @@ class single_ventricle_circulation():
 
         def derivs(t, v):
             dv = np.zeros(self.model['no_of_compartments'])
-            flows = self.return_flows(v)
+            flows = self.return_flows(v, time_step)
             for i in np.arange(self.model['no_of_compartments']):
                 if (i == (self.model['no_of_compartments']-1)):
                     dv[i] = flows[i] - flows[0] + flows[-1]

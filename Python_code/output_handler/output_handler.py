@@ -27,29 +27,42 @@ class output_handler():
                  sim_results_file_string=[],
                  cb_dump_file_string=[]):
 
+        print("sim_data")
+        print(sim_data)
+        print('sim_results_file_string')
+        print(sim_results_file_string)
+        print('cb_dump_file_string')
+        print(cb_dump_file_string)
+
         # Check for output_handler file
         if (output_handler_file_string == []):
             print('No output handler file specified. Cannot write output')
             return
 
-        # Check for a sim_results file, overwriting sim data that may
-        # have been passed in
-        if (sim_results_file_string):
-            print('Loading sim data from %s' % sim_results_file_string)
-            sim_data = pd.read_csv(sim_results_file_string)
-
         # Load the output handler structure as a dict
         with open(output_handler_file_string, 'r') as f:
             self.oh_data = json.load(f)
+
+        # Check for a sim_results file, overwriting sim data that may
+        # have been passed in
+        if not sim_results_file_string:
+            print('Loading sim data from %s' % sim_results_file_string)
+            sim_data = pd.read_csv(sim_results_file_string)
 
         # Animation
         if ('distribution_animation' in self.oh_data):
             if (cb_dump_file_string):
                 da = self.oh_data['distribution_animation']
+                print('Loading distribution data from %s' %
+                      cb_dump_file_string)
                 self.animate_cb_distributions(
                     cb_dump_file_string=cb_dump_file_string,
                     output_image_file_string=da['output_file_string'],
                     skip_frames=da['skip_frames'])
+
+        if (sim_data == []):
+            print('No simulation data available')
+            return
 
         # User defined files
         base_directory = Path(output_handler_file_string).parent.absolute()

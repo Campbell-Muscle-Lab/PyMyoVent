@@ -4,7 +4,8 @@ def write_complete_data_to_sim_data(self, index):
     """ Writes full data to data frame """
 
     for f in list(self.data.keys()):
-        if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
+        if (f not in ['p', 'v', 's', 'compliance', 'resistance',
+                      'inertance', 'f']):
             self.sim_data.at[self.write_counter, f] = self.data[f]
     for f in list(self.hr.data.keys()):
         self.sim_data.at[self.write_counter, f] = self.hr.data[f]
@@ -28,7 +29,8 @@ def write_complete_data_to_envelope_data(self, index):
     """ Writes full data to envelope frame """
 
     for f in list(self.data.keys()):
-        if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
+        if (f not in ['p', 'v', 's', 'compliance', 'resistance',
+                      'inertance', 'f']):
             self.envelope_data.at[self.envelope_counter, f] = self.data[f]
     for f in list(self.hr.data.keys()):
         self.envelope_data.at[self.envelope_counter, f] = self.hr.data[f]
@@ -56,7 +58,8 @@ def write_envelope_data_to_sim_data(self, index):
 
     # Cycle through picking off min and max values in envelope
     for f in list(self.data.keys()):
-        if (f not in ['p', 'v', 's', 'compliance', 'resistance', 'f']):
+        if (f not in ['p', 'v', 's', 'compliance', 'resistance',
+                      'inertance', 'f']):
             min_value, max_value = self.return_min_max(
                 self.envelope_data[f])
             self.sim_data.at[self.write_counter, f] = min_value

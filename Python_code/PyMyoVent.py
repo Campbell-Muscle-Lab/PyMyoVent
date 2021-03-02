@@ -46,15 +46,21 @@ def PyMyoVent_main():
             create_summary(sys.argv[2],
                            output_file_string=sys.argv[3])
 
+    if (no_of_arguments == 5):
+        if (sys.argv[1] == 'create_figures'):
+            oh.output_handler(sys.argv[2],
+                              sim_results_file_string=sys.argv[3],
+                              cb_dump_file_string=sys.argv[4])
+
 
 def run_batch(batch_json_file_string):
     if (batch_json_file_string == []):
         print('No batch file specified. Exiting')
         return
 
-    # Create thread_jobs to hold job information that
+    # Create batch_jobs to hold job information that
     # will be passed to worker thread
-    thread_jobs = []
+    batch_jobs = []
 
     with open(batch_json_file_string, 'r') as bf:
         batch_data = json.load(bf)
@@ -81,36 +87,28 @@ def run_batch(batch_json_file_string):
                             job[k] = os.path.join(base_directory, job[k])
 
             # Append to thread_jobs
-            thread_jobs.append(job)
+            batch_jobs.append(job)
 
-    # Now that we have parsed the job data, run the batch
-    # using multiprocessing and all cores but 1
-    num_processes = multiprocessing.cpu_count()
-    print("num_processes: %i" % num_processes)
+    # Run jobs using multi-processing if there is more than 1 job
+    if (len(batch_jobs) == 1):
+        worker(batch_jobs[0], 0)
+    else:
+        # Use all the cores but 1
+        num_processes = multiprocessing.cpu_count()
+        print("num_processes: %i" % num_processes)
 
-    pool = multiprocessing.Pool(processes=(num_processes-1))
-    for i in range(len(thread_jobs)):
-        pool.appl_async(worker, args=[thread_jobs[i]])
-    pool.close()
-    pool.join()
-
-    # while threads or my_list:
-    #     if (len(threads) < (num_processes-1)) and my_list:
-    #         t = threading.Thread(target=worker, args=[my_list.pop()])
-    #         t.setDaemon(True)
-    #         t.start()
-    #         threads.append(t)
-    #     else:
-    #         for thread in threads:
-    #             if not thread.isAlive():
-    #                 threads.remove(thread)
+        pool = multiprocessing.Pool(processes=(num_processes-1))
+        for i in range(len(batch_jobs)):
+            pool.apply_async(worker, args=(batch_jobs[i], i))
+        pool.close()
+        pool.join()
 
 
-def worker(job):
+def worker(job, thread_id=[]):
     """ Runs a job in a batch """
 
     svc_object = svc.single_ventricle_circulation(
-        job['model_file_string'])
+        job['model_file_string'], thread_id)
     svc_object.run_simulation(
         protocol_file_string=job['protocol_file_string'],
         output_handler_file_string=job['output_handler_file_string'],
