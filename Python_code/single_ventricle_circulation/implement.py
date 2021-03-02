@@ -30,7 +30,7 @@ def write_complete_data_to_envelope_data(self, index):
 
     for f in list(self.data.keys()):
         if (f not in ['p', 'v', 's', 'compliance', 'resistance',
-                      'intertance', 'f']):
+                      'inertance', 'f']):
             self.envelope_data.at[self.envelope_counter, f] = self.data[f]
     for f in list(self.hr.data.keys()):
         self.envelope_data.at[self.envelope_counter, f] = self.hr.data[f]

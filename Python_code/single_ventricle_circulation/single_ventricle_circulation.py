@@ -22,7 +22,7 @@ class single_ventricle_circulation():
         write_complete_data_to_envelope_data, \
         write_envelope_data_to_sim_data
 
-    def __init__(self, model_json_file_string, thread_id):
+    def __init__(self, model_json_file_string, thread_id=[]):
 
         # Check for file
         if (model_json_file_string == []):
