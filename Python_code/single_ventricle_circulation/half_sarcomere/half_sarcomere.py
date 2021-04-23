@@ -13,9 +13,14 @@ class half_sarcomere():
         self.data = dict()
         self.data['hs_length'] = hs_struct['initial_hs_length']
         self.data['slack_hs_length'] = 0
-        self.data['hs_force'] = 0
+        self.data['cb_stress'] = 0
+        self.data['int_pas_stress'] = 0
+        self.data['ext_pas_stress'] = 0
+        self.data['myofil_stress'] = 0
         self.data['cb_force'] = 0
-        self.data['pas_force'] = 0        
+        self.data['int_pas_force'] = 0
+        self.data['ext_pas_force'] = 0
+        self.data['hs_force'] = 0
 
         # Pull of membrane parameters
         membrane_struct = hs_struct["membranes"]
@@ -29,30 +34,29 @@ class half_sarcomere():
 
         if (time_step > 0.0):
             # Need to do some kinetics stuff
-    
+
             # Update calcium
             self.memb.implement_time_step(time_step,
                                            activation)
-    
+
             # Myofilaments
             self.myof.evolve_kinetics(time_step,
                                       self.memb.data['Ca_cytosol'])
-    
+
         if (np.abs(delta_hsl) > 0.0):
             # Need to move some things
             self.myof.move_cb_distributions(delta_hsl)
             self.data['hs_length'] = self.data['hs_length'] + delta_hsl
-    
+
         # Update forces
-        self.myof.set_myofilament_forces()
-        self.hs_force = self.myof.total_force
+        self.myof.set_myofilament_stress()
+        self.hs_force = self.myof.hs_force
         
     def update_data(self):
         # First update own object data
         f = self.myof.check_myofilament_forces(0)
-        self.data['hs_force'] = f['total_force']
-        self.data['pas_force'] = f['pas_force']
-        self.data['cb_force'] = f['cb_force']
+        for key in f.keys():
+            self.data[key] = f[key]
         
         # Now update membrane and myofilaments
         self.memb.update_data()

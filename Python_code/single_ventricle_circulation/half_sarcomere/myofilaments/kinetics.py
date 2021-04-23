@@ -5,12 +5,19 @@ from scipy.integrate import solve_ivp
 
 def evolve_kinetics(self, time_step, Ca_conc):
     """Updates kinetics, switches to different sub-functions as required"""
+
     if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
         update_3_state_with_SRX(self, time_step, Ca_conc)
 
+    if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+        update_4_state_with_SRX(self, time_step, Ca_conc)
+
 
 def update_3_state_with_SRX(self, time_step, Ca_conc):
-    """ Updates kinetics for thick and thin filaments """
+    """ Updates kinetics for thick and thin filaments
+        This is implements the model described in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6084639/ """
+    
 
     # Pull out the myofilaments vector
     y = self.y
@@ -48,9 +55,63 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
 
     self.fluxes = return_fluxes(self, self.y, Ca_conc)
 
+def update_4_state_with_SRX(self, time_step, Ca_conc):
+    """ Updates kinetics for thick and thin filaments. This is
+        an extension of the three-state model in
+        https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6084639/
+        with pre and post-power stroke states """
+
+    y = self.y
+
+    # Get the overlap
+    self.n_overlap = self.return_n_overlap()
+
+    def derivs(t, y):
+        dy = np.zeros(np.size(y))
+
+        fluxes = return_fluxes(self, y, Ca_conc)
+
+        # Calculate the derivs
+        dy[0] = -fluxes['J_1'] + fluxes['J_2']
+        dy[1] = (fluxes['J_1'] + np.sum(fluxes['J_4']) +
+                     np.sum(fluxes['J_7'])) - \
+                (fluxes['J_2'] + np.sum(fluxes['J_3']) +
+                     np.sum(fluxes['J_8']))
+        J_3 = fluxes['J_3']
+        J_4 = fluxes['J_4']
+        J_5 = fluxes['J_5']
+        J_6 = fluxes['J_6']
+        J_7 = fluxes['J_7']
+        J_8 = fluxes['J_8']
+
+        for i in np.arange(0, self.no_of_x_bins):
+            dy[i + 2] = (J_3[i] + J_6[i]) - \
+                        (J_4[i] + J_5[i])
+            dy[i + self.no_of_x_bins] = \
+                (J_5[i] + J_8[i]) - \
+                    (J_6[i] + J_7[i])
+                    
+        dy[-2] = -fluxes['J_on'] + fluxes['J_off']
+        dy[-1] = fluxes['J_on'] - fluxes['J_off']
+
+        return dy
+
+    # Evolve the system
+    sol = solve_ivp(derivs, [0, time_step], y, method='RK23')
+    self.y = sol.y[:, -1]
+
+    # Do some tidying for extreme situations
+    self.y[np.nonzero(self.y > 1.0)] = 1.0
+    self.y[np.nonzero(self.y < 0.0)] = 0.0
+    sum_of_heads = np.sum(self.y[np.arange(2 + 2*self.no_of_x_bins)])
+    # Additionals appear in M_DRX
+    self.y[0] = self.y[0] + (1.0 - sum_of_heads)
+
+    self.fluxes = return_fluxes(self, self.y, Ca_conc)
 
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
+    
     if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
 
         # Unpack
@@ -62,7 +123,8 @@ def return_fluxes(self, y, Ca_conc):
 
         r_1 = np.minimum(self.implementation['max_rate'],
                         self.data['k_1'] * 
-                        (1.0 + self.data['k_force'] * self.parent_hs.hs_force))
+                        (1.0 + self.data['k_force'] *
+                             self.myofil_stress))
         J_1 = r_1 * M_SRX
 
         r_2 = np.minimum(self.implementation['max_rate'], self.data['k_2'])
@@ -101,6 +163,87 @@ def return_fluxes(self, y, Ca_conc):
 
         return fluxes
 
+    if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+
+        # Unpack
+        M_SRX = y[0]
+        M_DRX = y[1]
+        pre_ind = 2+np.arange(0, self.no_of_x_bins)
+        M_PRE = y[pre_ind]
+        post_ind = 2 + self.no_of_x_bins + np.arange(0, self.no_of_x_bins)
+        M_POST = y[post_ind]
+        N_ON = y[-1]
+        N_BOUND = np.sum(M_PRE) + np.sum(M_POST)
+
+        r_1 = np.minimum(self.implementation['max_rate'],
+                         self.data['k_1'] *
+                         (1.0 + self.data['k_force'] *
+                              self.myofil_stress))
+        J_1 = r_1 * M_SRX
+
+        r_2 = np.minimum(self.implementation['max_rate'],
+                         self.data['k_2'])
+        J_2 = r_2 * M_DRX
+
+        r_3 = self.data['k_3'] * \
+                np.exp(-self.data['k_cb'] * (self.x**2) /
+                       (2.0 * 1e18 * scipy_constants.Boltzmann *
+                        self.implementation['temperature']))
+        r_3[r_3 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * \
+                (N_ON - N_BOUND)
+        
+        r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
+        r_4[r_4 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+        J_4 = r_4 * M_PRE
+
+        r_5 = np.minimum(self.implementation['max_rate'],
+                         self.data['k_5'])
+        J_5 = r_5 * M_PRE
+        
+        r_6 = np.minimum(self.implementation['max_rate'],
+                         self.data['k_6'])
+        J_6 = r_6 * M_POST
+
+        r_7 = self.data['k_7_0'] + (self.data['k_7_1'] * np.power(self.x, 4))
+        r_7[r_7 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+        J_7 = r_7 * M_POST
+        
+        r_8 = self.data['k_8'] * np.ones(self.no_of_x_bins)
+        r_8[r_8 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+        J_8 = r_8 * self.implementation['bin_width'] * M_DRX * \
+                (N_ON - N_BOUND)
+
+        if (self.n_overlap > 0.0):
+            J_on = (self.data['k_on'] * Ca_conc * (self.n_overlap - N_ON) *
+                (1.0 + self.data['k_coop'] * (N_ON / self.n_overlap)))
+        else:
+            J_on = 0.0
+
+        if (self.n_overlap > 0.0):
+            J_off = self.data['k_off'] * (N_ON - N_BOUND) * \
+                (1.0 + self.data['k_coop'] * ((self.n_overlap - N_ON) /
+                                      self.n_overlap))
+        else:
+            J_off = 0.0
+
+        fluxes = dict()
+        fluxes['J_1'] = J_1
+        fluxes['J_2'] = J_2
+        fluxes['J_3'] = J_3
+        fluxes['J_4'] = J_4
+        fluxes['J_5'] = J_5
+        fluxes['J_6'] = J_6
+        fluxes['J_7'] = J_7
+        fluxes['J_8'] = J_8
+        fluxes['J_on'] = J_on
+        fluxes['J_off'] = J_off
+
+        return fluxes
 
 # def return_ATPase(self,wall_volume):
 

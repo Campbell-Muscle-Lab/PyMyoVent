@@ -45,7 +45,7 @@ class output_handler():
 
         # Check for a sim_results file, overwriting sim data that may
         # have been passed in
-        if not sim_results_file_string:
+        if (sim_results_file_string != []):
             print('Loading sim data from %s' % sim_results_file_string)
             sim_data = pd.read_csv(sim_results_file_string)
 
@@ -60,7 +60,7 @@ class output_handler():
                     output_image_file_string=da['output_file_string'],
                     skip_frames=da['skip_frames'])
 
-        if (sim_data == []):
+        if not isinstance(sim_data, pd.DataFrame):
             print('No simulation data available')
             return
 

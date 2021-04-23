@@ -306,6 +306,7 @@ class single_ventricle_circulation():
         if self.so:
             if ('cb_dump_file_string' in self.so.data):
                 cb_dump_file_string = self.so.data['cb_dump_file_string']
+
         self.oh = oh.output_handler(output_handler_file_string,
                                     sim_data=self.sim_data,
                                     cb_dump_file_string=cb_dump_file_string)
@@ -531,7 +532,7 @@ class single_ventricle_circulation():
         new_hs_length = 1e9 * new_lv_circumference / self.data['n_hs']
         delta_hsl = new_hs_length - self.hs.data['hs_length']
         f = self.hs.myof.check_myofilament_forces(delta_hsl)
-        total_force = f['total_force']
+        total_force = f['hs_force']
 
         internal_r = self.return_internal_radius_for_chamber_volume(
             chamber_volume)
