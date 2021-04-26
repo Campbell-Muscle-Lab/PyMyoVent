@@ -49,17 +49,6 @@ class output_handler():
             print('Loading sim data from %s' % sim_results_file_string)
             sim_data = pd.read_csv(sim_results_file_string)
 
-        # Animation
-        if ('distribution_animation' in self.oh_data):
-            if (cb_dump_file_string):
-                da = self.oh_data['distribution_animation']
-                print('Loading distribution data from %s' %
-                      cb_dump_file_string)
-                self.animate_cb_distributions(
-                    cb_dump_file_string=cb_dump_file_string,
-                    output_image_file_string=da['output_file_string'],
-                    skip_frames=da['skip_frames'])
-
         if not isinstance(sim_data, pd.DataFrame):
             print('No simulation data available')
             return
@@ -81,6 +70,18 @@ class output_handler():
                     sim_data,
                     ud['template_file_string'],
                     ud['output_file_string'])
+
+        # Animation
+        if ('distribution_animation' in self.oh_data):
+            if (cb_dump_file_string):
+                da = self.oh_data['distribution_animation']
+                print('Loading distribution data from %s' %
+                      cb_dump_file_string)
+                self.animate_cb_distributions(
+                    cb_dump_file_string=cb_dump_file_string,
+                    output_image_file_string=da['output_file_string'],
+                    skip_frames=da['skip_frames'])
+
 
     def create_image_from_template(self,
                                    sim_data,
@@ -112,9 +113,19 @@ class output_handler():
         with open(cb_dump_file_string, 'r') as f:
             x_strings = f.readline().split('\t')
         f.close()
+        # Deduce max number of attached states
+        no_of_states = int(x_strings[-1][1])
+        print(no_of_states)
+
+        # Deduce the x values
+        # Pull off the x values
+        x_strings = x_strings[1::]
+        # Correct for the no of states
+        n = int(len(x_strings) / no_of_states)
+        x_strings = x_strings[0 : n]
         x = []
-        for i, xs in enumerate(x_strings[1:]):
-            x.append(float(xs[1:]))
+        for i, xs in enumerate(x_strings):
+            x.append(float(xs[3:]))
         # Now load distribs as numpy arrray
         cb_dump = np.loadtxt(cb_dump_file_string, skiprows=1)
         cb_distribs = cb_dump[:, 1:]
@@ -129,7 +140,7 @@ class output_handler():
                                skip_frames):
                 print(('Frame: %.0f' % i), end=' ', flush=True)
                 self.draw_cb_distribution(x, cb_distribs[i, :],
-                                          t[i], 1.2*max_pop,
+                                          t[i], 1.2*max_pop, no_of_states,
                                           temp_image_file_string)
                 image = imageio.imread(temp_image_file_string, format='png')
                 writer.append_data(image)
@@ -137,7 +148,7 @@ class output_handler():
             print('Animation written to %s' % output_image_file_string)
         os.remove(temp_image_file_string)
 
-    def draw_cb_distribution(self, x, y, t, max_y,
+    def draw_cb_distribution(self, x, y, t, max_y, no_of_states,
                              output_image_file_string):
         """ Draws a single cb distribution """
 
@@ -147,7 +158,15 @@ class output_handler():
         ax = []
         ax.append(fig.add_subplot(spec[0, 0]))
 
-        ax[0].plot(x, y, 'b-')
+        # Deduce indices for plotting distributions
+        n = len(y)
+        ind = np.arange(0, int(n/no_of_states))
+        ind_0 = 0
+        for i in range(0, no_of_states):
+            ind = ind_0 + ind
+            ind_0 = ind[-1]
+            ax[0].plot(x, y[ind])
+
         ax[0].set_xlim([np.amin(x), np.amax(x)])
         ax[0].set_ylim([0, max_y])
         ax[0].text(np.amin(x), max_y, ('Time %.3f s' % t),

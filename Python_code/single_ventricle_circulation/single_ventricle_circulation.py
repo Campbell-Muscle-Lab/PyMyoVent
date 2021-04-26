@@ -22,6 +22,8 @@ class single_ventricle_circulation():
         write_complete_data_to_envelope_data, \
         write_envelope_data_to_sim_data
 
+    from .energy import return_myosin_ATPase
+
     def __init__(self, model_json_file_string, thread_id=[]):
 
         # Check for file
@@ -200,6 +202,14 @@ class single_ventricle_circulation():
                 self.gr.data['gr_eccentric_set']
         else:
             self.gr = []
+
+        # Add in ATPase, stroke work, and efficiency
+        self.data['ATPase'] = 0
+        self.data['stroke_work']= 0
+        self.data['efficiency'] = 0
+
+        # Set the last index for heart_beat initiation
+        self.last_heart_beat_time = -1
 
         # If required create a VAD
         if ('VAD' in sc_model):
@@ -408,7 +418,25 @@ class single_ventricle_circulation():
                                         self.data['growth_active'])
 
         # Run the hr module
-        activation = self.hr.implement_time_step(time_step)
+        (activation, new_beat) = self.hr.implement_time_step(time_step)
+
+        # Calculate efficiency for the last cycle
+        if ((new_beat > 0) and (self.last_heart_beat_time >= 0)):
+            # We have a new beat so calculate the myosin ATPase and stroke work
+            d_temp = self.sim_data[self.sim_data['time'].between(
+                        self.last_heart_beat_time, self.data['time'])]
+            p = d_temp['pressure_ventricle'].to_numpy()
+            # Convert volume to m^3
+            v = 0.001 * d_temp['volume_ventricle'].to_numpy()
+            
+            e = 0.5*np.abs(np.dot(v, np.roll(p, 1)) -
+                           np.dot(p, np.roll(v,1)))
+            print('energy = %f' % e)
+
+        # Update last heart beat time
+        if (new_beat > 0):
+            self.last_heart_beat_time = self.data['time']
+
 
         # Advance half_sarcomere forward in time
         # First update the kinetic steps
@@ -425,6 +453,9 @@ class single_ventricle_circulation():
         delta_hsl = ((1e9*delta_circumference) -
                      (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
             self.data['n_hs']
+
+        # Calculate the ATPase
+        self.data['myosin_ATPase'] = self.return_myosin_ATPase()
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
@@ -562,10 +593,9 @@ class single_ventricle_circulation():
         t  = np.power(0.001 * (chamber_volume +
                                self.data['ventricle_wall_volume']) /
                       ((2.0 / 3.0) * np.pi), (1.0 / 3.0)) - \
-                        internal_r
+                          internal_r
 
         return t
-
 
     def return_lv_circumference(self, chamber_volume):
         # Based on 2 pi * (internal r + 0.5 * wall thickness)
@@ -582,7 +612,6 @@ class single_ventricle_circulation():
                       (0.5 * wall_thickness)))
 
         return lv_circum
-
 
     def return_internal_radius_for_chamber_volume(self, chamber_volume):
         # Returns internal radius in meters for chamber volume in liters

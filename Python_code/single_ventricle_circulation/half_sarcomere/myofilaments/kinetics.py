@@ -1,7 +1,8 @@
 # Functions for myofilament kinetics
 import numpy as np
-import scipy.constants as scipy_constants
 from scipy.integrate import solve_ivp
+
+import scipy.constants as scipy_constants
 
 def evolve_kinetics(self, time_step, Ca_conc):
     """Updates kinetics, switches to different sub-functions as required"""
@@ -87,7 +88,7 @@ def update_4_state_with_SRX(self, time_step, Ca_conc):
         for i in np.arange(0, self.no_of_x_bins):
             dy[i + 2] = (J_3[i] + J_6[i]) - \
                         (J_4[i] + J_5[i])
-            dy[i + self.no_of_x_bins] = \
+            dy[i + self.no_of_x_bins + 2] = \
                 (J_5[i] + J_8[i]) - \
                     (J_6[i] + J_7[i])
                     
@@ -199,20 +200,25 @@ def return_fluxes(self, y, Ca_conc):
             self.implementation['max_rate']
         J_4 = r_4 * M_PRE
 
-        r_5 = np.minimum(self.implementation['max_rate'],
-                         self.data['k_5'])
+        r_5 = self.data['k_5'] * np.ones(self.no_of_x_bins)
+        r_5[r_5 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
         J_5 = r_5 * M_PRE
-        
-        r_6 = np.minimum(self.implementation['max_rate'],
-                         self.data['k_6'])
+
+        r_6 = self.data['k_6'] * np.ones(self.no_of_x_bins)
+        r_6[r_6 > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
         J_6 = r_6 * M_POST
 
         r_7 = self.data['k_7_0'] + (self.data['k_7_1'] * np.power(self.x, 4))
         r_7[r_7 > self.implementation['max_rate']] = \
             self.implementation['max_rate']
         J_7 = r_7 * M_POST
-        
-        r_8 = self.data['k_8'] * np.ones(self.no_of_x_bins)
+
+        r_8 = self.data['k_8'] * \
+            np.exp(-self.data['k_cb'] * (self.x**2) /
+                (2.0 * 1e18 * scipy_constants.Boltzmann *
+                 self.implementation['temperature']))
         r_8[r_8 > self.implementation['max_rate']] = \
             self.implementation['max_rate']
         J_8 = r_8 * self.implementation['bin_width'] * M_DRX * \
@@ -244,20 +250,3 @@ def return_fluxes(self, y, Ca_conc):
         fluxes['J_off'] = J_off
 
         return fluxes
-
-# def return_ATPase(self,wall_volume):
-
-#     N0 = self.parent_hs.cb_number_density
-#     delta_G = self.parent_hs.delta_G
-
-#     L0 = 1e-9*self.parent_hs.L0
-#     N_A = self.parent_hs.N_A
-
-#     fluxes = return_fluxes(self,self.y,self.parent_hs.Ca_conc)
-#     J4 = np.sum(fluxes['J4'])
-#     # convert liter to meter^3
-#     w_vol = wall_volume*0.001
-
-#     self.ATPase = (N0 * w_vol * delta_G * J4)/(L0 * N_A)
-
-#     return self.ATPase

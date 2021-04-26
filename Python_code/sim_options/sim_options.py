@@ -56,13 +56,21 @@ class sim_options():
             self.cb_dump_file = open(
                 self.data['cb_dump_file_string'], 'w')
             self.cb_dump_file.write('Time_s\t')
-            for i, x in enumerate(
-                    self.parent_circulation.hs.myof.x):
-                self.cb_dump_file.write('x%.1f' % x)
-                if (i == (np.size(self.parent_circulation.hs.myof.x)-1)):
-                    self.cb_dump_file.write('\n')
-                else:
-                    self.cb_dump_file.write('\t')
+            # Header depends on model
+            if (self.parent_circulation.hs.myof.implementation['kinetic_scheme'] ==
+                    '3_state_with_SRX'):
+                r = 1
+            else:
+                r = 2
+            for j in range(0, r):
+                for i, x in enumerate(
+                        self.parent_circulation.hs.myof.x):
+                    self.cb_dump_file.write('x%i_%.1f' % ((j+1), x))
+                    if ((j == (r - 1)) and
+                        (i == (np.size(self.parent_circulation.hs.myof.x) - 1))):
+                        self.cb_dump_file.write('\n')
+                    else:
+                        self.cb_dump_file.write('\t')
             self.cb_dump_file.close()
 
         # Check for burst mode
@@ -110,14 +118,20 @@ class sim_options():
 
         # Pull off cb distribution
         m = self.parent_circulation.hs.myof
-        cb_distribution = m.y[2 + np.arange(m.no_of_x_bins)]
+
+        if (self.parent_circulation.hs.myof.implementation['kinetic_scheme'] ==
+                    '3_state_with_SRX'):
+            cb_distribution = m.y[2 + np.arange(m.no_of_x_bins)]
+        if (self.parent_circulation.hs.myof.implementation['kinetic_scheme'] ==
+                    '4_state_with_SRX'):
+            cb_distribution = m.y[2 + np.arange(2 * m.no_of_x_bins)]
 
         self.cb_dump_file = open(
             self.data['cb_dump_file_string'], 'a')
 
         self.cb_dump_file.write('%.4f\t' % sim_time)
         for i, y in enumerate(cb_distribution):
-            self.cb_dump_file.write('%g' % y)
+            self.cb_dump_file.write('%.4f' % y)
             if (i == (np.size(cb_distribution)-1)):
                 self.cb_dump_file.write('\n')
             else:

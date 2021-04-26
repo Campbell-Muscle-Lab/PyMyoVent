@@ -16,6 +16,7 @@ class heart_rate():
         for f in list(heart_rate_struct.keys()):
             self.data[f] = heart_rate_struct[f]
 
+        self.data['activation'] = 0
         self.data['t_active_left'] = 0
         self.data['t_RR'] = self.data['t_first_activation']
 
@@ -32,13 +33,20 @@ class heart_rate():
                                 self.data['t_quiescent_period']
 
         # Manage t_active_left
+        old_activation = self.data['activation']
         if (self.data['t_active_left'] > 0):
-            activation = 1
+            self.data['activation'] = 1
         else:
-            activation = 0
+            self.data['activation'] = 0
             self.data['t_active_left'] = 0
 
-        return activation
+        # Check whether this was initiating a new beat
+        if ((old_activation == 0) and (self.data['activation'] == 1)):
+            new_beat = 1
+        else:
+            new_beat = 0
+
+        return (self.data['activation'], new_beat)
 
     def return_heart_rate(self):
         """ returns heart rate in beats per minute """
