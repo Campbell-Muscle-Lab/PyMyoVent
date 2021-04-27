@@ -78,7 +78,7 @@ class baroreflex():
                 self.parent_circulation.data[bc.data['variable']] = y
             
             # Add in data field
-            k = bc.data['level']+'_'+bc.data['variable']+'_rc_level'
+            k = bc.data['level']+'_'+bc.data['variable']+'_rc'
             self.data[k] = bc.data['rc']
 
 

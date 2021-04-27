@@ -3,26 +3,28 @@
 def write_complete_data_to_sim_data(self, index):
     """ Writes full data to data frame """
 
-    for f in list(self.data.keys()):
-        if (f not in ['p', 'v', 's', 'compliance', 'resistance',
-                      'inertance', 'f']):
-            self.sim_data.at[self.write_counter, f] = self.data[f]
-    for f in list(self.hr.data.keys()):
-        self.sim_data.at[self.write_counter, f] = self.hr.data[f]
-    for f in list(self.hs.data.keys()):
-        self.sim_data.at[self.write_counter, f] = self.hs.data[f]
-    for f in list(self.hs.memb.data.keys()):
-        self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
-    for f in list(self.hs.myof.data.keys()):
-        self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
-    if (self.br):
-        for f in list(self.br.data.keys()):
-            self.sim_data.at[self.write_counter, f] = self.br.data[f]
-    if (self.gr):
-        for f in list(self.gr.data.keys()):
-            self.sim_data.at[self.write_counter, f] = self.gr.data[f]
-    self.sim_data.at[self.write_counter, 'write_mode'] = 'complete'
-    self.write_counter = self.write_counter + 1
+    # This works but is very slow
+    if (True):
+        for f in list(self.data.keys()):
+            if (f not in ['p', 'v', 's', 'compliance', 'resistance',
+                          'inertance', 'f']):
+                self.sim_data.at[self.write_counter, f] = self.data[f]
+        for f in list(self.hr.data.keys()):
+            self.sim_data.at[self.write_counter, f] = self.hr.data[f]
+        for f in list(self.hs.data.keys()):
+            self.sim_data.at[self.write_counter, f] = self.hs.data[f]
+        for f in list(self.hs.memb.data.keys()):
+            self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
+        for f in list(self.hs.myof.data.keys()):
+            self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
+        if (self.br):
+            for f in list(self.br.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.br.data[f]
+        if (self.gr):
+            for f in list(self.gr.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.gr.data[f]
+        self.sim_data.at[self.write_counter, 'write_mode'] = 1
+        self.write_counter = self.write_counter + 1
 
 
 def write_complete_data_to_envelope_data(self, index):

@@ -13,6 +13,7 @@ from protocol import protocol as prot
 from sim_options import sim_options as sim_opt
 from output_handler import output_handler as oh
 
+from scipy.constants import mmHg as mmHg_in_pascals
 
 class single_ventricle_circulation():
     """Class for a single ventricle circulation"""
@@ -22,7 +23,10 @@ class single_ventricle_circulation():
         write_complete_data_to_envelope_data, \
         write_envelope_data_to_sim_data
 
-    from .energy import return_myosin_ATPase
+    from .energy import \
+        handle_energetics, \
+        return_myosin_ATPase, \
+        return_stroke_work
 
     def __init__(self, model_json_file_string, thread_id=[]):
 
@@ -204,9 +208,9 @@ class single_ventricle_circulation():
             self.gr = []
 
         # Add in ATPase, stroke work, and efficiency
-        self.data['ATPase'] = 0
+        self.data['myosin_ATPase'] = 0
         self.data['stroke_work']= 0
-        self.data['efficiency'] = 0
+        self.data['myosin_efficiency'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -226,19 +230,26 @@ class single_ventricle_circulation():
         sim_data = pd.DataFrame()
         z = np.zeros(no_of_data_points)
 
-        data_fields = list(self.data.keys()) + \
+        # Prune some fields from the self_data
+        sk = []
+        for k in self.data.keys():
+            if (k not in ['p','v','s','compliance','resistance',
+                          'inertance','f']):
+                sk.append(k)
+
+        data_fields = sk + \
             list(self.hr.data.keys()) + \
             list(self.hs.data.keys()) + \
             list(self.hs.memb.data.keys()) + \
             list(self.hs.myof.data.keys()) + \
-            ['output_mode']
+            ['write_mode']
 
         # Add in fields from optional modules
-        if (self.br):
+        if (self.br != []):
             data_fields = data_fields + list(self.br.data.keys())
-        if (self.gr):
+        if (self.gr != [] ):
             data_fields = data_fields + list(self.gr.data.keys())
-        if (self.va):
+        if (self.va != []):
             data_fields = data_fields + list(self.va.data.keys())
 
         for f in data_fields:
@@ -339,6 +350,7 @@ class single_ventricle_circulation():
             d['fractional_shortening'] = \
                 (d['hs_length_max'] - self.temp_data['hs_length'].min()) / \
                 d['hs_length_max']
+            d['myosin_efficiency'] = self.data['myosin_efficiency']
             d['pressure_artery_max'] = \
                 self.temp_data['pressure_arteries'].max()
             d['pressure_artery_min'] = \
@@ -420,24 +432,6 @@ class single_ventricle_circulation():
         # Run the hr module
         (activation, new_beat) = self.hr.implement_time_step(time_step)
 
-        # Calculate efficiency for the last cycle
-        if ((new_beat > 0) and (self.last_heart_beat_time >= 0)):
-            # We have a new beat so calculate the myosin ATPase and stroke work
-            d_temp = self.sim_data[self.sim_data['time'].between(
-                        self.last_heart_beat_time, self.data['time'])]
-            p = d_temp['pressure_ventricle'].to_numpy()
-            # Convert volume to m^3
-            v = 0.001 * d_temp['volume_ventricle'].to_numpy()
-            
-            e = 0.5*np.abs(np.dot(v, np.roll(p, 1)) -
-                           np.dot(p, np.roll(v,1)))
-            print('energy = %f' % e)
-
-        # Update last heart beat time
-        if (new_beat > 0):
-            self.last_heart_beat_time = self.data['time']
-
-
         # Advance half_sarcomere forward in time
         # First update the kinetic steps
         self.hs.update_simulation(time_step, 0, activation)
@@ -454,8 +448,8 @@ class single_ventricle_circulation():
                      (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
             self.data['n_hs']
 
-        # Calculate the ATPase
-        self.data['myosin_ATPase'] = self.return_myosin_ATPase()
+        # Handle energetics
+        self.handle_energetics(time_step, new_beat)
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
@@ -511,6 +505,10 @@ class single_ventricle_circulation():
                      self.so.data['cb_dump_t_stop_ind'])):
                     self.so.append_cb_distribution(self.data['time'])
 
+        # Update the last heart beat time if required
+        if (new_beat > 0):
+            self.last_heart_beat_time = self.data['time']
+
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
 
@@ -556,7 +554,6 @@ class single_ventricle_circulation():
 
     def return_lv_pressure(self, chamber_volume):
         """ return pressure for a given volume """
-        from scipy.constants import mmHg as mmHg_in_pascals
 
         # Estimate the force produced at the new length
         new_lv_circumference = self.return_lv_circumference(chamber_volume)

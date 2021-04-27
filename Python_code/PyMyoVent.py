@@ -22,6 +22,9 @@ def PyMyoVent_main():
     # Get the number of arguments
     no_of_arguments = len(sys.argv)
 
+    if (no_of_arguments == 1):
+        run_batch('c:/ken/github/campbellmusclelab/publications/paper_pymyovent_baroreceptor/simulations/batch_test_base.json')
+
     # Switch depending on number of arguments
     if (no_of_arguments == 3):
         # Demos
