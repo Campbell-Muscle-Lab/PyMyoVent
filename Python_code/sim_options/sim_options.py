@@ -98,6 +98,10 @@ class sim_options():
             print('Max sim time (s): %f' % t)
             print('Output points: %i' % self.data['n_burst_points'])
             print('Envelope_points: %i' % self.data['n_envelope_points'])
+        else:
+            print('Full dump mode, writing %i time-points' %
+                  self.parent_circulation.prot.data['no_of_time_steps'])
+
 
     def return_save_status(self, t):
         """ Given a time in s, return 1 for full save, 2 for envelope save

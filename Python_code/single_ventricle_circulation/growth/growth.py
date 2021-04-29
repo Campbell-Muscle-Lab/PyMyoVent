@@ -104,6 +104,8 @@ class growth_component():
             y=[]
             if (self.data['level'] == 'half_sarcomere'):
                 y = self.parent_circulation.hs.data[self.data['signal']]
+            elif (self.data['level'] == 'circulation'):
+                y = self.parent_circulation.data[self.data['signal']]
             if (y >= self.data['setpoint']):
                 dgdt += self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \

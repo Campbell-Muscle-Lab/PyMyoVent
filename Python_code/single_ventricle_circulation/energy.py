@@ -6,7 +6,6 @@ Created on Mon Apr 26 10:07:05 2021
 """
 
 import numpy as np
-import pandas as pd
 
 import scipy.constants as scipy_constants
 
@@ -19,6 +18,11 @@ def handle_energetics(self, time_step, new_beat):
     # Irrespective, calculate and store myosin ATPase
     self.data['myosin_ATPase'] = self.return_myosin_ATPase()
 
+    self.data['ATPase_to_myo'] = self.data['myosin_ATPase'] / \
+        (0.001 * self.data['ventricle_wall_volume'] *
+             (1.0 - self.hs.myof.data['prop_fibrosis']))
+
+
     # It's a new beat, calculate stroke work and myosin ATPase
     if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
         
@@ -29,6 +33,9 @@ def handle_energetics(self, time_step, new_beat):
                                'myosin_ATPase']]
         d_temp = d_temp[d_temp['time'].between(
             self.last_heart_beat_time, self.data['time'])]
+
+        self.data['stroke_volume'] = d_temp['volume_ventricle'].max() - \
+                                        d_temp['volume_ventricle'].min()
 
         self.data['stroke_work'] = self.return_stroke_work(d_temp)
 

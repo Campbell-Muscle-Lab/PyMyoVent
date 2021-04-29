@@ -188,7 +188,6 @@ class single_ventricle_circulation():
             self.br = br.baroreflex(sc_model['baroreflex'],
                                     self,
                                     self.data['pressure_arteries'])
-            self.data['baroreflex_setpoint'] = self.br.data['baro_b_setpoint']
         else:
             self.br = []
 
@@ -196,21 +195,18 @@ class single_ventricle_circulation():
         self.data['growth_active'] = 0
         self.data['growth_dn'] = 0
         self.data['growth_dm'] = 0
-        self.data['growth_concentric_set'] = 0
-        self.data['growth_eccentric_set'] = 0
+
         if ('growth' in sc_model):
             self.gr = gr.growth(sc_model['growth'], self)
-            self.data['growth_concentric_set'] = \
-                self.gr.data['gr_concentric_set']
-            self.data['growth_eccentric_set'] = \
-                self.gr.data['gr_eccentric_set']
         else:
             self.gr = []
 
         # Add in ATPase, stroke work, and efficiency
         self.data['myosin_ATPase'] = 0
+        self.data['stroke_volume'] = 0
         self.data['stroke_work']= 0
         self.data['myosin_efficiency'] = 0
+        self.data['ATPase_to_myo'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -379,31 +375,6 @@ class single_ventricle_circulation():
             system_values = self.return_system_values()
             print(json.dumps(system_values, indent=4))
 
-        # Check and implement perturbations
-        for p in self.prot.perturbations:
-            # Implement step_change perturbations
-            if ('new_value' in p.data):
-                if (self.t_counter == p.data['t_start_ind']):
-                    self.data[p.data['variable']] = p.data['new_value']
-            else:
-                if((self.t_counter >= p.data['t_start_ind']) and
-                   (self.t_counter < p.data['t_stop_ind'])):
-                    handled = 0
-                    if (p.data['variable'].startswith("myo_")):
-                        v = p.data['variable']
-                        v = v[4::]
-                        self.hs.myof.data[v] += p.data['increment']
-                        handled = 1
-                    if (p.data['variable'].startswith("vad_")):
-                        v = p.data['variable']
-                        v = v[4::]
-                        self.va.data[v] += p.data['increment']
-                        handled = 1
-                    if (handled == 0):
-                        self.data[p.data['variable']] += p.data['increment']
-
-        self.rebuild_from_perturbations()
-
         # Check for baroreflex and implement
         if (self.br):
             self.data['baroreflex_active'] = 0
@@ -416,6 +387,32 @@ class single_ventricle_circulation():
                                         time_step,
                                         reflex_active=
                                         self.data['baroreflex_active'])
+
+        # Check and implement perturbations
+        for p in self.prot.perturbations:
+
+            if((self.t_counter >= p.data['t_start_ind']) and
+               (self.t_counter < p.data['t_stop_ind'])):
+                if (p.data['level'] == 'myofilaments'):
+                    self.hs.myof.data[p.data['variable']] += \
+                        p.data['increment']
+                elif (p.data['level'] == 'vad'):
+                    self.va.data[p.data['variable']] += \
+                        p.data['increment']
+                elif (p.data['level'] == 'circulation'):
+                    self.data[p.data['variable']] += \
+                        p.data['increment']
+                elif (p.data['level'] == 'baroreflex'):
+                    self.br.data[p.data['variable']] += \
+                        p.data['increment']
+                elif (p.data['level'] == 'growth'):
+                    self.gr.data[p.data['variable']] += \
+                        p.data['growth']
+
+                self.check_baroreflex_perturbations(p)
+
+        # Rebuild system arrays
+        self.rebuild_from_perturbations()
 
         # Check for growth module and implement
         if (self.gr):
@@ -512,6 +509,19 @@ class single_ventricle_circulation():
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1
 
+    def check_baroreflex_perturbations(self, p):
+        """ Checks whether a parameter under reflex control has been
+            externally perturned and adjusts values accordingly """
+
+        for bc in self.br.controls:
+            if (bc.data['variable'] == p.data['variable']):
+                bc.data['basal_value'] = bc.data['basal_value'] + \
+                    p.data['increment']
+                bc.data['para_value'] == bc.data['para_factor'] * \
+                    bc.data['basal_value']
+                bc.data['symp_value'] == bc.data['symp_factor'] * \
+                    bc.data['basal_value']
+
     def return_min_max(self, data_frame):
         """ returns list of min and max values from a data frame """
         min_value = data_frame.min()
@@ -530,13 +540,6 @@ class single_ventricle_circulation():
             if (i < (self.model['no_of_compartments']-1)):
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i] = c
-
-        # apply changes to baroreceptor
-        self.br.data['baro_b_setpoint'] = self.data['baroreflex_setpoint']
-
-        # apply the the perturbed set-points for growth module here
-        self.gr.data['gr_concentric_set'] = self.data['growth_concentric_set']
-        self.gr.data['gr_eccentric_set'] = self.data['growth_eccentric_set']
 
     def update_data(self, time_step):
         """ Update data after a time step """

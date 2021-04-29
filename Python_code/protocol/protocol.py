@@ -21,9 +21,9 @@ class protocol():
             self.data[p] = prot[p]
 
         self.perturbations = []
-        if ('perturbations' in s):
-            pert_struct = s['perturbations']
-            for i, p in enumerate(pert_struct['perturbation']):
+        if ('perturbation' in s):
+            pert_struct = s['perturbation']
+            for i, p in enumerate(pert_struct['perturbations']):
                 self.perturbations.append(perturbation(p,
                                                        self.data['time_step']))
 
@@ -46,6 +46,7 @@ class perturbation():
     
     def __init__(self, perturbation_struct, time_step):
         self.data = dict()
+        self.data['level'] = perturbation_struct['level']
         self.data['variable'] = perturbation_struct['variable']
         self.data['t_start_s'] = perturbation_struct['t_start_s']
         self.data['t_start_ind'] = int(self.data['t_start_s'] / time_step)

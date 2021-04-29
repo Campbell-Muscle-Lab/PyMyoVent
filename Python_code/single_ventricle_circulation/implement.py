@@ -48,7 +48,7 @@ def write_complete_data_to_envelope_data(self, index):
     if (self.gr):
         for f in list(self.gr.data.keys()):
             self.envelope_data.at[self.envelope_counter, f] = self.gr.data[f]
-    self.envelope_data.at[self.envelope_counter, 'write_mode'] = 'complete'
+    self.envelope_data.at[self.envelope_counter, 'write_mode'] = 1
     self.envelope_counter = self.envelope_counter + 1
     # Reset counter at limit
     if (self.envelope_counter == self.so.data['n_envelope_points']):
@@ -98,6 +98,6 @@ def write_envelope_data_to_sim_data(self, index):
                 self.envelope_data[f])
             self.sim_data.at[self.write_counter, f] = min_value
             self.sim_data.at[self.write_counter+1, f] = max_value
-    self.sim_data.at[self.write_counter, 'write_mode'] = 'envelope'
-    self.sim_data.at[self.write_counter+1, 'write_mode'] = 'envelope'
+    self.sim_data.at[self.write_counter, 'write_mode'] = 2
+    self.sim_data.at[self.write_counter+1, 'write_mode'] = 2
     self.write_counter = self.write_counter + 2
