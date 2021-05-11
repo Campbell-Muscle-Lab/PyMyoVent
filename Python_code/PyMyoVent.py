@@ -62,7 +62,7 @@ def run_batch(batch_json_file_string):
                 output_handler_file_string=job['output_handler_file_string'],
                 sim_options_file_string=sim_options_file_string,
                 sim_results_file_string=job['sim_results_file_string'])
-                
+
 # Define a function for running a single object
 def run_objects(job):
     if ('sim_options_file_string' in job):
@@ -87,7 +87,7 @@ def run_batch_with_multiprocesses(batch_json_file_string):
         batch_data = json.load(bf)
         jobs = batch_data['job']
 
-    # Now run the objects with multhi processes
+    # Now run the objects with multi processes
     processes = []
     for job in jobs:
         process = Process(target=run_objects,args=(job,))
