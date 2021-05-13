@@ -32,7 +32,8 @@ def check_myofilament_forces(self, delta_hsl):
 
 def return_cb_stress(self, delta_hsl):
 
-    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+        self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_detach'):
         bin_pops = self.y[2 + np.arange(0, self.no_of_x_bins)]
         cb_stress = \
             self.data['cb_number_density'] * \
@@ -43,7 +44,8 @@ def return_cb_stress(self, delta_hsl):
                      delta_hsl)))
         return cb_stress
 
-    if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+    elif (self.implementation['kinetic_scheme'] == '4_state_with_SRX' or \
+        self.implementation['kinetic_scheme'] == '4_state_with_SRX_and_exp_detach'):
         pre_ind = 2 + np.arange(0, self.no_of_x_bins)
         post_ind = 2 + self.no_of_x_bins + np.arange(0, self.no_of_x_bins)
         

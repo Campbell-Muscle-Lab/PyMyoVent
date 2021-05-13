@@ -32,10 +32,12 @@ class myofilaments():
         self.n_overlap = self.return_n_overlap()
 
         # Set up the rates and the y vector which are kinetics specific
-        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+            self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_detach'):
             self.set_up_3_state_with_SRX()
         
-        if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '4_state_with_SRX' or \
+            self.implementation['kinetic_scheme'] == '4_state_with_SRX_and_exp_detach'):
             self.set_up_4_state_with_SRX()
 
        # Initialise stresses
@@ -70,7 +72,7 @@ class myofilaments():
         # Set up data fields and variables
         
         scheme_fields = ['M_SRX', 'M_DRX', 'M_PRE', 'M_POST'
-                         'N_off', 'n_on', 'n_bound',
+                         'n_off', 'n_on', 'n_bound',
                          'n_overlap']
         self.flux_fields = ['J_1','J_2','J_3','J_4',
                             'J_5','J_6','J_7','J_8',
@@ -95,7 +97,8 @@ class myofilaments():
     def update_data(self):
         # Update model dict for reporting back to half_sarcomere
         
-        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+            self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_detach'):
             self.data['M_SRX'] = self.y[0]
             self.data['M_DRX'] = self.y[1]
             self.data["M_FG"] = np.sum(self.y[2+np.arange(self.no_of_x_bins)])
@@ -112,7 +115,8 @@ class myofilaments():
                     x = self.fluxes[f]    
                 self.data[f] = x
 
-        if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+        if (self.implementation['kinetic_scheme'] == '4_state_with_SRX' or \
+            self.implementation['kinetic_scheme'] == '4_state_with_SRX_and_exp_detach'):
             self.data['M_SRX'] = self.y[0]
             self.data['M_DRX'] = self.y[1]
             self.data["M_PRE"] = \

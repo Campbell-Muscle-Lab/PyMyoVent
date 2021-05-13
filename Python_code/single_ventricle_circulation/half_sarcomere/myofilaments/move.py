@@ -7,7 +7,8 @@ def move_cb_distributions(self, delta_hsl):
 
     delta_x = delta_hsl * self.implementation['filament_compliance_factor']
 
-    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+        self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_detach'):
         interp_positions = self.x - delta_x
         bin_indices = 2 + np.arange(0, self.no_of_x_bins)
         
@@ -29,7 +30,8 @@ def move_cb_distributions(self, delta_hsl):
         # These appear in M_on
         self.y[1] = self.y[1] + (before_heads - after_heads)
 
-    if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+    elif (self.implementation['kinetic_scheme'] == '4_state_with_SRX' or \
+        self.implementation['kinetic_scheme'] == '4_state_with_SRX_and_exp_detach'):
         interp_positions = self.x - delta_x
 
         for i in range(0, 2):

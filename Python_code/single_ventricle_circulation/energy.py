@@ -64,9 +64,11 @@ def return_myosin_ATPase(self):
     m_myocardium = 0.001 * self.data['ventricle_wall_volume']
 
     # Deduce the flux
-    if (self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+    if (self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX' or \
+        self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_detach'):
         flux = self.hs.myof.data['J_3']
-    if (self.hs.myof.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+    if (self.hs.myof.implementation['kinetic_scheme'] == '4_state_with_SRX' or \
+        self.hs.myof.implementation['kinetic_scheme'] == '4_state_with_SRX_and_exp_detach'):
         flux = self.hs.myof.data['J_7']
 
     # Now calculate energy per second
