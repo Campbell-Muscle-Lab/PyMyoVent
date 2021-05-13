@@ -52,7 +52,7 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
 
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
-<<<<<<< HEAD
+
     #if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
 
     # Unpack
@@ -82,89 +82,12 @@ def return_fluxes(self, y, Ca_conc):
         r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
 
     elif (self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_J4'):
-=======
-    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
-
-        # Unpack
-        M_SRX = y[0]
-        M_DRX = y[1]
-        M_FG = y[2 + np.arange(self.no_of_x_bins)]
-        n_on = y[-1]
-        n_bound = np.sum(M_FG)
-
-        r_1 = np.minimum(self.implementation['max_rate'],
-                        self.data['k_1'] *
-                        (1.0 + self.data['k_force'] * self.parent_hs.hs_force))
-        J_1 = r_1 * M_SRX
-
-        r_2 = np.minimum(self.implementation['max_rate'], self.data['k_2'])
-        J_2 = r_2 * M_DRX
-
-        r_3 = self.data['k_3'] * \
-                np.exp(-self.data['k_cb'] * (self.x**2) /
-                    (2.0 * 1e18 * scipy_constants.Boltzmann *
-                         self.implementation['temperature']))
-        r_3[r_3 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * (n_on - n_bound)
-
-        r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
-        r_4[r_4 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_4 = r_4 * M_FG
-        if (self.n_overlap > 0.0):
-            J_on = (self.data['k_on'] * Ca_conc * (self.n_overlap - n_on) *
-                (1.0 + self.data['k_coop'] * (n_on / self.n_overlap)))
-        else:
-            J_on = 0.0
-
-        if (self.n_overlap > 0.0):
-            J_off = self.data['k_off'] * (n_on - n_bound) * \
-                (1.0 + self.data['k_coop'] * ((self.n_overlap - n_on) /
-                                      self.n_overlap))
-        else:
-            J_off = 0.0
-
-        fluxes = dict()
-        fluxes['J_1'] = J_1
-        fluxes['J_2'] = J_2
-        fluxes['J_3'] = J_3
-        fluxes['J_4'] = J_4
-        fluxes['J_on'] = J_on
-        fluxes['J_off'] = J_off
-
-        return fluxes
-    elif (self.implementation['kinetic_scheme'] == '3_state_with_SRX_and_exp_J4'):
-
-        # Unpack
-        M_SRX = y[0]
-        M_DRX = y[1]
-        M_FG = y[2 + np.arange(self.no_of_x_bins)]
-        n_on = y[-1]
-        n_bound = np.sum(M_FG)
-
-        r_1 = np.minimum(self.implementation['max_rate'],
-                        self.data['k_1'] *
-                        (1.0 + self.data['k_force'] * self.parent_hs.hs_force))
-        J_1 = r_1 * M_SRX
-
-        r_2 = np.minimum(self.implementation['max_rate'], self.data['k_2'])
-        J_2 = r_2 * M_DRX
-
-        r_3 = self.data['k_3'] * \
-                np.exp(-self.data['k_cb'] * (self.x**2) /
-                    (2.0 * 1e18 * scipy_constants.Boltzmann *
-                         self.implementation['temperature']))
-        r_3[r_3 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * (n_on - n_bound)
-
->>>>>>> 9c9f1aa2edce7d48a5e9ebfdd60eee64438ee834
-        # define exponential detachment rate
         r_4 = self.data['k_4_0']*\
                 np.exp(-self.data['k_cb'] * self.x * self.data['exp_delta']/\
                         (1e18 * scipy_constants.Boltzmann * self.implementation['temperature']))
-        # apply the boundary for |x| > 8 nm
+
         indicies = np.where(np.abs(self.x) > 8)
         r_4[indicies] += (np.abs(self.x[indicies]) - 8 ) * self.implementation['max_rate']
-<<<<<<< HEAD
 
     r_4[r_4 > self.implementation['max_rate']] = self.implementation['max_rate']
     J_4 = r_4 * M_FG
@@ -190,32 +113,6 @@ def return_fluxes(self, y, Ca_conc):
     fluxes['J_off'] = J_off
 
     return fluxes
-=======
-        r_4[r_4 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_4 = r_4 * M_FG
-        if (self.n_overlap > 0.0):
-            J_on = (self.data['k_on'] * Ca_conc * (self.n_overlap - n_on) *
-                (1.0 + self.data['k_coop'] * (n_on / self.n_overlap)))
-        else:
-            J_on = 0.0
-
-        if (self.n_overlap > 0.0):
-            J_off = self.data['k_off'] * (n_on - n_bound) * \
-                (1.0 + self.data['k_coop'] * ((self.n_overlap - n_on) /
-                                      self.n_overlap))
-        else:
-            J_off = 0.0
-
-        fluxes = dict()
-        fluxes['J_1'] = J_1
-        fluxes['J_2'] = J_2
-        fluxes['J_3'] = J_3
-        fluxes['J_4'] = J_4
-        fluxes['J_on'] = J_on
-        fluxes['J_off'] = J_off
-
-        return fluxes
->>>>>>> 9c9f1aa2edce7d48a5e9ebfdd60eee64438ee834
 
 
 # def return_ATPase(self,wall_volume):
