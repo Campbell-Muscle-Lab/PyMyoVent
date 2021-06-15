@@ -119,7 +119,7 @@ class single_ventricle_circulation():
 
         # Deduce the hsl where force is zero and set the hsl to that length
         self.hs.data['slack_hsl'] = \
-            self.hs.myof.return_hs_length_for_force(0.0)
+            self.hs.myof.return_hs_length_for_stress(0.0)
         delta_hsl = self.hs.data['slack_hsl'] - self.hs.data['hs_length']
         self.hs.update_simulation(0.0, delta_hsl, 0.0)
 
@@ -143,6 +143,12 @@ class single_ventricle_circulation():
         # Excess blood goes in veins
         self.data['v'][-2] = self.data['v'][-2] + \
             (self.data['blood_volume'] - self.data['total_slack_volume'])
+
+        # Set the thick wall multiplier
+        # 0 for thin_wall, 1 for thick_wall
+        self.thick_wall_multiplier = 0
+        if (sc_model['half_sarcomere']['myofilaments']['implementation']['thick_wall_approximation']):
+            self.thick_wall_multiplier = 1
 
         self.data['p'] = np.zeros(self.model['no_of_compartments'])
         for i in np.arange(0, self.model['no_of_compartments']-1):
@@ -562,20 +568,22 @@ class single_ventricle_circulation():
         new_lv_circumference = self.return_lv_circumference(chamber_volume)
         new_hs_length = 1e9 * new_lv_circumference / self.data['n_hs']
         delta_hsl = new_hs_length - self.hs.data['hs_length']
-        f = self.hs.myof.check_myofilament_forces(delta_hsl)
-        total_force = f['hs_force']
+        f = self.hs.myof.check_myofilament_stresses(delta_hsl)
+        total_stress = f['hs_stress']
 
         internal_r = self.return_internal_radius_for_chamber_volume(
             chamber_volume)
 
         wall_thickness = self.return_wall_thickness(chamber_volume)
 
-        # Pressure from Laplaces lawNo documentation available
+        # Pressure from Laplaces law
         # https://www.annalsthoracicsurgery.org/action/showPdf?pii=S0003-4975%2810%2901981-8
         if (internal_r < 1e-6):
             P_in_pascals = 0
         else:
-            P_in_pascals = ((total_force * wall_thickness *(2.0 + (wall_thickness / internal_r))) /
+            # Check options for approximation
+            P_in_pascals = ((total_stress * wall_thickness *
+                             (2.0 + self.thick_wall_multiplier*(wall_thickness / internal_r))) /
                             internal_r)
         P_in_mmHg = P_in_pascals / mmHg_in_pascals
 

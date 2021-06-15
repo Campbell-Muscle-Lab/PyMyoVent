@@ -153,15 +153,15 @@ class reflex_control():
     def diff_rc(self, y, t, c, reflex_active=0):
         
         # Recovery component
-        # drcdt = -1 *self.data['rate'] * (y-0.5)
-        drcdt = 0
+        drcdt = -1 * self.data['k_recov'] * (y-0.5)
+        #drcdt = 0
         
         if (reflex_active):
             if (c > 0.5):
-                drcdt += self.data['rate'] * \
+                drcdt += self.data['k_drive'] * \
                     ((c-0.5)/0.5) * (1.0 - y)
             else:
-                drcdt += self.data['rate'] * \
+                drcdt += self.data['k_drive'] * \
                     ((c-0.5)/0.5) * y
 
         return drcdt

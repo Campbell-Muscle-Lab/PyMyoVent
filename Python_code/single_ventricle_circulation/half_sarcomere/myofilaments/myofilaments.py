@@ -5,8 +5,8 @@ class myofilaments():
 
     from .kinetics import evolve_kinetics, return_fluxes
     from .move import move_cb_distributions
-    from .forces import set_myofilament_stress, check_myofilament_forces, \
-        return_hs_length_for_force, return_intracellular_passive_stress, \
+    from .forces import set_myofilament_stresses, check_myofilament_stresses, \
+        return_hs_length_for_stress, return_intracellular_passive_stress, \
         return_extracellular_passive_stress, return_cb_stress
 
     def __init__(self, myofil_struct, parent_half_sarcomere):
@@ -39,8 +39,8 @@ class myofilaments():
             self.set_up_4_state_with_SRX()
 
        # Initialise stresses
-        self.myofil_stress = 0.0
-        self.set_myofilament_stress()
+        self.cpt_myofil_stress = 0.0
+        self.set_myofilament_stresses()
     
     def set_up_3_state_with_SRX(self):
         # Set up data fields and variables

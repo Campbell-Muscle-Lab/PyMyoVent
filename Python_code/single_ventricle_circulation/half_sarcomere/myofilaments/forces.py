@@ -3,29 +3,33 @@ import numpy as np
 import scipy.optimize as opt
 
 
-def set_myofilament_stress(self):
+def set_myofilament_stresses(self):
     """ Sets initial values """
 
-    d = self.check_myofilament_forces(0.0)
-    self.myofil_stress = d['myofil_stress']
-    self.hs_force = d['hs_force']
+    d = self.check_myofilament_stresses(0.0)
+    self.cpt_myofil_stress = d['cpt_myofil_stress']
+    self.hs_stress = d['hs_stress']
 
-def check_myofilament_forces(self, delta_hsl):
+def check_myofilament_stresses(self, delta_hsl):
+    """ cpt_ values are stresses (that is normalized to area) within the
+        individual components. Other stresses correct for relative areas
+        of components and are normalized to the relative areas of the
+        components in the wall """
 
     d = dict()
-    d['cb_stress'] = return_cb_stress(self, delta_hsl)
-    d['int_pas_stress'] = return_intracellular_passive_stress(self, delta_hsl)
-    d['ext_pas_stress'] = return_extracellular_passive_stress(self, delta_hsl)
+    d['cpt_cb_stress'] = return_cb_stress(self, delta_hsl)
+    d['cpt_int_pas_stress'] = return_intracellular_passive_stress(self, delta_hsl)
+    d['cpt_ext_pas_stress'] = return_extracellular_passive_stress(self, delta_hsl)
 
-    d['myofil_stress'] = d['cb_stress'] + d['int_pas_stress']
+    d['cpt_myofil_stress'] = d['cpt_cb_stress'] + d['cpt_int_pas_stress']
 
-    d['cb_force'] = (1.0 - self.data['prop_fibrosis']) * \
-                        self.data['prop_myofilaments'] * d['cb_stress']
-    d['int_pas_force'] = (1.0 - self.data['prop_fibrosis']) * \
-                        self.data['prop_myofilaments'] * d['int_pas_stress']
-    d['ext_pas_force'] = self.data['prop_fibrosis'] * d['ext_pas_stress']
+    d['cb_stress'] = (1.0 - self.data['prop_fibrosis']) * \
+                        self.data['prop_myofilaments'] * d['cpt_cb_stress']
+    d['int_pas_stress'] = (1.0 - self.data['prop_fibrosis']) * \
+                        self.data['prop_myofilaments'] * d['cpt_int_pas_stress']
+    d['ext_pas_stress'] = self.data['prop_fibrosis'] * d['cpt_ext_pas_stress']
 
-    d['hs_force'] = d['cb_force'] + d['int_pas_force'] + d['ext_pas_force']
+    d['hs_stress'] = d['cb_stress'] + d['int_pas_stress'] + d['ext_pas_stress']
 
     return d
 
@@ -101,11 +105,11 @@ def return_extracellular_passive_stress(self, delta_hsl):
 
     return pas_force
 
-def return_hs_length_for_force(self, force):
+def return_hs_length_for_stress(self, force):
     
     def f(dx):
-        d = check_myofilament_forces(self, dx)
-        return d['hs_force']
+        d = check_myofilament_stresses(self, dx)
+        return d['hs_stress']
     
     sol = opt.brentq(f,-500, 500)
     return self.parent_hs.data['hs_length'] + sol

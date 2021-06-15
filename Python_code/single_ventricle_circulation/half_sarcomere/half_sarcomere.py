@@ -13,16 +13,16 @@ class half_sarcomere():
         self.data = dict()
         self.data['hs_length'] = hs_struct['initial_hs_length']
         self.data['slack_hs_length'] = 0
+        self.data['cpt_cb_stress'] = 0
+        self.data['cpt_int_pas_stress'] = 0
+        self.data['cpt_ext_pas_stress'] = 0
+        self.data['cpt_myofil_stress'] = 0
         self.data['cb_stress'] = 0
         self.data['int_pas_stress'] = 0
         self.data['ext_pas_stress'] = 0
-        self.data['myofil_stress'] = 0
-        self.data['cb_force'] = 0
-        self.data['int_pas_force'] = 0
-        self.data['ext_pas_force'] = 0
-        self.data['hs_force'] = 0
+        self.data['hs_stress'] = 0
 
-        # Pull of membrane parameters
+        # Pull off membrane parameters
         membrane_struct = hs_struct["membranes"]
         self.memb = memb.membranes(membrane_struct, self)
 
@@ -49,12 +49,12 @@ class half_sarcomere():
             self.data['hs_length'] = self.data['hs_length'] + delta_hsl
 
         # Update forces
-        self.myof.set_myofilament_stress()
-        self.hs_force = self.myof.hs_force
+        self.myof.set_myofilament_stresses()
+        self.hs_stress = self.myof.hs_stress
         
     def update_data(self):
         # First update own object data
-        f = self.myof.check_myofilament_forces(0)
+        f = self.myof.check_myofilament_stresses(0)
         for key in f.keys():
             self.data[key] = f[key]
         
