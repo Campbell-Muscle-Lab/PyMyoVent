@@ -366,6 +366,7 @@ class single_ventricle_circulation():
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
+            d['baro_b'] = self.temp_data['baro_b'].mean()
 
         return d
 

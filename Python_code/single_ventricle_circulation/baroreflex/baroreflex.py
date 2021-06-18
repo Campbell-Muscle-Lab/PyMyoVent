@@ -92,18 +92,18 @@ class baroreflex():
             where c tends towards 0.5 when baro_b is equal to 0.5
             but goes towards 0 when baro_b is high and
             towards 1 when baro_b is low """
-            
-        # First set the recovery towards 0.5
-        dcdt = -self.model['baro_k_recov'] * (c-0.5)
 
-        # Now put in the active control
+        # Build in the reflex control
         if (reflex_active):
             if (self.data['baro_b'] >= 0.5):
-                dcdt += -self.model['baro_k_drive'] * \
+                dcdt = -self.model['baro_k_drive'] * \
                         (self.data['baro_b']-0.5)*c
             if (self.data['baro_b'] < 0.5):
-                dcdt += -self.model['baro_k_drive'] * \
+                dcdt = -self.model['baro_k_drive'] * \
                         (self.data['baro_b']-0.5) * (1-c)
+        else:
+            dcdt = -self.model['baro_k_recov'] * (c-0.5)
+
 
         return dcdt
 
@@ -142,30 +142,26 @@ class reflex_control():
                                     self.data['basal_value']
 
     def implement_time_step(self, time_step, c, reflex_active=0):
-        
+
         sol = odeint(self.diff_rc, self.data['rc'],
                      [0, time_step],
                      args=((c, reflex_active)))
 
         self.data['rc'] = sol[-1].item()
-        
-        
+
     def diff_rc(self, y, t, c, reflex_active=0):
-        
         # Recovery component
-        drcdt = -1 * self.data['k_recov'] * (y-0.5)
-        #drcdt = 0
-        
         if (reflex_active):
             if (c > 0.5):
-                drcdt += self.data['k_drive'] * \
+                drcdt = self.data['k_drive'] * \
                     ((c-0.5)/0.5) * (1.0 - y)
             else:
-                drcdt += self.data['k_drive'] * \
+                drcdt = self.data['k_drive'] * \
                     ((c-0.5)/0.5) * y
+        else:
+            drcdt = -1 * self.data['k_recov'] * (y-0.5)
 
         return drcdt
-
 
     def return_output(self):
 
