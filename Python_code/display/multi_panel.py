@@ -438,7 +438,11 @@ def handle_annotations(template_data, ax, panel_index, formatting):
 
 def deduce_axis_limits(lim, mode_string=[]):
 
-    # Start simply
+    # First check for nans
+    if (all(np.isnan(lim))):
+        return ((0, 1))
+
+    # Not nans, start simply
     lim = np.asarray(lim)
     lim[0] = multiple_less_than(lim[0])
     lim[1] = multiple_greater_than(lim[1])

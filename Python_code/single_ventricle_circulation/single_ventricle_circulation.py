@@ -211,6 +211,7 @@ class single_ventricle_circulation():
         self.data['myosin_ATPase'] = 0
         self.data['stroke_volume'] = 0
         self.data['stroke_work']= 0
+        self.data['ejection_fraction'] = 0
         self.data['myosin_efficiency'] = 0
         self.data['ATPase_to_myo'] = 0
 
@@ -344,8 +345,7 @@ class single_ventricle_circulation():
                 self.temp_data['volume_ventricle'].max()
             d['stroke_volume'] = d['volume_ventricle_max'] - \
                 self.temp_data['volume_ventricle'].min()
-            d['ejection_fraction'] = d['stroke_volume'] / \
-                d['volume_ventricle_max']
+            d['ejection_fraction'] = self.temp_data['ejection_fraction'].mean()
             d['heart_rate'] = self.data['heart_rate']
             d['cardiac_output'] = d['stroke_volume'] * d['heart_rate']
             d['hs_length_max'] = self.temp_data['hs_length'].max()

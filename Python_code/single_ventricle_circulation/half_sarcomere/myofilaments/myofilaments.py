@@ -101,6 +101,7 @@ class myofilaments():
             self.data["M_FG"] = np.sum(self.y[2+np.arange(self.no_of_x_bins)])
             self.data['n_off'] = self.y[-2]
             self.data['n_on'] = self.y[-1]
+            self.data['n_bound'] = self.data['M_FG']
             self.data["n_overlap"] = self.n_overlap
             
             

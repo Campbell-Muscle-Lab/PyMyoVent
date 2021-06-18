@@ -39,10 +39,16 @@ def handle_energetics(self, time_step, new_beat):
 
         self.data['stroke_work'] = self.return_stroke_work(d_temp)
 
+        self.data['ejection_fraction'] = self.data['stroke_volume'] / \
+            d_temp['volume_ventricle'].max()
+
         myosin_used = time_step * d_temp['myosin_ATPase'].sum()
 
-        self.data['myosin_efficiency'] = self.data['stroke_work'] / \
+        if (myosin_used > 0):
+            self.data['myosin_efficiency'] = self.data['stroke_work'] / \
                                             myosin_used
+        else:
+            self.data['myosin_efficiency'] = np.nan
 
 
 def return_myosin_ATPase(self):
