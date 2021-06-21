@@ -367,6 +367,8 @@ class single_ventricle_circulation():
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
             d['baro_b'] = self.temp_data['baro_b'].mean()
+            d['baro_c'] = self.temp_data['baro_c'].mean()
+            d['heart_rate_rc'] = self.temp_data['heart_rate_t_quiescent_period_rc'].mean()
 
         return d
 
