@@ -1,6 +1,7 @@
 # Functions for myofilament kinetics
 import numpy as np
 from scipy.integrate import solve_ivp
+from numba import jit
 
 import scipy.constants as scipy_constants
 
@@ -27,20 +28,27 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
     self.n_overlap = self.return_n_overlap()
 
     def derivs(t, y):
-        dy = np.zeros(np.size(y))
+        # Calculate the derivs
 
         fluxes = return_fluxes(self, y, Ca_conc)
 
-        # Calculate the derivs
-        dy[0] = -fluxes['J_1'] + fluxes['J_2']
-        dy[1] = (fluxes['J_1'] + np.sum(fluxes['J_4'])) - \
-            (fluxes['J_2'] + np.sum(fluxes['J_3']))
-        J_3 = fluxes['J_3']
-        J_4 = fluxes['J_4']
-        for i in np.arange(0, self.no_of_x_bins):
-            dy[i + 2] = J_3[i] - J_4[i]
-        dy[-2] = -fluxes['J_on'] + fluxes['J_off']
-        dy[-1] = fluxes['J_on'] - fluxes['J_off']
+        if (True):
+            dy = helper_3state(y, np.size(y), self.no_of_x_bins,
+                               fluxes['J_1'], fluxes['J_2'],
+                               fluxes['J_3'], fluxes['J_4'],
+                               fluxes['J_on'], fluxes['J_off'])
+        else:
+            dy = np.zeros(np.size(y))
+            dy[0] = -fluxes['J_1'] + fluxes['J_2']
+            dy[1] = (fluxes['J_1'] + np.sum(fluxes['J_4'])) - \
+                (fluxes['J_2'] + np.sum(fluxes['J_3']))
+            J_3 = fluxes['J_3']
+            J_4 = fluxes['J_4']
+            for i in np.arange(0, self.no_of_x_bins):
+                dy[i + 2] = J_3[i] - J_4[i]
+            dy[-2] = -fluxes['J_on'] + fluxes['J_off']
+            dy[-1] = fluxes['J_on'] - fluxes['J_off']
+
         return dy
 
     # Evolve the system
@@ -55,6 +63,19 @@ def update_3_state_with_SRX(self, time_step, Ca_conc):
     self.y[0] = self.y[0] + (1.0-sum_of_heads)
 
     self.fluxes = return_fluxes(self, self.y, Ca_conc)
+
+@jit(nopython=True)
+def helper_3state(y, ny, n, F1, F2, F3, F4, Fon, Foff):
+    # Calculate the derivs
+    dy = np.zeros(ny)
+    dy[0] = -F1 + F2
+    dy[1] = (F1 + np.sum(F4)) - (F2 + np.sum(F3))
+    for i in np.arange(0, n):
+        dy[i+2] = F3[i] - F4[i]
+    dy[-2] = -Fon + Foff
+    dy[-1] = Fon - Foff
+    return dy
+
 
 def update_4_state_with_SRX(self, time_step, Ca_conc):
     """ Updates kinetics for thick and thin filaments. This is

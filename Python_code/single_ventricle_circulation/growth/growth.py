@@ -100,8 +100,6 @@ class growth_component():
 
     def diff_g(self, g, t, growth_active=False):
         
-        dgdt = -1 * self.data['k_recov'] * (g - 0.5)
-
         if (growth_active):
             y=[]
             if (self.data['level'] == 'half_sarcomere'):
@@ -110,16 +108,17 @@ class growth_component():
                 y = self.parent_circulation.data[self.data['signal']]
                 
             if (y >= self.data['setpoint']):
-                
-                dgdt += self.data['k_drive'] * \
+                dgdt = self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \
                         np.amax([1, self.data['setpoint']])) * \
                         (1.0 - g)
             else:
-                dgdt += self.data['k_drive'] * \
+                dgdt = self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \
                          np.amax([1, self.data['setpoint']])) * \
                         g
+        else:
+            dgdt = -1 * self.data['k_recov'] * (g - 0.5)
 
         return dgdt
 

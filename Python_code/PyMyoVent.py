@@ -8,6 +8,7 @@ Created on Sun Oct 20 15:04:38 2019
 import os
 import sys
 import json
+import time
 
 import multiprocessing
 
@@ -61,6 +62,9 @@ def run_batch(batch_json_file_string):
         print('No batch file specified. Exiting')
         return
 
+    # Start timer
+    start = time.time()
+
     # Create batch_jobs to hold job information that
     # will be passed to worker thread
     batch_jobs = []
@@ -105,6 +109,11 @@ def run_batch(batch_json_file_string):
             pool.apply_async(worker, args=(batch_jobs[i], i))
         pool.close()
         pool.join()
+
+    # Finish
+    stop = time.time()
+    print('Batch run time')
+    print(stop-start)
 
 
 def worker(job, thread_id=[]):

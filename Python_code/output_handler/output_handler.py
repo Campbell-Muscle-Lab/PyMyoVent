@@ -55,8 +55,10 @@ class output_handler():
 
         # User defined files
         base_directory = Path(output_handler_file_string).parent.absolute()
+        print(base_directory)
         if ('templated_images' in self.oh_data):
             user_defined = self.oh_data['templated_images']
+            print(user_defined)
             for ud in user_defined:
                 # Adjust for relative path
                 if ('relative_path' in ud):

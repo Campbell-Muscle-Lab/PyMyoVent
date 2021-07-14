@@ -106,15 +106,9 @@ def multi_panel_from_flat_data(
     if 'global_x_field' not in x_display:
         x_display['global_x_field'] = pandas_data.columns[0]
 
-    if (('ticks' not in x_display) or ('ticks_rel_to_end' not in x_display)):
-        if ('ticks_rel_to_end' not in x_display):
-            # Set ticks to beginning and end of record
-            x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-                     pandas_data[x_display['global_x_field']].iloc[-1])
-            x_display['ticks'] = \
-                np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-            x_ticks_defined = False
-        else:
+    x_ticks_defined = False
+    if ('ticks' in x_display):
+        if ('ticks_rel_to_end' in x_display):
             # Set ticks relative to end
             x = pandas_data[x_display['global_x_field']].to_numpy()
             x_end = x[-1]
@@ -123,9 +117,33 @@ def multi_panel_from_flat_data(
             x_display['ticks'] = x_lim
             print(x_display['ticks'])
             x_ticks_defined = True
-
+        else:
+            x_ticks_defined = True
     else:
-        x_ticks_defined = True
+        # Set ticks to beginning and end of record
+        x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
+                  pandas_data[x_display['global_x_field']].iloc[-1])
+        x_display['ticks'] = \
+            np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
+
+
+    # if (('ticks' not in x_display) or ('ticks_rel_to_end' not in x_display)):
+    #     if ('ticks_rel_to_end' not in x_display):
+    #         # Set ticks to beginning and end of record
+    #         x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
+    #                  pandas_data[x_display['global_x_field']].iloc[-1])
+    #         x_display['ticks'] = \
+    #             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
+    #         x_ticks_defined = False
+    #     else:
+    #         # Set ticks relative to end
+    #         x = pandas_data[x_display['global_x_field']].to_numpy()
+    #         x_end = x[-1]
+    #         x_lim = [x[x < (x_end + x_display['ticks_rel_to_end'][0])][-1],
+    #                  x[x < (x_end + x_display['ticks_rel_to_end'][-1])][-1]]
+    #         x_display['ticks'] = x_lim
+    #         print(x_display['ticks'])
+    #         x_ticks_defined = True
 
     if 'label' not in x_display:
         x_display['label'] = x_display['global_x_field']
@@ -307,6 +325,7 @@ def multi_panel_from_flat_data(
             xlim = deduce_axis_limits(xlim, 'autoscaled')
         ax[i].set_xlim(xlim)
         ax[i].set_xticks(x_display['ticks'])
+
         # Set y limits
         if ('ticks' in p_data['y_info']):
             ylim = tuple(p_data['y_info']['ticks'])
@@ -381,7 +400,8 @@ def multi_panel_from_flat_data(
     hei = (fig_height - 0*layout['bottom_margin'] -
            layout['top_margin']) / fig_height
     r = [lhs, bot, wid, hei]
-    spec.tight_layout(fig, rect=r)
+    spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
+                      h_pad = layout['grid_hspace'])
 
     fig.align_labels()
 
@@ -415,7 +435,7 @@ def handle_annotations(template_data, ax, panel_index, formatting):
                 x = np.array([xc[0], xc[0], xc[1], xc[1], xc[0]])
                 y_lim = ax.get_ylim()
                 yc = an['y_rel_coords']
-                y = (y_lim[1] - y_lim[0]) *\
+                y = y_lim[0] + (y_lim[1] - y_lim[0]) *\
                     np.array([yc[0], yc[1], yc[1], yc[0], yc[0]])
                 ax.plot(x, y, 'k-', clip_on=False)
                 ax.text(np.mean(x[[0, 2]]), y[0] + 0.45 * (y[1] - y[0]),
@@ -428,7 +448,7 @@ def handle_annotations(template_data, ax, panel_index, formatting):
             if (an['type'] == 'text'):
                 y_lim = ax.get_ylim()
                 ax.text(an['x_coord'],
-                        (y_lim[1]-y_lim[0]) * an['y_rel_coord'],
+                        y_lim[0] + ((y_lim[1]-y_lim[0]) * an['y_rel_coord']),
                         an['label'],
                         fontsize=an['label_fontsize'],
                         fontfamily=formatting['fontname'],

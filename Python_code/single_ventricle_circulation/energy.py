@@ -67,7 +67,7 @@ def return_myosin_ATPase(self):
                 (1 / (1e-9 * self.hs.myof.implementation['reference_hsl_0']))
 
     # Calculate volume of myocadium in m^3
-    m_myocardium = 0.001 * self.data['ventricle_wall_volume']
+    v_myocardium = 0.001 * self.data['ventricle_wall_volume']
 
     # Deduce the flux
     if (self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX'):
@@ -76,7 +76,7 @@ def return_myosin_ATPase(self):
         flux = self.hs.myof.data['J_7']
 
     # Now calculate energy per second
-    ATPase = d_heads * m_myocardium * \
+    ATPase = d_heads * v_myocardium * \
                 self.hs.myof.implementation['delta_G_ATP'] * \
                 flux / scipy_constants.Avogadro
 
