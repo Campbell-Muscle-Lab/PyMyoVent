@@ -20,7 +20,8 @@ def handle_energetics(self, time_step, new_beat):
 
     self.data['ATPase_to_myo'] = self.data['myosin_ATPase'] / \
         (0.001 * self.data['ventricle_wall_volume'] *
-             (1.0 - self.hs.myof.data['prop_fibrosis']))
+             (1.0 - self.hs.myof.data['prop_fibrosis']) *
+                 self.hs.myof.data['prop_myofilaments'])
 
 
     # It's a new beat, calculate stroke work and myosin ATPase

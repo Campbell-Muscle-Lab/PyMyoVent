@@ -246,6 +246,9 @@ def multi_panel_from_flat_data(
             if 'log_display' in y_d:
                 if y_d['log_display'] == 'on':
                     y = np.log10(y)
+            
+            if 'moving_average' in y_d:
+                y = moving_average(y, y_d['moving_average'])
 
             # Track min and max y
             if (j == 0):
@@ -502,7 +505,11 @@ def multiple_less_than(v, multiple=0.2):
 
     return v
 
+def moving_average(x, n=3):
+    x= np.pad(x, (n//2, n-1-n//2), mode='edge')
+    return np.convolve(x, np.ones((n,))/n, mode='valid')
 
 if __name__ == "__main__":
+    
     (fig, ax) = multi_panel_from_flat_data()
     plt.close(fig)
