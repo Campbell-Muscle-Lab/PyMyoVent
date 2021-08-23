@@ -418,7 +418,7 @@ class single_ventricle_circulation():
                         p.data['increment']
                 elif (p.data['level'] == 'growth'):
                     self.gr.data[p.data['variable']] += \
-                        p.data['growth']
+                        p.data['increment']
 
                 self.check_baroreflex_perturbations(p)
 
