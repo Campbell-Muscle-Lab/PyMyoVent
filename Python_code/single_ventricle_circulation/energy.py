@@ -72,7 +72,7 @@ def return_myosin_ATPase(self):
 
     # Deduce the flux
     if (self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX'):
-        flux = self.hs.myof.data['J_4']
+        flux = self.hs.myof.data['J_3']
     if (self.hs.myof.implementation['kinetic_scheme'] == '4_state_with_SRX'):
         flux = self.hs.myof.data['J_7']
 

@@ -1,0 +1,25 @@
+{
+    "protocol": {
+        "no_of_time_steps": 250000,
+        "time_step": 0.0005
+    },
+    "baroreflex": {
+        "activations": [
+            {
+                "t_start_s": 400,
+                "t_stop_s": 1000
+            }
+        ]
+    },
+    "perturbation": {
+        "perturbations": [
+            {
+                "level": "circulation",
+                "variable": "aorta_resistance",
+                "t_start_s": 75,
+                "t_stop_s": 80,
+                "total_change": 200
+            }
+        ]
+    }
+}

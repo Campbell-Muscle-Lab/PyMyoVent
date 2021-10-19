@@ -1,4 +1,5 @@
-
+import pandas as pd
+import numpy as np
 
 def write_complete_data_to_sim_data(self, index):
     """ Writes full data to data frame """
@@ -24,6 +25,46 @@ def write_complete_data_to_sim_data(self, index):
             for f in list(self.gr.data.keys()):
                 self.sim_data.at[self.write_counter, f] = self.gr.data[f]
         self.sim_data.at[self.write_counter, 'write_mode'] = 1
+        self.write_counter = self.write_counter + 1
+
+    if (False):
+        # Trying different ways to speed up. The code below seems ~10% slower
+        # than first version
+        keys=[]
+        x=[]
+        for f in list(self.data.keys()):
+            if (f not in ['p', 'v', 's', 'compliance', 'resistance',
+                          'inertance', 'f']):
+                keys.append(f)
+                x.append(self.data[f])
+        for f in list(self.hr.data.keys()):
+            keys.append(f)
+            x.append(self.hr.data[f])
+        for f in list(self.hs.data.keys()):
+            keys.append(f)
+            x.append(self.hs.data[f])
+        for f in list(self.hs.memb.data.keys()):
+            keys.append(f)
+            x.append(self.hs.memb.data[f])
+        for f in list(self.hs.myof.data.keys()):
+            keys.append(f)
+            x.append(self.hs.myof.data[f])
+        if (self.br):
+            for f in list(self.br.data.keys()):
+                keys.append(f)
+                x.append(self.br.data[f])
+        if (self.gr):
+            for f in list(self.gr.data.keys()):
+                keys.append(f)
+                x.append(self.gr.data[f])
+        keys.append('write_mode')
+        x.append(1)
+
+        # Convert x to array
+        x = np.asarray(x)
+        self.sim_data.loc[self.write_counter, keys] = x
+
+        # Update counter
         self.write_counter = self.write_counter + 1
 
 

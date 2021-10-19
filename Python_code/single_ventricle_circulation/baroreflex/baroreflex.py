@@ -21,15 +21,15 @@ class baroreflex():
 
         # Initialise the model dict
         self.model = dict()
-        self.model['baro_b_slope'] = baro_structure['b_slope']
-        self.model['baro_k_drive'] = baro_structure['k_drive']
-        self.model['baro_k_recov'] = baro_structure['k_recov']
+        self.model['baro_S'] = baro_structure['b_S']
+        self.model['baro_k_drive'] = baro_structure['b_k_drive']
+        self.model['baro_k_recov'] = baro_structure['b_k_recov']
 
         # Initialise the data dict
         self.data = dict()
-        self.data['baro_b_setpoint'] = baro_structure['b_setpoint']
-        self.data['baro_b'] = self.return_b(pressure)
-        self.data['baro_c'] = 0.5
+        self.data['baro_P_set'] = baro_structure['b_P_set']
+        self.data['baro_B_a'] = self.return_b_a(pressure)
+        self.data['baro_B_b'] = 0.5
 
         # Pull off the controls
         self.controls = []
@@ -41,24 +41,24 @@ class baroreflex():
                                        self.parent_circulation))
         # Add in data field
         for bc in self.controls:
-            k = bc.data['level']+'_'+bc.data['variable']+'_rc'
-            self.data[k] = bc.data['rc']
+            k = 'baro_B_c_'+bc.data['level']+'_'+bc.data['variable']
+            self.data[k] = bc.data['B_c']
 
     def implement_time_step(self, pressure, time_step,
                             reflex_active=0):
         """ implements time-step """
 
         # First update baro c
-        self.data['baro_b'] = self.return_b(pressure)
-        sol = odeint(self.diff_c, self.data['baro_c'],
+        self.data['baro_B_a'] = self.return_b_a(pressure)
+        sol = odeint(self.diff_B_b, self.data['baro_B_b'],
                      [0, time_step],
                      args=((reflex_active,)))
-        self.data['baro_c'] = sol[-1].item()
+        self.data['baro_B_b'] = sol[-1].item()
 
         # Now cycle through the controls and update the variables
         for bc in self.controls:
 
-            bc.implement_time_step(time_step, self.data['baro_c'],
+            bc.implement_time_step(time_step, self.data['baro_B_b'],
                                    reflex_active)
             y = bc.return_output()
 
@@ -78,34 +78,34 @@ class baroreflex():
                 self.parent_circulation.data[bc.data['variable']] = y
             
             # Add in data field
-            k = bc.data['level']+'_'+bc.data['variable']+'_rc'
-            self.data[k] = bc.data['rc']
+            k = 'baro_B_c_'+bc.data['level']+'_'+bc.data['variable']
+            self.data[k] = bc.data['B_c']
 
 
-    def return_b(self, pressure):
-        b = 1 / (1 + np.exp(-self.model['baro_b_slope']*
-                            (pressure - self.data['baro_b_setpoint'])))
-        return b
+    def return_b_a(self, pressure):
+        b_a = 1 / (1 + np.exp(-self.model['baro_S']*
+                            (pressure - self.data['baro_P_set'])))
+        return b_a
 
-    def diff_c(self, c, t, reflex_active=False):
-        """ returns the rate of change of the control signal c
-            where c tends towards 0.5 when baro_b is equal to 0.5
-            but goes towards 0 when baro_b is high and
-            towards 1 when baro_b is low """
+    def diff_B_b(self, B_b, t, reflex_active=False):
+        """ returns the rate of change of the balance signal B_b
+            where B_b tends towards 0.5 when baro_a is equal to 0.5
+            but goes towards 0 when baro_a is high and
+            towards 1 when baro_a is low """
 
         # Build in the reflex control
         if (reflex_active):
-            if (self.data['baro_b'] >= 0.5):
-                dcdt = -self.model['baro_k_drive'] * \
-                        (self.data['baro_b']-0.5)*c
-            if (self.data['baro_b'] < 0.5):
-                dcdt = -self.model['baro_k_drive'] * \
-                        (self.data['baro_b']-0.5) * (1-c)
+            if (self.data['baro_B_a'] >= 0.5):
+                dB_b_dt = -self.model['baro_k_drive'] * \
+                        (self.data['baro_B_a']-0.5)*B_b
+            if (self.data['baro_B_a'] < 0.5):
+                dB_b_dt = -self.model['baro_k_drive'] * \
+                        (self.data['baro_B_a']-0.5) * (1-B_b)
         else:
-            dcdt = -self.model['baro_k_recov'] * (c-0.5)
+            dB_b_dt = -self.model['baro_k_recov'] * (B_b-0.5)
 
 
-        return dcdt
+        return dB_b_dt
 
 
 class reflex_control():
@@ -117,7 +117,7 @@ class reflex_control():
             self.data[k] = control_struct[k]
         self.data['basal_value'] = 0
         
-        self.data['rc'] = 0.5
+        self.data['B_c'] = 0.5
 
         # Now try to find the base value linking to the
         # other components through the parent circulation
@@ -141,37 +141,37 @@ class reflex_control():
         self.data['symp_value'] = self.data['symp_factor'] * \
                                     self.data['basal_value']
 
-    def implement_time_step(self, time_step, c, reflex_active=0):
+    def implement_time_step(self, time_step, B_b, reflex_active=0):
 
-        sol = odeint(self.diff_rc, self.data['rc'],
+        sol = odeint(self.diff_B_c, self.data['B_c'],
                      [0, time_step],
-                     args=((c, reflex_active)))
+                     args=((B_b, reflex_active)))
 
-        self.data['rc'] = sol[-1].item()
+        self.data['B_c'] = sol[-1].item()
 
-    def diff_rc(self, y, t, c, reflex_active=0):
+    def diff_B_c(self, y, t, B_b, reflex_active=0):
         # Recovery component
         if (reflex_active):
-            if (c > 0.5):
-                drcdt = self.data['k_drive'] * \
-                    ((c-0.5)/0.5) * (1.0 - y)
+            if (B_b > 0.5):
+                dB_c_dt = self.data['k_control'] * \
+                    (B_b-0.5) * (1.0 - y)
             else:
-                drcdt = self.data['k_drive'] * \
-                    ((c-0.5)/0.5) * y
+                dB_c_dt = self.data['k_control'] * \
+                    (B_b-0.5) * y
         else:
-            drcdt = -1 * self.data['k_recov'] * (y-0.5)
+            dB_c_dt = -1 * self.data['k_recov'] * (y-0.5)
 
-        return drcdt
+        return dB_c_dt
 
     def return_output(self):
 
-        rc = self.data['rc']
+        B_c = self.data['B_c']
 
-        if (rc>=0.5):
+        if (B_c >= 0.5):
             m = (self.data['symp_value'] - self.data['basal_value'])/0.5
-            y = self.data['basal_value'] + m*(rc-0.5)
+            y = self.data['basal_value'] + m*(B_c-0.5)
         else:
             m = (self.data['basal_value'] - self.data['para_value'])/0.5
-            y = self.data['basal_value'] + m*(rc-0.5)
+            y = self.data['basal_value'] + m*(B_c-0.5)
 
         return y

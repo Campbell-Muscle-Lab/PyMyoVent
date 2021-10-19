@@ -1,0 +1,81 @@
+{
+    "PyMyoVent_batch":
+    {
+        "max_threads": 10,
+        "job":
+        [
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_base.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_base.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_base.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_Pset_40.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_Pset_40.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_Pset_40.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_Pset_-40.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_Pset_-40.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_Pset_-40.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_Pset_110.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_Pset_110.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_Pset_110.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model_no_vascular.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_Pset_40_no_vascular.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_Pset_40_no_vascular.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_Pset_40_no_vascular.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_V_-600.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_V_-600.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_V_-600.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_V_-600_no_baro.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_V_-600_no_baro.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_V_-600_no_baro.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_aorta_R_x10.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_aorta_R_x10.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_aorta_R_x10.json"
+            },
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_aorta_R_x10_no_baro.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_aorta_R_x10_no_baro.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_aorta_R_x10_no_baro.json"
+            }
+        ]
+    }
+}

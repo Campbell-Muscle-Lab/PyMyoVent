@@ -1,9 +1,10 @@
 ---
-Title: Demos
+title: Demos
 nav_order: 3
-has_children: True
+has_children: true
 ---
-# Demos
-{:.no_toc}
 
-This tab helps you to run various simulations with **PyMyoVent** to get more familiar with the software.
+# Demos
+
++ [Getting started](getting_started.html)
+  + [Base simulation](getting_started/base_simulation.html)

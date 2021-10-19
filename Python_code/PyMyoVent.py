@@ -20,44 +20,22 @@ from display.display import create_summary
 
 
 def PyMyoVent_main():
+    """ Main entry point for code """
+    
+    
     # Get the number of arguments
     no_of_arguments = len(sys.argv)
 
-    if (no_of_arguments == 1):
-        run_batch('c:/ken/github/campbellmusclelab/publications/paper_pymyovent_baroreceptor/simulations/batch_test_base.json')
-
-    # Switch depending on number of arguments
-    if (no_of_arguments == 3):
-        # Demos
-        if (sys.argv[1] == 'demo'):
-            if (sys.argv[2] == '3state_with_SRX_base'):
-                run_batch('../demo_files/3state_with_SRX_base/batch.json')
-            if (sys.argv[2] == '3state_with_SRX_growth'):
-                run_batch('../demo_files/3state_with_SRX_growth/batch.json')
-
-            elif (sys.argv[2] == 'test'):
-                run_batch('../demo_files/test/batch.json')
-
+    if (no_of_arguments > 0):
         if (sys.argv[1] == 'run_batch'):
             run_batch(sys.argv[2])
 
-    if (no_of_arguments == 4):
         if (sys.argv[1] == 'create_figures'):
-            oh.output_handler(sys.argv[2],
-                              sim_results_file_string=sys.argv[3])
-
-        if (sys.argv[1] == 'create_summary'):
-            create_summary(sys.argv[2],
-                           output_file_string=sys.argv[3])
-
-    if (no_of_arguments == 5):
-        if (sys.argv[1] == 'create_figures'):
-            oh.output_handler(sys.argv[2],
-                              sim_results_file_string=sys.argv[3],
-                              cb_dump_file_string=sys.argv[4])
+            create_figures(sys.argv[2])
 
 
 def run_batch(batch_json_file_string):
+    """ Run simulations as a batch process """
     if (batch_json_file_string == []):
         print('No batch file specified. Exiting')
         return
@@ -70,7 +48,15 @@ def run_batch(batch_json_file_string):
     batch_jobs = []
 
     with open(batch_json_file_string, 'r') as bf:
-        batch_data = json.load(bf)
+        batch_struct = json.load(bf)
+        batch_data = batch_struct['PyMyoVent_batch']
+
+        # Set max_threads if available
+        requested_max_threads = float("inf")
+        if ('max_threads' in batch_data):
+            requested_max_threads = batch_data['max_threads']
+        
+
         jobs = batch_data['job']
         for job in jobs:
             if ('sim_options_file_string' not in job):
@@ -100,11 +86,13 @@ def run_batch(batch_json_file_string):
     if (len(batch_jobs) == 1):
         worker(batch_jobs[0], 0)
     else:
-        # Use all the cores but 1
-        num_processes = multiprocessing.cpu_count()
-        print("num_processes: %i" % num_processes)
+        # Set processes to minimum of requested and available
+        available_threads = multiprocessing.cpu_count()-1
 
-        pool = multiprocessing.Pool(processes=(num_processes-1))
+        num_processes = int(min([requested_max_threads, available_threads]))
+        print('Running batch using %i threads' % num_processes)
+
+        pool = multiprocessing.Pool(processes=num_processes)
         for i in range(len(batch_jobs)):
             pool.apply_async(worker, args=(batch_jobs[i], i))
         pool.close()
@@ -127,6 +115,32 @@ def worker(job, thread_id=[]):
         sim_options_file_string=job['sim_options_file_string'],
         sim_results_file_string=job['sim_results_file_string'])
 
+
+def create_figures(batch_json_file_string):
+    """ Create figures from batch file """
+
+    if (batch_json_file_string == []):
+        print('No batch file specified. Exiting')
+        return
+    
+    # Loop through data files and output handlers
+    with open(batch_json_file_string, 'r') as bf:
+        batch_struct = json.load(bf)
+        batch_data = batch_struct['PyMyoVent_batch']
+        jobs = batch_data['job']
+        for job in jobs:
+            if ('output_handler_file_string' in job):
+                # Adapt for relative path
+                if ('relative_path' in job):
+                    if (job['relative_path']):
+                        base_directory = Path(batch_json_file_string).parent.absolute();
+                        output_handler_file_string = \
+                            os.path.join(base_directory, job['output_handler_file_string'])
+                        results_file_string = \
+                            os.path.join(base_directory, job['sim_results_file_string'])
+                            
+                oh.output_handler(output_handler_file_string,
+                    sim_results_file_string = results_file_string)
 
 if __name__ == "__main__":
     PyMyoVent_main()

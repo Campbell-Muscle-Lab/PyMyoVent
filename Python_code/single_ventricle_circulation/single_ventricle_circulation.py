@@ -3,6 +3,8 @@ import json
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 from .half_sarcomere import half_sarcomere as hs
 from .heart_rate import heart_rate as hr
 from .baroreflex import baroreflex as br
@@ -14,6 +16,7 @@ from sim_options import sim_options as sim_opt
 from output_handler import output_handler as oh
 
 from scipy.constants import mmHg as mmHg_in_pascals
+
 
 class single_ventricle_circulation():
     """Class for a single ventricle circulation"""
@@ -45,6 +48,34 @@ class single_ventricle_circulation():
         # Load the model as a dict
         with open(model_json_file_string, 'r') as f:
             sc_model = json.load(f)
+        
+        # Check code version against the version in the model file
+        # First get this code version from a matching file
+        version_file_string = os.path.join(Path(__file__).parent, 'version.json')
+        with open(version_file_string, 'r') as f:
+            v = json.load(f)
+        code_v_string = v['PyMyoVent_code']['version'].split('.')
+        code_v = []
+        for i in range(len(code_v_string)):
+            code_v.append(int(code_v_string[i]))
+        
+        # Now get model version
+        model_v_string = sc_model['PyMyoVent']['version'].split('.')
+        model_v = []
+        for i in range(len(model_v_string)):
+            model_v.append(int(model_v_string[i]))
+        
+        # Now compare
+        version_problem = False;
+        if (code_v[0] > model_v[0]):
+            version_problem = True
+        elif (code_v[1] < model_v[1]):
+            version_problem = True
+        if (version_problem):
+            print('PyMyoVent version problem')
+            print('Code version %s' % code_v_string)
+            print('Model version %s' % model_v_string)
+            exit(1)
 
         # Create a model dict for things that do not change during a simulation
         self.model = dict()
@@ -188,8 +219,7 @@ class single_ventricle_circulation():
         self.data['heart_rate'] = self.hr.return_heart_rate()
 
         # If requried, create the baroreceptor
-        self.data['baroreflex_active'] = 0
-        self.data['baroreflex_setpoint'] = 0
+        self.data['baro_active'] = 0
         if ('baroreflex' in sc_model):
             self.br = br.baroreflex(sc_model['baroreflex'],
                                     self,
@@ -368,9 +398,13 @@ class single_ventricle_circulation():
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
-            d['baro_b'] = self.temp_data['baro_b'].mean()
-            d['baro_c'] = self.temp_data['baro_c'].mean()
-            d['heart_rate_rc'] = self.temp_data['heart_rate_t_quiescent_period_rc'].mean()
+
+            if ('baro_B_a' in self.temp_data):
+                d['baro_B_a'] = self.temp_data['baro_B_a'].mean()
+            if ('baro_B_b' in self.temp_data):
+                d['baro_B_b'] = self.temp_data['baro_B_b'].mean()
+            if ('baro_B_c_heart_rate_t_quiescent_period' in self.temp_data):
+                d['baro_B_c_heart_rate'] = self.temp_data['baro_B_c_heart_rate_t_quiescent_period'].mean()
 
         return d
 
@@ -388,16 +422,16 @@ class single_ventricle_circulation():
 
         # Check for baroreflex and implement
         if (self.br):
-            self.data['baroreflex_active'] = 0
+            self.data['baro_active'] = 0
             for b in self.prot.baro_activations:
                 if ((self.t_counter >= b.data['t_start_ind']) and
                         (self.t_counter < b.data['t_stop_ind'])):
-                    self.data['baroreflex_active'] = 1
+                    self.data['baro_active'] = 1
 
             self.br.implement_time_step(self.data['pressure_arteries'],
                                         time_step,
                                         reflex_active=
-                                        self.data['baroreflex_active'])
+                                        self.data['baro_active'])
 
         # Check and implement perturbations
         for p in self.prot.perturbations:
@@ -407,7 +441,7 @@ class single_ventricle_circulation():
                 if (p.data['level'] == 'myofilaments'):
                     self.hs.myof.data[p.data['variable']] += \
                         p.data['increment']
-                elif (p.data['level'] == 'vad'):
+                elif (p.data['level'] == 'VAD'):
                     self.va.data[p.data['variable']] += \
                         p.data['increment']
                 elif (p.data['level'] == 'circulation'):
@@ -418,7 +452,7 @@ class single_ventricle_circulation():
                         p.data['increment']
                 elif (p.data['level'] == 'growth'):
                     self.gr.data[p.data['variable']] += \
-                        p.data['increment']
+                        p.data['growth']
 
                 self.check_baroreflex_perturbations(p)
 

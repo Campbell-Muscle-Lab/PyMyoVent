@@ -1,0 +1,17 @@
+{
+    "PyMyoVent_batch":
+    {
+        "max_threads": 10,
+        "job":
+        [
+            {
+                "relative_path": true,
+                "model_file_string": "../sim_input/model.json",
+                "protocol_file_string": "../sim_input/protocols/protocol_base.json",
+                "sim_options_file_string": "../sim_input/options/options.json",
+                "sim_results_file_string": "../sim_output/results/results_base.csv",
+                "output_handler_file_string": "../sim_output/output_handlers/output_handler_base.json"
+            }
+        ]
+    }
+}

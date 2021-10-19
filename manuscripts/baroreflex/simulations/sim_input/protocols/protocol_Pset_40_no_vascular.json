@@ -1,0 +1,32 @@
+{
+    "protocol": {
+        "no_of_time_steps": 350000,
+        "time_step": 0.001
+    },
+    "baroreflex": {
+        "activations": [
+            {
+                "t_start_s": 50,
+                "t_stop_s": 1000
+            }
+        ]
+    },
+    "perturbation": {
+        "perturbations": [
+            {
+                "level": "baroreflex",
+                "variable": "baro_P_set",
+                "t_start_s": 100,
+                "t_stop_s": 105,
+                "total_change": 40.0
+            },
+            {
+                "level": "circulation",
+                "variable": "blood_volume",
+                "t_start_s": 100,
+                "t_stop_s": 105,
+                "total_change": 0.0
+            }
+        ]
+    }
+}
