@@ -6,5 +6,5 @@ has_children: true
 
 # Demos
 
-+ [Getting started](getting_started.html)
-  + [Base simulation](getting_started/base_simulation.html)
++ [Getting started](getting_started/getting_started.html)
+  + [Base simulation](getting_started/base_simulation/base_simulation.html)
