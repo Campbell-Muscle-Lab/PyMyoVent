@@ -10,7 +10,7 @@ nav_order: 1
 
 ## Instructions
 
-+ Install the software [as described](../../installation/installation.html)
++ Install the software [as described](../../../installation/installation.html)
   + This manuscript is based on PyMyoVent 1.2.1
 + Open an Anaconda prompt
 + Activate the PyMyoVent environment
