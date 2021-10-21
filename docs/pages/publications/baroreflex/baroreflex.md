@@ -23,7 +23,7 @@ parent: Publications
 + Install the software [as described](../../installation/installation.html)
   + This manuscript is based on PyMyoVent 1.2.1
 + Open an Anaconda prompt
-+ Active the PyMyoVent environment
++ Activate the PyMyoVent environment
 + Change directory to `<PyMyoVent_repo>/Python_code`
 + Run the commmand `python pymyovent.py run_batch ../manuscripts/baroreflex/batch/batch_paper.json`
   + This may take some time
