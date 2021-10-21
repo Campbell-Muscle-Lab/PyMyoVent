@@ -42,4 +42,4 @@ parent: Publications
 <img src='images/figure_Pset_-40.svg'><br>
 <img src='images/figure_Pset_40_no_vascular_zoom.svg'><br>
 <img src='images/figure_aorta_R_x10_no_baro.svg'><br>
-<img src='images/figure_V_-600.svg_no_baro'><br>
+<img src='images/figure_V_-600_no_baro.svg'><br>
