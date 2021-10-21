@@ -7,7 +7,7 @@ has_children: False
 # PyMyoVent
 {:.no_toc}
 
-PyMyoVent is reseaach software written in Python that simulates a single ventricle pumping blood through a closed circulation.
+PyMyoVent is research software written in Python that simulates a single ventricle pumping blood through a closed circulation.
 
 The code is fully open-source and available at <https://github.com/Campbell-Muscle-Lab/PyMyoVent>.
 
