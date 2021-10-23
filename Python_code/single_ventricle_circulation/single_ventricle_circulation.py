@@ -383,6 +383,7 @@ class single_ventricle_circulation():
                 (d['hs_length_max'] - self.temp_data['hs_length'].min()) / \
                 d['hs_length_max']
             d['cpt_int_pas_stress_mean'] = self.temp_data['cpt_int_pas_stress'].mean()
+            d['cpt_ext_pas_stress_mean'] = self.temp_data['cpt_ext_pas_stress'].mean()
             d['cpt_cb_stress_mean'] = self.temp_data['cpt_cb_stress'].mean()
             d['myosin_efficiency'] = self.data['myosin_efficiency']
             d['pressure_artery_max'] = \
