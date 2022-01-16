@@ -7,7 +7,52 @@ Created on Mon Apr 26 10:07:05 2021
 
 import numpy as np
 
+from scipy.integrate import odeint
+
 import scipy.constants as scipy_constants
+
+class energetics():
+    """ Class for the energetics component """
+    
+    def __init__(self, energetics_structure,
+                 parent_circulation):
+        
+        # Set the parent circulation
+        self.parent_circulation = parent_circulation
+
+        # Initialise the model dict
+        self.model = dict()
+        self.model['energy_mitochondrial_ATP_rate'] = \
+            energetics_structure['mitochondrial_ATP_rate']
+
+        # Initialise the data dict
+        self.data = dict()
+        self.data['energy_intracell_ATP_conc'] = 0
+        self.data['energy_myosin_ATPase'] = 0
+        self.data['energy_mitochondrial_ATP_rate'] = 0
+
+    def implement_time_step(self, time_step, new_beat):
+        """ updates energetic components
+            new beat is 1 if it is a new beat, 0 otherwise,
+            and is a signal to calculate stroke work and
+            efficiency """
+
+        # Integrate the differential equation to get
+        # new intracellular ATP concentration
+        sol = odeint(self.diff_intracell_ATP_conc,
+                     self.data['energy_intracell_ATP_conc'],
+                     [0, time_step])
+        
+        self.data['energy_intracell_ATP_conc'] = \
+            sol[-1].item()
+
+    def diff_intracell_ATP_conc(self, y, t):
+        # Differentials
+        d_intracell_ATP_conc_dt = \
+            self.data['energy_mitochondrial_ATP_rate'] - \
+                self.return_myosin_ATPase()
+
+        return d_intracell_ATP_conc_dt
 
 def handle_energetics(self, time_step, new_beat):
     """ handles energertics
@@ -72,7 +117,7 @@ def return_myosin_ATPase(self):
 
     # Deduce the flux
     if (self.hs.myof.implementation['kinetic_scheme'] == '3_state_with_SRX'):
-        flux = self.hs.myof.data['J_3']
+        flux = self.hs.myof.data['J_4']
     if (self.hs.myof.implementation['kinetic_scheme'] == '4_state_with_SRX'):
         flux = self.hs.myof.data['J_7']
 
