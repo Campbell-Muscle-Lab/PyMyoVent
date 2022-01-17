@@ -18,7 +18,10 @@ def create_summary(data_file_string, output_file_string=[]):
     """ Creates a figure showing every panel in the sim output file """
 
     # Load data file
-    sim_data = pd.read_csv(data_file_string)
+    sim_data = pd.read_csv(data_file_string, sep='\t')
+
+    print(data_file_string)
+    print(output_file_string)
 
     # Get columns
     field_names = list(sim_data.columns)

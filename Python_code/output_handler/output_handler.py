@@ -47,7 +47,7 @@ class output_handler():
         # have been passed in
         if (sim_results_file_string != []):
             print('Loading sim data from %s' % sim_results_file_string)
-            sim_data = pd.read_csv(sim_results_file_string)
+            sim_data = pd.read_csv(sim_results_file_string, sep='\t')
 
         if not isinstance(sim_data, pd.DataFrame):
             print('No simulation data available')

@@ -26,11 +26,6 @@ class single_ventricle_circulation():
         write_complete_data_to_envelope_data, \
         write_envelope_data_to_sim_data
 
-    from .energy import \
-        handle_energetics, \
-        return_myosin_ATPase, \
-        return_stroke_work
-
     def __init__(self, model_json_file_string, thread_id=[]):
 
         # Check for file
@@ -146,7 +141,7 @@ class single_ventricle_circulation():
         self.hr = hr.heart_rate(sc_model['heart_rate'])
 
         # Pull off the half_sarcomere parameters and make a half-sarcomere
-        self.hs = hs.half_sarcomere(sc_model['half_sarcomere'])
+        self.hs = hs.half_sarcomere(sc_model['half_sarcomere'], self)
 
         # Deduce the hsl where force is zero and set the hsl to that length
         self.hs.data['slack_hsl'] = \
@@ -237,13 +232,9 @@ class single_ventricle_circulation():
         else:
             self.gr = []
 
-        # Add in ATPase, stroke work, and efficiency
-        self.data['myosin_ATPase'] = 0
+        # Add functional fields
         self.data['stroke_volume'] = 0
-        self.data['stroke_work']= 0
         self.data['ejection_fraction'] = 0
-        self.data['myosin_efficiency'] = 0
-        self.data['ATPase_to_myo'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -274,6 +265,7 @@ class single_ventricle_circulation():
             list(self.hr.data.keys()) + \
             list(self.hs.data.keys()) + \
             list(self.hs.memb.data.keys()) + \
+            list(self.hs.ener.data.keys()) + \
             list(self.hs.myof.data.keys()) + \
             ['write_mode']
 
@@ -347,9 +339,13 @@ class single_ventricle_circulation():
                 os.makedirs(output_dir)
             print('Writing sim_data to %s' % output_file_string)
             if (ext == 'xlsx'):
-                self.sim_data.to_excel(output_file_string, index=False)
+                self.sim_data.to_excel(output_file_string,
+                                       index=False)
             else:
-                self.sim_data.to_csv(output_file_string, index=False)
+                self.sim_data.to_csv(output_file_string,
+                                     float_format='%g',
+                                     sep='\t',
+                                     index=False)
 
         # Load the output_handler and process
         if (output_handler_file_string == []):
@@ -490,9 +486,6 @@ class single_ventricle_circulation():
                      (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
             self.data['n_hs']
 
-        # Handle energetics
-        self.handle_energetics(time_step, new_beat)
-
         # Update model
         self.data['ventricle_circumference'] = new_circumference
         self.data['ventricle_wall_volume'] = \
@@ -513,7 +506,7 @@ class single_ventricle_circulation():
 
         # Update the objects' data
         self.update_data(time_step)
-        self.hs.update_data()
+        self.hs.update_data(new_beat)
 
         # Now that ventricular volume is calculated, update the wall thickness
         self.data['ventricle_wall_thickness'] = self.return_wall_thickness(

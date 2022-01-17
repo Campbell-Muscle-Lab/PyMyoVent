@@ -93,7 +93,7 @@ class myofilaments():
         self.update_data()        
             
     def update_data(self):
-        # Update model dict for reporting back to half_sarcomere
+        # Update data dict for reporting back to half_sarcomere
         
         if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
             self.data['M_SRX'] = self.y[0]

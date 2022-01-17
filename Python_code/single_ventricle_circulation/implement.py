@@ -16,6 +16,8 @@ def write_complete_data_to_sim_data(self, index):
             self.sim_data.at[self.write_counter, f] = self.hs.data[f]
         for f in list(self.hs.memb.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
+        for f in list(self.hs.ener.data.keys()):
+            self.sim_data.at[self.write_counter, f] = self.hs.ener.data[f]
         for f in list(self.hs.myof.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
         if (self.br):
@@ -44,6 +46,9 @@ def write_complete_data_to_sim_data(self, index):
             keys.append(f)
             x.append(self.hs.data[f])
         for f in list(self.hs.memb.data.keys()):
+            keys.append(f)
+            x.append(self.hs.memb.data[f])
+        for f in list(self.hs.ener.data.keys()):
             keys.append(f)
             x.append(self.hs.memb.data[f])
         for f in list(self.hs.myof.data.keys()):
@@ -81,6 +86,8 @@ def write_complete_data_to_envelope_data(self, index):
         self.envelope_data.at[self.envelope_counter, f] = self.hs.data[f]
     for f in list(self.hs.memb.data.keys()):
         self.envelope_data.at[self.envelope_counter, f] = self.hs.memb.data[f]
+    for f in list(self.hs.ener.data.keys()):
+        self.envelope_data.at[self.envelope_counter, f] = self.hs.ener.data[f]
     for f in list(self.hs.myof.data.keys()):
         self.envelope_data.at[self.envelope_counter, f] = self.hs.myof.data[f]
     if (self.br):
@@ -118,6 +125,11 @@ def write_envelope_data_to_sim_data(self, index):
         self.sim_data.at[self.write_counter, f] = min_value
         self.sim_data.at[self.write_counter+1, f] = max_value
     for f in list(self.hs.memb.data.keys()):
+        min_value, max_value = self.return_min_max(
+            self.envelope_data[f])
+        self.sim_data.at[self.write_counter, f] = min_value
+        self.sim_data.at[self.write_counter+1, f] = max_value
+    for f in list(self.hs.ener.data.keys()):
         min_value, max_value = self.return_min_max(
             self.envelope_data[f])
         self.sim_data.at[self.write_counter, f] = min_value

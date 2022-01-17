@@ -16,7 +16,6 @@ from pathlib import Path
 
 from single_ventricle_circulation import single_ventricle_circulation as svc
 from output_handler import output_handler as oh
-from display.display import create_summary
 
 
 def PyMyoVent_main():
