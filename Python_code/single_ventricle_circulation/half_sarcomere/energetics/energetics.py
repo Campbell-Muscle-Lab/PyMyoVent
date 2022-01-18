@@ -24,15 +24,17 @@ class energetics():
 
         # Initialise the model dict
         self.model = dict()
-        self.model['mitochondrial_ATP_rate'] = \
-            energetics_structure['mitochondrial_ATP_rate']
+        self.model['intracell_ATP_conc'] = \
+            energetics_structure['intracell_ATP_conc']
+        self.model['mitochondrial_rate_ATP_generation'] = \
+            energetics_structure['mitochondrial_rate_ATP_generation']
 
         # Initialise the data dict
         self.data = dict()
         self.data['intracell_ATP_conc'] = 0
         self.data['myosin_ATPase'] = 0
-        self.data['mitochondrial_ATP_rate'] = \
-            self.model['mitochondrial_ATP_rate']
+        self.data['mitochondrial_rate_ATP_generation'] = \
+            self.model['mitochondrial_rate_ATP_generation']
         self.data['myosin_ATPase_to_myofibril_volume'] = 0
 
         # Initialize ATP vectory
@@ -93,14 +95,14 @@ class energetics():
     def diff_intracell_ATP_conc(self, y, t):
         # Differentials
         d_intracell_ATP_conc_dt = \
-            self.return_mitochondrial_ATP_rate() - \
+            self.return_flux_ATP_generated - \
                 self.return_myosin_ATPase()
 
         return d_intracell_ATP_conc_dt
 
-    def return_mitochondrial_ATP_rate(self):
+    def return_flux_ATP_generated(self):
         """ Returns rate at which ATP is generated as
-            mormalized rate * (1-fibrosis) * (1-prop_myofilaments) """
+            normalized rate * (1-fibrosis) * (1-prop_myofilaments) """
         
         # Calculation volume of mitochondria in m^3
         v_mitochondria = 0.001 * self.parent_hs.parent_circulation.data['ventricle_wall_volume'] * \
@@ -108,13 +110,15 @@ class energetics():
                             self.parent_hs.myof.data['prop_myofilaments']
 
         # Deduce the rate
-        rate = v_mitochondria * self.model['mitochondrial_ATP_rate']
+        flux_ATP_generated = v_mitochondria * \
+            self.data['mitochondrial_rate_ATP_generation']
 
-        return rate
+        return flux_ATP_generated
 
-    def return_myosin_ATPase(self):
-        # Returns ATPase as product of
-        # flux through ATPase cycle, the number of heads, and energy from ATP
+    def return_flux_ATP_consumed(self):
+        # Returns moles of ATP consumed per s
+        # as product of flux through ATPase cycle (mol^-1 s^-1) and
+        # the number of heads corrected for Avogadro's number
         # Number of heads per m^3 is (1-fibrosis) * prop_myofilaments *
         # cb_number_density / l_0 [reference length]
     
@@ -137,11 +141,10 @@ class energetics():
             flux = self.parent_hs.myof.data['J_7']
     
         # Now calculate energy per second
-        ATPase = d_heads * v_myocardium * \
-                    self.parent_hs.myof.implementation['delta_G_ATP'] * \
-                    flux / scipy_constants.Avogadro
+        flux_ATP_consumed = d_heads * v_myocardium * flux  / \
+            scipy_constants.Avogadro
     
-        return ATPase
+        return flux_ATP_consumed
     
     def return_stroke_work(self, d_temp):
         # Calculate stroke work from p and v using shoe-string formula
