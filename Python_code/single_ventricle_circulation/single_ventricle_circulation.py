@@ -482,7 +482,7 @@ class single_ventricle_circulation():
         self.data['p'][-1] = self.return_lv_pressure(self.data['v'][-1])
 
         # Update the objects' data
-        self.update_data(time_step)
+        self.update_data(time_step, new_beat)
         self.hs.update_data(new_beat)
 
         # Now that ventricular volume is calculated, update the wall thickness
@@ -556,7 +556,7 @@ class single_ventricle_circulation():
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i] = c
 
-    def update_data(self, time_step):
+    def update_data(self, time_step, new_beat):
         """ Update data after a time step """
 
         # Update data for the heart-rate
@@ -569,6 +569,16 @@ class single_ventricle_circulation():
         for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
+
+        # If it is new beat, calculate cycle metrics
+        if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
+            # Prune data to last cycle
+            d_cycle = self.sim_data[['time', 'pressure_ventricle',
+                                     'volume_ventricle',
+                                     'ener_flux_ATP_consumed']]
+            d_cycle = d_cycle[d_cycle['time'].between(
+                self.last_heart_beat_time, self.data['time'])]
+            
 
     def return_flows(self, v, time_step):
         """ return flows between compartments """
