@@ -26,16 +26,19 @@ class energetics():
         self.model = dict()
         self.model['intracell_ATP_conc'] = \
             energetics_structure['intracell_ATP_conc']
-        self.model['mitochondrial_rate_ATP_generation'] = \
-            energetics_structure['mitochondrial_rate_ATP_generation']
+        self.model['rate_ATP_generated'] = \
+            energetics_structure['rate_ATP_generated']
+        self.model['delta_G_ATP'] = \
+            self.parent_hs.myof.implementation['delta_G_ATP']
 
         # Initialise the data dict
         self.data = dict()
-        self.data['intracell_ATP_conc'] = 0
-        self.data['myosin_ATPase'] = 0
-        self.data['mitochondrial_rate_ATP_generation'] = \
-            self.model['mitochondrial_rate_ATP_generation']
-        self.data['myosin_ATPase_to_myofibril_volume'] = 0
+        self.data['ener_intracell_ATP_conc'] = \
+            self.model['intracell_ATP_conc']
+        self.data['ener_rate_ATP_generated'] = \
+            self.model['rate_ATP_generated']
+        self.data['ener_flux_ATP_consumed'] = 0
+        self.data['ener_flux_ATP_generated'] = 0
 
         # Initialize ATP vectory
         self.y = np.zeros(1)
@@ -46,7 +49,7 @@ class energetics():
         # Integrate the differential equation to get
         # new intracellular ATP concentration
         sol = odeint(self.diff_intracell_ATP_conc,
-                     self.data['intracell_ATP_conc'],
+                     self.data['ener_intracell_ATP_conc'],
                      [0, time_step])
         
         self.y = sol[-1].item()
@@ -55,14 +58,11 @@ class energetics():
         """ Update data for reporting back to half-sarcomere """
 
         # Irrespective, calculate and store myosin ATPase
-        self.data['myosin_ATPase'] = self.return_myosin_ATPase()
-    
-        self.data['myosin_ATPase_to_myofibril_volume'] = self.data['myosin_ATPase'] / \
-            (0.001 * self.parent_hs.parent_circulation.data['ventricle_wall_volume'] *
-                 (1.0 - self.parent_hs.myof.data['prop_fibrosis']) *
-                     self.parent_hs.myof.data['prop_myofilaments'])
+        self.data['ener_intracell_ATP_conc'] = self.y
+        
+        self.data['ener_flux_ATP_generated'] = self.return_flux_ATP_generated()
 
-        self.data['intracell_ATP_conc'] = self.y
+        self.data['ener_flux_ATP_consumed'] = self.return_flux_ATP_consumed()
 
         # # It's a new beat, calculate stroke work and myosin ATPase
         # if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
@@ -93,10 +93,21 @@ class energetics():
 
 
     def diff_intracell_ATP_conc(self, y, t):
-        # Differentials
+        """ Differentials """
+
+        # Calculate change in concentration of ATP as
+        # moles of ATP / volume of myofibrils in liters
+
+        v_myofibrils_liters = \
+            self.parent_hs.parent_circulation.data['ventricle_wall_volume'] * \
+            (1.0 - self.parent_hs.myof.data['prop_fibrosis']) * \
+            self.parent_hs.myof.data['prop_myofilaments']
+
         d_intracell_ATP_conc_dt = \
-            self.return_flux_ATP_generated - \
-                self.return_myosin_ATPase()
+            (self.return_flux_ATP_generated() /
+                 v_myofibrils_liters) + \
+            (self.return_flux_ATP_consumed() /
+                 v_myofibrils_liters)
 
         return d_intracell_ATP_conc_dt
 
@@ -111,7 +122,7 @@ class energetics():
 
         # Deduce the rate
         flux_ATP_generated = v_mitochondria * \
-            self.data['mitochondrial_rate_ATP_generation']
+            self.data['ener_rate_ATP_generated']
 
         return flux_ATP_generated
 
@@ -141,11 +152,19 @@ class energetics():
             flux = self.parent_hs.myof.data['J_7']
     
         # Now calculate energy per second
-        flux_ATP_consumed = d_heads * v_myocardium * flux  / \
+        flux_ATP_consumed = -d_heads * v_myocardium * flux  / \
             scipy_constants.Avogadro
     
         return flux_ATP_consumed
-    
+
+    def return_energy_consumed(self):
+        """ Returns energy consumed by ATP """
+
+        energy_consumed = -self.return_flux_ATP_consumed() * \
+            self.model['delta_G_ATP']
+
+        return energy_consumed
+
     def return_stroke_work(self, d_temp):
         # Calculate stroke work from p and v using shoe-string formula
         # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates

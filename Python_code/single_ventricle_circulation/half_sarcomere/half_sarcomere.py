@@ -31,13 +31,14 @@ class half_sarcomere():
         membrane_struct = hs_struct["membranes"]
         self.memb = memb.membranes(membrane_struct, self)
 
+        # Pull off the mofilament_params
+        myofil_struct = hs_struct["myofilaments"]
+        self.myof = myof.myofilaments(myofil_struct, self)
+
         # Pull of energetics parameters
         energetics_struct = hs_struct["energetics"]
         self.ener = ener.energetics(energetics_struct, self)
 
-        # Pull off the mofilament_params
-        myofil_struct = hs_struct["myofilaments"]
-        self.myof = myof.myofilaments(myofil_struct, self)
 
     def update_simulation(self, time_step, delta_hsl,
                           activation):
