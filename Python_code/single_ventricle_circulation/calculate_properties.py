@@ -7,7 +7,7 @@ Created on Tue Jan 18 11:50:06 2022
 
 import numpy as np
 
-from scipy.constants import mmHg as mmHg_in_pascals
+from scipy.constants import mmHg as mmHg_in_Pascals
 
 def return_wall_thickness(self, chamber_volume):
     """ returns wall thickness given internal_r """
@@ -68,13 +68,28 @@ def return_lv_pressure(self, chamber_volume):
     # Pressure from Laplaces law
     # https://www.annalsthoracicsurgery.org/action/showPdf?pii=S0003-4975%2810%2901981-8
     if (internal_r < 1e-6):
-        P_in_pascals = 0
+        P_in_Pascals = 0
     else:
         # Check options for approximation
-        P_in_pascals = ((total_stress * wall_thickness *
+        P_in_Pascals = ((total_stress * wall_thickness *
                          (2.0 + self.thick_wall_multiplier*(wall_thickness / internal_r))) /
                         internal_r)
-    P_in_mmHg = P_in_pascals / mmHg_in_pascals
+    P_in_mmHg = P_in_Pascals / mmHg_in_Pascals
 
     return P_in_mmHg
 
+def return_stroke_work(self, d_temp):
+    # Calculate stroke work from p and v using shoe-string formula
+    # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
+
+    # Convert pressure to Pa
+    p = mmHg_in_Pascals * d_temp['pressure_ventricle'].to_numpy()
+    
+    # Convert volume to m^3
+    v = 0.001 * d_temp['volume_ventricle'].to_numpy()
+
+    # Calculate area inside loop
+    w = 0.5*np.abs(np.dot(v, np.roll(p, 1)) -
+                   np.dot(p, np.roll(v,1)))
+
+    return w

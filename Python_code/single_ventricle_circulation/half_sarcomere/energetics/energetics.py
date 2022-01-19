@@ -19,8 +19,6 @@ class energetics():
         
         # Set the parent circulation
         self.parent_hs = parent_hs
-        
-        print(energetics_structure)
 
         # Initialise the model dict
         self.model = dict()
@@ -28,8 +26,8 @@ class energetics():
             energetics_structure['intracell_ATP_conc']
         self.model['rate_ATP_generated'] = \
             energetics_structure['rate_ATP_generated']
-        self.model['delta_G_ATP'] = \
-            self.parent_hs.myof.implementation['delta_G_ATP']
+        self.model['implementation'] = \
+            energetics_structure['implementation']['kinetic_scheme']
 
         # Initialise the data dict
         self.data = dict()
@@ -53,6 +51,31 @@ class energetics():
                      [0, time_step])
         
         self.y = sol[-1].item()
+
+    def diff_intracell_ATP_conc(self, y, t):
+        """ Differentials """
+
+        # Calculate change in concentration of ATP as
+        # moles of ATP / volume of myofibrils in liters
+
+        v_myofibrils_liters = \
+            self.parent_hs.parent_circulation.data['ventricle_wall_volume'] * \
+            (1.0 - self.parent_hs.myof.data['prop_fibrosis']) * \
+            self.parent_hs.myof.data['prop_myofilaments']
+            
+        if (self.model['implementation'] == 'simple_2_compartment'):
+            d_intracell_ATP_conc_dt = \
+                (self.return_flux_ATP_generated() /
+                     v_myofibrils_liters) + \
+                (self.return_flux_ATP_consumed() /
+                     v_myofibrils_liters)
+        else:
+            print('energetics[\'implementation\']: %s not defined' %
+                  self.model['implementation'])
+            
+
+        return d_intracell_ATP_conc_dt
+
 
     def update_data(self):
         """ Update data for reporting back to half-sarcomere """
@@ -92,24 +115,6 @@ class energetics():
         #         self.data['myosin_efficiency'] = np.nan
 
 
-    def diff_intracell_ATP_conc(self, y, t):
-        """ Differentials """
-
-        # Calculate change in concentration of ATP as
-        # moles of ATP / volume of myofibrils in liters
-
-        v_myofibrils_liters = \
-            self.parent_hs.parent_circulation.data['ventricle_wall_volume'] * \
-            (1.0 - self.parent_hs.myof.data['prop_fibrosis']) * \
-            self.parent_hs.myof.data['prop_myofilaments']
-
-        d_intracell_ATP_conc_dt = \
-            (self.return_flux_ATP_generated() /
-                 v_myofibrils_liters) + \
-            (self.return_flux_ATP_consumed() /
-                 v_myofibrils_liters)
-
-        return d_intracell_ATP_conc_dt
 
     def return_flux_ATP_generated(self):
         """ Returns rate at which ATP is generated as
@@ -164,19 +169,3 @@ class energetics():
             self.model['delta_G_ATP']
 
         return energy_consumed
-
-    def return_stroke_work(self, d_temp):
-        # Calculate stroke work from p and v using shoe-string formula
-        # https://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates
-    
-        # Convert pressure to Pa
-        p = scipy_constants.mmHg * d_temp['pressure_ventricle'].to_numpy()
-        
-        # Convert volume to m^3
-        v = 0.001 * d_temp['volume_ventricle'].to_numpy()
-    
-        # Calculate area inside loop
-        e = 0.5*np.abs(np.dot(v, np.roll(p, 1)) -
-                       np.dot(p, np.roll(v,1)))
-    
-        return e

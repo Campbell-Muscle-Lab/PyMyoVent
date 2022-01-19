@@ -22,7 +22,8 @@ class single_ventricle_circulation():
         return_wall_thickness, \
         return_lv_circumference, \
         return_internal_radius_for_chamber_volume, \
-        return_lv_pressure
+        return_lv_pressure, \
+        return_stroke_work
 
     from .write_data import \
         write_complete_data_to_sim_data, \
@@ -49,34 +50,6 @@ class single_ventricle_circulation():
         # Load the model as a dict
         with open(model_json_file_string, 'r') as f:
             sc_model = json.load(f)
-        
-        # Check code version against the version in the model file
-        # First get this code version from a matching file
-        version_file_string = os.path.join(Path(__file__).parent, 'version.json')
-        with open(version_file_string, 'r') as f:
-            v = json.load(f)
-        code_v_string = v['PyMyoVent_code']['version'].split('.')
-        code_v = []
-        for i in range(len(code_v_string)):
-            code_v.append(int(code_v_string[i]))
-        
-        # Now get model version
-        model_v_string = sc_model['PyMyoVent']['version'].split('.')
-        model_v = []
-        for i in range(len(model_v_string)):
-            model_v.append(int(model_v_string[i]))
-        
-        # Now compare
-        version_problem = False;
-        if (code_v[0] > model_v[0]):
-            version_problem = True
-        elif (code_v[1] < model_v[1]):
-            version_problem = True
-        if (version_problem):
-            print('PyMyoVent version problem')
-            print('Code version %s' % code_v_string)
-            print('Model version %s' % model_v_string)
-            exit(1)
 
         # Create a model dict for things that do not change during a simulation
         self.model = dict()
@@ -241,6 +214,9 @@ class single_ventricle_circulation():
         # Add functional fields
         self.data['stroke_volume'] = 0
         self.data['ejection_fraction'] = 0
+        self.data['stroke_work'] = 0
+        self.data['stroke_cost'] = 0
+        self.data['efficiency'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -357,7 +333,7 @@ class single_ventricle_circulation():
                 d['hs_length_max']
             d['cpt_int_pas_stress_mean'] = self.temp_data['cpt_int_pas_stress'].mean()
             d['cpt_cb_stress_mean'] = self.temp_data['cpt_cb_stress'].mean()
-            d['myosin_efficiency'] = self.data['myosin_efficiency']
+            d['efficiency'] = self.data['efficiency']
             d['pressure_artery_max'] = \
                 self.temp_data['pressure_arteries'].max()
             d['pressure_artery_min'] = \
@@ -537,12 +513,12 @@ class single_ventricle_circulation():
                 bc.data['symp_value'] == bc.data['symp_factor'] * \
                     bc.data['basal_value']
 
-    def return_min_max(self, data_frame):
-        """ returns list of min and max values from a data frame """
-        min_value = data_frame.min()
-        max_value = data_frame.max()
+    # def return_min_max(self, data_frame):
+    #     """ returns list of min and max values from a data frame """
+    #     min_value = data_frame.min()
+    #     max_value = data_frame.max()
 
-        return min_value, max_value
+        # return min_value, max_value
 
     def rebuild_from_perturbations(self):
         """ builds system arrays that could change during simulation """
@@ -578,6 +554,24 @@ class single_ventricle_circulation():
                                      'ener_flux_ATP_consumed']]
             d_cycle = d_cycle[d_cycle['time'].between(
                 self.last_heart_beat_time, self.data['time'])]
+            
+            self.data['stroke_volume'] = d_cycle['volume_ventricle'].max() - \
+                d_cycle['volume_ventricle'].min()
+            
+            self.data['ejection_fraction'] = self.data['stroke_volume'] / \
+                d_cycle['volume_ventricle'].max()
+            
+            self.data['stroke_work'] = self.return_stroke_work(d_cycle)
+        
+            self.data['stroke_cost'] = \
+                -d_cycle['ener_flux_ATP_consumed'].sum() * time_step * \
+                    self.hs.myof.implementation['delta_G_ATP']
+            
+            if (self.data['stroke_cost'] > 0):
+                self.data['efficiency'] = self.data['stroke_work'] / \
+                    self.data['stroke_cost']
+            else:
+                self.data['efficiency'] = np.nan
             
 
     def return_flows(self, v, time_step):
