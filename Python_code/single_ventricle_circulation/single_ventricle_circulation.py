@@ -217,6 +217,7 @@ class single_ventricle_circulation():
         self.data['stroke_work'] = 0
         self.data['stroke_cost'] = 0
         self.data['efficiency'] = 0
+        self.data['mean_arterial_pressure'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -347,6 +348,8 @@ class single_ventricle_circulation():
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
+            d['ener_intracell_ATP_conc'] = \
+                self.temp_data['ener_intracell_ATP_conc'].mean()
 
             if ('baro_B_a' in self.temp_data):
                 d['baro_B_a'] = self.temp_data['baro_B_a'].mean()
@@ -549,7 +552,9 @@ class single_ventricle_circulation():
         # If it is new beat, calculate cycle metrics
         if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
             # Prune data to last cycle
-            d_cycle = self.sim_data[['time', 'pressure_ventricle',
+            d_cycle = self.sim_data[['time',
+                                     'pressure_ventricle',
+                                     'pressure_arteries',
                                      'volume_ventricle',
                                      'ener_flux_ATP_consumed']]
             d_cycle = d_cycle[d_cycle['time'].between(
@@ -572,6 +577,9 @@ class single_ventricle_circulation():
                     self.data['stroke_cost']
             else:
                 self.data['efficiency'] = np.nan
+            
+            self.data['mean_arterial_pressure'] = \
+                d_cycle['pressure_arteries'].mean()
             
 
     def return_flows(self, v, time_step):

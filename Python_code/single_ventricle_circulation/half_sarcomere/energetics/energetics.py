@@ -87,34 +87,6 @@ class energetics():
 
         self.data['ener_flux_ATP_consumed'] = self.return_flux_ATP_consumed()
 
-        # # It's a new beat, calculate stroke work and myosin ATPase
-        # if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
-            
-        #     # Pull off data for energy calculations
-        #     d_temp = self.parent_circulation.sim_data[['time',
-        #                            'pressure_ventricle',
-        #                            'volume_ventricle',
-        #                            'myosin_ATPase']]
-        #     d_temp = d_temp[d_temp['time'].between(
-        #         self.last_heart_beat_time, self.data['time'])]
-
-        #     self.data['stroke_volume'] = d_temp['volume_ventricle'].max() - \
-        #                                     d_temp['volume_ventricle'].min()
-
-        #     self.data['stroke_work'] = self.return_stroke_work(d_temp)
-
-        #     self.data['ejection_fraction'] = self.data['stroke_volume'] / \
-        #         d_temp['volume_ventricle'].max()
-
-        #     myosin_used = time_step * d_temp['myosin_ATPase'].sum()
-    
-        #     if (myosin_used > 0):
-        #         self.data['myosin_efficiency'] = self.data['stroke_work'] / \
-        #                                         myosin_used
-        #     else:
-        #         self.data['myosin_efficiency'] = np.nan
-
-
 
     def return_flux_ATP_generated(self):
         """ Returns rate at which ATP is generated as
@@ -123,7 +95,7 @@ class energetics():
         # Calculation volume of mitochondria in m^3
         v_mitochondria = 0.001 * self.parent_hs.parent_circulation.data['ventricle_wall_volume'] * \
                             (1.0 - self.parent_hs.myof.data['prop_fibrosis']) * \
-                            self.parent_hs.myof.data['prop_myofilaments']
+                            (1.0 - self.parent_hs.myof.data['prop_myofilaments'])
 
         # Deduce the rate
         flux_ATP_generated = v_mitochondria * \

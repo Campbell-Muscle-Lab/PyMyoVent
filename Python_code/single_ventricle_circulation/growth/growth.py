@@ -104,19 +104,23 @@ class growth_component():
             y=[]
             if (self.data['level'] == 'half_sarcomere'):
                 y = self.parent_circulation.hs.data[self.data['signal']]
+            elif(self.data['level'] == 'energetics'):
+                y = self.parent_circulation.hs.ener.data[self.data['signal']]
             elif (self.data['level'] == 'circulation'):
                 y = self.parent_circulation.data[self.data['signal']]
-                
+            
+            if (np.abs(self.data['setpoint']) < np.finfo(float).eps):
+                print('Growth setpoint is too close to zero')
+                return
+            
             if (y >= self.data['setpoint']):
                 dgdt = self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \
-                        np.amax([1, self.data['setpoint']])) * \
-                        (1.0 - g)
+                        self.data['setpoint']) * (1.0 - g)
             else:
                 dgdt = self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \
-                         np.amax([1, self.data['setpoint']])) * \
-                        g
+                        self.data['setpoint']) * g
         else:
             dgdt = -1 * self.data['k_recov'] * (g - 0.5)
 
