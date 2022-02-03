@@ -49,12 +49,14 @@ class growth():
 
                 # Update the data holders for reporting
                 if (gc.data['type'] == 'eccentric'):
-                    self.data['growth_eccentric_g'] = gc.data['growth_g']
+                    self.data['growth_eccentric_a'] = gc.data['growth_a']
+                    self.data['growth_eccentric_b'] = gc.data['growth_b']
                     self.data['growth_eccentric_c'] = gc.data['growth_c']
                     gc.data['setpoint'] = self.data['gr_eccentric_set']
 
                 else:
-                    self.data['growth_concentric_g'] = gc.data['growth_g']
+                    self.data['growth_concentric_a'] = gc.data['growth_a']
+                    self.data['growth_concentric_b'] = gc.data['growth_b']
                     self.data['growth_concentric_c'] = gc.data['growth_c']
                     gc.data['setpoint'] = self.data['gr_concentric_set']
 
@@ -70,8 +72,9 @@ class growth_component():
         for k in list(gc_struct.keys()):
             self.data[k] = gc_struct[k]
         # Add in growth and controller signals
-        self.data['growth_g'] = 0.5
-        self.data['growth_c'] = 0
+        self.data['G_a'] = 0.5
+        self.data['G_b'] = 0.5
+        self.data['G_c'] = 0
 
 
     def implement_time_step(self, time_step, growth_active=0):
@@ -96,24 +99,33 @@ class growth_component():
             self.parent_circulation.data['growth_dm'] = \
                 self.parent_circulation.data['ventricle_wall_volume'] * \
                     time_step * self.data['growth_c']
+    
+    def return_G_a(self):
+        """ Return the G_a signal """
+        
+        if (self.data['level'] == 'half_sarcomere'):
+            y = self.parent_circulation.hs.data[self.data['signal']]
+        elif(self.data['level'] == 'energetics'):
+            y = self.parent_circulation.hs.ener.data[self.data['signal']]
+        elif (self.data['level'] == 'circulation'):
+            y = self.parent_circulation.data[self.data['signal']]
+        
+        
+        G_a = 1 / (1 + np.exp(-self.model['g_S'] *
+                              (y - self.data['setpoint'])))
+        
+        return G_a
 
 
-    def diff_g(self, g, t, growth_active=False):
+    def diff_G_b(self, G_b, t, growth_active=False):
+        """ Returns the rate of change of the G_b signal
+            where G_b tends towards 0.5 when G_a is equal to 0.5
+            but goes towards 1 when G_a is high and
+            towards 0 when G_a is low """
         
         if (growth_active):
-            y=[]
-            if (self.data['level'] == 'half_sarcomere'):
-                y = self.parent_circulation.hs.data[self.data['signal']]
-            elif(self.data['level'] == 'energetics'):
-                y = self.parent_circulation.hs.ener.data[self.data['signal']]
-            elif (self.data['level'] == 'circulation'):
-                y = self.parent_circulation.data[self.data['signal']]
-            
-            if (np.abs(self.data['setpoint']) < np.finfo(float).eps):
-                print('Growth setpoint is too close to zero')
-                return
-            
-            if (y >= self.data['setpoint']):
+            if (self.data['']
+                    y >= self.data['setpoint']):
                 dgdt = self.data['k_drive'] * \
                     ((y - self.data['setpoint']) / \
                         self.data['setpoint']) * (1.0 - g)

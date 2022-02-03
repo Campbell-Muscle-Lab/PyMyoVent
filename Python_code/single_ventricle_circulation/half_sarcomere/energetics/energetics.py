@@ -37,6 +37,7 @@ class energetics():
             self.model['rate_ATP_generated']
         self.data['ener_flux_ATP_consumed'] = 0
         self.data['ener_flux_ATP_generated'] = 0
+        self.data['ener_ATPase_to_myo'] = 0
 
         # Initialize ATP vectory
         self.y = np.zeros(1)

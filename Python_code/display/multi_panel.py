@@ -319,6 +319,21 @@ def multi_panel_from_flat_data(
                     legend_strings.append(y_d['field_label'])
 
                 patch_counter = patch_counter+1
+                
+            if ('reference' in y_d):
+                if (y_d['reference'] == "initial"):
+                    y_d['reference'] = y[0]
+                xx = x[draw_indices[[0, -1]]]
+                yy = y_d['reference'] + 0*xx
+                if ('reference_style' in y_d):
+                    line_style = y_d['reference_style']
+                else:
+                    line_style = 'k:'
+                        
+                ax[i].plot(xx, yy,
+                           line_style,
+                           linewidth=formatting['data_linewidth'],
+                           clip_on=True)
 
         # Tidy up axes and legends
 

@@ -548,6 +548,12 @@ class single_ventricle_circulation():
         for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
+            
+        self.data['ener_ATPase_to_myo'] = \
+            self.hs.ener.data['ener_flux_ATP_consumed'] / \
+                (0.001 * self.data['ventricle_wall_volume'] *
+                 (1.0 - self.hs.myof.data['prop_fibrosis']) * 
+                  self.hs.myof.data['prop_myofilaments'])
 
         # If it is new beat, calculate cycle metrics
         if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
