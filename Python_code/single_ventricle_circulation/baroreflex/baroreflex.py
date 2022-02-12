@@ -48,8 +48,9 @@ class baroreflex():
                             reflex_active=0):
         """ implements time-step """
 
-        # First update baro c
+        # First update the B_a and B_b signals
         self.data['baro_B_a'] = self.return_B_a(pressure)
+        
         sol = odeint(self.diff_B_b, self.data['baro_B_b'],
                      [0, time_step],
                      args=((reflex_active,)))

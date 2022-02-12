@@ -52,6 +52,10 @@ class output_handler():
         if not isinstance(sim_data, pd.DataFrame):
             print('No simulation data available')
             return
+        
+        # Drop write mode == 2 to handle data written in burst mode
+        if ('write_mode' in sim_data.columns):
+            sim_data = sim_data.drop(np.flatnonzero(sim_data['write_mode']==2))
 
         # User defined files
         base_directory = Path(output_handler_file_string).parent.absolute()

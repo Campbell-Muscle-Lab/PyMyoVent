@@ -120,9 +120,16 @@ def multi_panel_from_flat_data(
         else:
             x_ticks_defined = True
     else:
-        # Set ticks to beginning and end of record
-        x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-                  pandas_data[x_display['global_x_field']].iloc[-1])
+        # Set ticks to min and max of record
+        x_lim = (np.amin(pandas_data[x_display['global_x_field']]),
+                 np.amax(pandas_data[x_display['global_x_field']]))
+        # Check whether x_lim[-1] is also max, if not prune data to max
+        if (not x_lim[-1] ==
+                pandas_data[x_display['global_x_field']].iloc[-1]):
+            diff_x = (pandas_data[x_display['global_x_field']].diff() < 0)
+            diff_ind = np.flatnonzero(diff_x)
+            pandas_data = pandas_data.head(diff_ind[0])
+            
         x_display['ticks'] = \
             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
 

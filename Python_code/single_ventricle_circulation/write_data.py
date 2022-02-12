@@ -159,21 +159,21 @@ def write_envelope_data_to_sim_data(self, index):
     self.sim_data.at[self.write_counter+1, 'write_mode'] = 2
     self.write_counter = self.write_counter + 2
 
-def write_output_files(self,
-                       sim_results_file_string,
-                       output_handler_file_string):
+def write_output_files(self):
     """ Write sim to data file and run output hander """
     
-    self.write_sim_results_to_file(sim_results_file_string)
+    if (not self.sim_results_file_string == []):
+        self.write_sim_results_to_file()
+        
+        if (not self.output_handler_file_string == []):
+            self.run_output_handler()
 
-    self.run_output_handler(output_handler_file_string)
-
-def write_sim_results_to_file(self, sim_results_file_string):
+def write_sim_results_to_file(self):
     """ Write sim results to specified file """
 
     # Save the simulation results to file
-    if ('sim_results_file_string'):
-        output_file_string = os.path.abspath(sim_results_file_string)
+    if (not self.sim_results_file_string == []):
+        output_file_string = os.path.abspath(self.sim_results_file_string)
         ext = output_file_string.split('.')[-1]
         # Make sure the path exists
         output_dir = os.path.dirname(output_file_string)
@@ -191,11 +191,11 @@ def write_sim_results_to_file(self, sim_results_file_string):
                                  sep='\t',
                                  index=False)
 
-def run_output_handler(self, output_handler_file_string):
+def run_output_handler(self):
     """ Launches output handler """
 
-    # Load the output_handler and process
-    if (output_handler_file_string == []):
+    # Check the output file
+    if (self.output_handler_file_string == []):
         print("No output_structure_file_string. Exiting")
         return
 
@@ -204,6 +204,6 @@ def run_output_handler(self, output_handler_file_string):
         if ('cb_dump_file_string' in self.so.data):
             cb_dump_file_string = self.so.data['cb_dump_file_string']
 
-    self.oh = oh.output_handler(output_handler_file_string,
+    self.oh = oh.output_handler(self.output_handler_file_string,
                                 sim_data=self.sim_data,
                                 cb_dump_file_string=cb_dump_file_string)

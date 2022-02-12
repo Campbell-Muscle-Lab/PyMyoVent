@@ -227,6 +227,10 @@ class single_ventricle_circulation():
             self.va = va.VAD(sc_model['VAD'], self)
         else:
             self.va = []
+        
+        # Save space for some filenames
+        self.sim_results_file_string = []
+        self.output_handerl_file_string = []
 
         # Create a sim_options object
         self.so = []
@@ -303,16 +307,30 @@ class single_ventricle_circulation():
             self.sim_data = \
                 self.create_data_structure(self.prot.data['no_of_time_steps'])
 
+        # Update the file handles
+        self.sim_results_file_string = sim_results_file_string
+        self.output_handler_file_string = output_handler_file_string
+
         # Step through the simulation
+        time_step = self.prot.data['time_step']
         self.t_counter = 0
         self.write_counter = 0
         self.envelope_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
-            self.implement_time_step(self.prot.data['time_step'])
+            # Iplmement a step
+            self.implement_time_step(time_step)
+            # Check whether we should dump the output
+            if ('periodic_save_interval_s' in self.so.data):
+                if ((i > 0) and 
+                    (np.mod(self.data['time'],
+                            self.so.data['periodic_save_interval_s'])
+                                 < time_step) and
+                    (i < (self.prot.data['no_of_time_steps']-1))):
+                    # Write sim data to file and run the output handler
+                    self.write_output_files()       
 
         # Tidy up by writing sim data to file and running the output handler
-        self.write_output_files(sim_results_file_string,
-                                output_handler_file_string)
+        self.write_output_files()
 
 
     def return_system_values(self, time_interval=3):
@@ -516,12 +534,12 @@ class single_ventricle_circulation():
                 bc.data['symp_value'] == bc.data['symp_factor'] * \
                     bc.data['basal_value']
 
-    # def return_min_max(self, data_frame):
-    #     """ returns list of min and max values from a data frame """
-    #     min_value = data_frame.min()
-    #     max_value = data_frame.max()
+    def return_min_max(self, data_frame):
+        """ returns list of min and max values from a data frame """
+        min_value = data_frame.min()
+        max_value = data_frame.max()
 
-        # return min_value, max_value
+        return min_value, max_value
 
     def rebuild_from_perturbations(self):
         """ builds system arrays that could change during simulation """
