@@ -107,13 +107,13 @@ class growth_component():
                      args=((growth_active,)))
         self.data['G_b'] = sol[-1].item()
         
-        # then G_c
-        sol = odeint(self.diff_G_c, self.data['G_c'], [0, time_step],
-                     args=((growth_active,)))
-        self.data['G_c'] = sol[-1].item()
+        # # then G_c
+        # sol = odeint(self.diff_G_c, self.data['G_c'], [0, time_step],
+        #              args=((growth_active,)))
+        # self.data['G_c'] = sol[-1].item()
 
         # And finally G_result        
-        self.data['G_result'] = self.return_G_result(self.data['G_c'])
+        self.data['G_result'] = self.return_G_result(self.data['G_b'])
         
             
     def return_G_a(self):
