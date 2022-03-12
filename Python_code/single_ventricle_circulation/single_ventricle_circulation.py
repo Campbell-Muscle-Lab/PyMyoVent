@@ -252,9 +252,11 @@ class single_ventricle_circulation():
             list(self.hr.data.keys()) + \
             list(self.hs.data.keys()) + \
             list(self.hs.memb.data.keys()) + \
-            list(self.hs.ener.data.keys()) + \
-            list(self.hs.myof.data.keys()) + \
-            ['write_mode']
+            list(self.hs.myof.data.keys())
+        if hasattr(self.hs, 'ener'):
+            data_fields = data_fields + \
+                list(self.hs.ener.data.keys())
+        data_fields = data_fields + ['write_mode']
 
         # Add in fields from optional modules
         if (self.br != []):
@@ -366,8 +368,10 @@ class single_ventricle_circulation():
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
-            d['ener_intracell_ATP_conc'] = \
-                self.temp_data['ener_intracell_ATP_conc'].mean()
+
+            if ('ener_intracell_ATP_conc' in self.temp_data):
+                d['ener_intracell_ATP_conc'] = \
+                    self.temp_data['ener_intracell_ATP_conc'].mean()
 
             if ('baro_B_a' in self.temp_data):
                 d['baro_B_a'] = self.temp_data['baro_B_a'].mean()
@@ -566,21 +570,26 @@ class single_ventricle_circulation():
         for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
-            
-        self.data['ener_ATPase_to_myo'] = \
-            self.hs.ener.data['ener_flux_ATP_consumed'] / \
-                (0.001 * self.data['ventricle_wall_volume'] *
-                 (1.0 - self.hs.myof.data['prop_fibrosis']) * 
-                  self.hs.myof.data['prop_myofilaments'])
+        
+        if (hasattr(self.hs, 'ener')):
+            self.data['ener_ATPase_to_myo'] = \
+                self.hs.ener.data['ener_flux_ATP_consumed'] / \
+                    (0.001 * self.data['ventricle_wall_volume'] *
+                     (1.0 - self.hs.myof.data['prop_fibrosis']) * 
+                      self.hs.myof.data['prop_myofilaments'])
 
         # If it is new beat, calculate cycle metrics
         if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
             # Prune data to last cycle
-            d_cycle = self.sim_data[['time',
-                                     'pressure_ventricle',
-                                     'pressure_arteries',
-                                     'volume_ventricle',
-                                     'ener_flux_ATP_consumed']]
+            
+            # Deduce the fields that are needed
+            cycle_fields = ['time', 'pressure_ventricle',
+                            'pressure_arteries', 'volume_ventricle']
+            if hasattr(self.hs, 'ener'):
+                cycle_fields = cycle_fields + ['ener_flux_ATP_consumed']
+
+            d_cycle = self.sim_data[cycle_fields]
+            
             d_cycle = d_cycle[d_cycle['time'].between(
                 self.last_heart_beat_time, self.data['time'])]
             
@@ -591,19 +600,21 @@ class single_ventricle_circulation():
                 d_cycle['volume_ventricle'].max()
             
             self.data['stroke_work'] = self.return_stroke_work(d_cycle)
-        
-            self.data['stroke_cost'] = \
-                -d_cycle['ener_flux_ATP_consumed'].sum() * time_step * \
-                    self.hs.myof.implementation['delta_G_ATP']
-            
-            if (self.data['stroke_cost'] > 0):
-                self.data['efficiency'] = self.data['stroke_work'] / \
-                    self.data['stroke_cost']
-            else:
-                self.data['efficiency'] = np.nan
-            
+
             self.data['mean_arterial_pressure'] = \
                 d_cycle['pressure_arteries'].mean()
+    
+            if hasattr(self.hs, 'ener'):
+                self.data['stroke_cost'] = \
+                    -d_cycle['ener_flux_ATP_consumed'].sum() * time_step * \
+                        self.hs.myof.implementation['delta_G_ATP']
+            
+                if (self.data['stroke_cost'] > 0):
+                    self.data['efficiency'] = self.data['stroke_work'] / \
+                        self.data['stroke_cost']
+                else:
+                    self.data['efficiency'] = np.nan
+            
             
 
     def return_flows(self, v, time_step):

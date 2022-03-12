@@ -20,8 +20,9 @@ def write_complete_data_to_sim_data(self, index):
             self.sim_data.at[self.write_counter, f] = self.hs.data[f]
         for f in list(self.hs.memb.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
-        for f in list(self.hs.ener.data.keys()):
-            self.sim_data.at[self.write_counter, f] = self.hs.ener.data[f]
+        if (hasattr(self.hs, 'ener')):
+            for f in list(self.hs.ener.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hs.ener.data[f]
         for f in list(self.hs.myof.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
         if (self.br):

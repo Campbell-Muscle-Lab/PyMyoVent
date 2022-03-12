@@ -138,16 +138,16 @@ class growth_component():
         """ Returns the rate of change of the G_b signal
             where G_b tends towards 1 when G_a is high and
             towards 0 when G_a is low """
+            
+        dG_b_dt = -self.model['g_B_k_recov'] * (G_b - 0.5)
         
         if (growth_active):
             if (self.data['G_a'] >= 0.5):
-                dG_b_dt = -self.model['g_B_k_drive'] * \
+                dG_b_dt = dG_b_dt -self.model['g_B_k_drive'] * \
                     (self.data['G_a'] - 0.5) * G_b
             else:
-                dG_b_dt = -self.model['g_B_k_drive'] * \
+                dG_b_dt = dG_b_dt -self.model['g_B_k_drive'] * \
                     (self.data['G_a'] - 0.5) * (1 - G_b)
-        else:
-            dG_b_dt = -self.model['g_B_k_recov'] * (G_b - 0.5)
 
         return dG_b_dt
 

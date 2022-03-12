@@ -102,7 +102,6 @@ def run_batch(batch_json_file_string):
     print('Batch run time')
     print(stop-start)
 
-
 def worker(job, thread_id=[]):
     """ Runs a job in a batch """
 
@@ -178,5 +177,8 @@ def create_figures(batch_json_file_string):
                 oh.output_handler(output_handler_file_string,
                     sim_results_file_string = results_file_string)
 
+
+
 if __name__ == "__main__":
     PyMyoVent_main()
+

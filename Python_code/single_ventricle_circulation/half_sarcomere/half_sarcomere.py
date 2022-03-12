@@ -35,9 +35,10 @@ class half_sarcomere():
         myofil_struct = hs_struct["myofilaments"]
         self.myof = myof.myofilaments(myofil_struct, self)
 
-        # Pull of energetics parameters
-        energetics_struct = hs_struct["energetics"]
-        self.ener = ener.energetics(energetics_struct, self)
+        # Pull of energetics parameters if appropriate
+        if ('energetics' in hs_struct):
+            energetics_struct = hs_struct["energetics"]
+            self.ener = ener.energetics(energetics_struct, self)
 
 
     def update_simulation(self, time_step, delta_hsl,
@@ -50,8 +51,9 @@ class half_sarcomere():
             self.memb.implement_time_step(time_step,
                                            activation)
 
-            # Update energetics
-            self.ener.implement_time_step(time_step)
+            # Update energetics if appropriate
+            if hasattr(self, 'ener'):
+                self.ener.implement_time_step(time_step)
 
             # Myofilaments
             self.myof.evolve_kinetics(time_step,
@@ -74,5 +76,6 @@ class half_sarcomere():
         
         # Now update other components
         self.memb.update_data()
-        self.ener.update_data()
+        if hasattr(self, 'ener'):
+            self.ener.update_data()
         self.myof.update_data()

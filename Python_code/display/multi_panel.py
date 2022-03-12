@@ -26,11 +26,14 @@ def default_formatting():
     formatting['x_label_pad'] = 0
     formatting['y_label_rotation'] = 0
     formatting['y_label_fontsize'] = 12
-    formatting['y_label_pad'] = 30
+    formatting['y_label_offset'] = -0.5
     formatting['legend_location'] = 'upper left'
     formatting['legend_bbox_to_anchor'] = [1.05, 1]
     formatting['legend_fontsize'] = 9
     formatting['legend_handlelength'] = 1
+    formatting['legend_borderaxespad'] = 0.5
+    formatting['legend_framealpha'] = 0.8
+    formatting['legend_edgecolor'] = 'inherit'
     formatting['tick_fontsize'] = 11
     formatting['patch_alpha'] = 0.3
     formatting['max_rows_per_legend'] = 4
@@ -66,7 +69,8 @@ def multi_panel_from_flat_data(
         excel_sheet='Sheet1',
         pandas_data=[],
         template_file_string=[],
-        output_image_file_string=[],
+        output_image_file=[],
+        image_formats=[],
         dpi=300):
 
     # Check for template file, make an empty dict if absent
@@ -132,25 +136,6 @@ def multi_panel_from_flat_data(
             
         x_display['ticks'] = \
             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-
-
-    # if (('ticks' not in x_display) or ('ticks_rel_to_end' not in x_display)):
-    #     if ('ticks_rel_to_end' not in x_display):
-    #         # Set ticks to beginning and end of record
-    #         x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-    #                  pandas_data[x_display['global_x_field']].iloc[-1])
-    #         x_display['ticks'] = \
-    #             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-    #         x_ticks_defined = False
-    #     else:
-    #         # Set ticks relative to end
-    #         x = pandas_data[x_display['global_x_field']].to_numpy()
-    #         x_end = x[-1]
-    #         x_lim = [x[x < (x_end + x_display['ticks_rel_to_end'][0])][-1],
-    #                  x[x < (x_end + x_display['ticks_rel_to_end'][-1])][-1]]
-    #         x_display['ticks'] = x_lim
-    #         print(x_display['ticks'])
-    #         x_ticks_defined = True
 
     if 'label' not in x_display:
         x_display['label'] = x_display['global_x_field']
@@ -395,23 +380,35 @@ def multi_panel_from_flat_data(
         ax[i].set_ylabel(p_data['y_info']['label'],
                          loc='center',
                          verticalalignment='center',
-                         labelpad=formatting['y_label_pad'],
                          fontfamily=formatting['fontname'],
                          fontsize=formatting['y_label_fontsize'],
                          rotation=formatting['y_label_rotation'])
 
         # Add legend if it exists
         if legend_symbols:
+            # Check for overrides of legend properties, otherwise
+            # use general formatting
+            legend_props = dict()
+            for p in ['legend_location', 'legend_handlelength',
+                      'legend_bbox_to_anchor', 'legend_borderaxespad',
+                      'legend_framealpha', 'legend_edgecolor']:
+                if (p in p_data['y_info']):
+                    legend_props[p] = p_data['y_info'][p]
+                else:
+                    legend_props[p] = formatting[p]
+                
             ax[i].legend(legend_symbols, legend_strings,
-                         loc=formatting['legend_location'],
-                         handlelength=formatting['legend_handlelength'],
-                         bbox_to_anchor=(
-                             formatting['legend_bbox_to_anchor'][0],
-                             formatting['legend_bbox_to_anchor'][1]),
+                         loc=legend_props['legend_location'],
+                         handlelength=legend_props['legend_handlelength'],
+                         bbox_to_anchor=(legend_props['legend_bbox_to_anchor'][0],
+                                         legend_props['legend_bbox_to_anchor'][1]),
                          prop={'family': formatting['fontname'],
                                'size': formatting['legend_fontsize']},
                          ncol=int(np.ceil(len(legend_symbols) /
-                                          formatting['max_rows_per_legend'])))
+                                          formatting['max_rows_per_legend'])),
+                         borderaxespad=legend_props['legend_borderaxespad'],
+                         framealpha=legend_props['legend_framealpha'],
+                         edgecolor=legend_props['legend_edgecolor'])
 
         # Handle annotations
         handle_annotations(template_data, ax[i], i, formatting)
@@ -428,16 +425,21 @@ def multi_panel_from_flat_data(
     spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
                       h_pad = layout['grid_hspace'])
 
-    fig.align_labels()
+    # Align y labels
+    for i in range(len(ax)):
+        ax[i].yaxis.set_label_coords(formatting['y_label_offset'], 0.5)
 
     # Save if required
-    if output_image_file_string:
-        print('Saving figure to %s' % output_image_file_string)
-        # Check path exists
-        folder = os.path.dirname(output_image_file_string)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        fig.savefig(output_image_file_string, dpi=dpi)
+    if output_image_file:
+        for f in image_formats:
+            output_image_file_string = '%s.%s' % (output_image_file, f)
+        
+            print('Saving figure to %s' % output_image_file_string)
+            # Check path exists
+            folder = os.path.dirname(output_image_file_string)
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            fig.savefig(output_image_file_string, dpi=dpi)
 
     return (fig, ax)
 
