@@ -30,7 +30,10 @@ def PyMyoVent_main():
             run_batch(sys.argv[2])
 
         if (sys.argv[1] == 'create_figures'):
-            create_figures(sys.argv[2])
+            if (no_of_arguments == 3):
+                create_figures(sys.argv[2])
+            else:
+                create_figures(sys.argv[2], sys.argv[3])
 
 
 def run_batch(batch_json_file_string):
@@ -62,11 +65,12 @@ def run_batch(batch_json_file_string):
                 job['sim_options_file_string'] = []
 
             # Adapt for relative paths
-            if ('relative_path' in job):
-                if (job['relative_path']):
+            if ('relative_to' in job):
+                if (job['relative_to'] == 'this_file'):
                     base_directory = \
                         Path(batch_json_file_string).parent.absolute()
-                    for k in ['model_file_string', 'protocol_file_string',
+                    for k in ['model_file_string',
+                              'protocol_file_string',
                               'output_handler_file_string',
                               'sim_options_file_string',
                               'sim_results_file_string']:
@@ -151,7 +155,7 @@ def check_version(model_file_string):
 
 
 
-def create_figures(batch_json_file_string):
+def create_figures(batch_json_file_string, show_figures=False):
     """ Create figures from batch file """
 
     if (batch_json_file_string == []):
@@ -166,8 +170,8 @@ def create_figures(batch_json_file_string):
         for job in jobs:
             if ('output_handler_file_string' in job):
                 # Adapt for relative path
-                if ('relative_path' in job):
-                    if (job['relative_path']):
+                if ('relative_to' in job):
+                    if (job['relative_to'] == 'this_file'):
                         base_directory = Path(batch_json_file_string).parent.absolute();
                         output_handler_file_string = \
                             os.path.join(base_directory, job['output_handler_file_string'])
@@ -175,7 +179,8 @@ def create_figures(batch_json_file_string):
                             os.path.join(base_directory, job['sim_results_file_string'])
                             
                 oh.output_handler(output_handler_file_string,
-                    sim_results_file_string = results_file_string)
+                    sim_results_file_string = results_file_string,
+                    show_figure = show_figures)
 
 
 

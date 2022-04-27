@@ -1,0 +1,556 @@
+{
+    "layout":
+    {
+        "fig_width": 7,
+        "top_margin": 0.25,
+        "left_margin": 0,
+        "right_margin": 0,
+        "panel_height": 1.0,
+        "grid_wspace": 0.5,
+        "grid_hspace": 0.65
+    },
+    "x_display":{
+        "global_x_field": "time",
+        "label": "Time (s)",
+        "ticks": [0, 200]
+    },
+    "processing":{
+        "envelope_rel_width": 0.005
+    },
+    "formatting":
+    {
+        "x_label_fontsize": 9,
+        "y_label_fontsize": 9,
+        "y_label_offset": -0.4,
+        "tick_fontsize": 9,
+        "legend_fontsize": 7,
+        "legend_bbox_to_anchor": [0.3, 0.5],
+        "legend_frame_alpha": 0.65,
+        "patch_alpha": 0.3
+    },
+    "annotation":
+    [
+        {
+            "panel": "all",
+            "type": "v_line",
+            "x_value": 50,
+            "line_style": "k:",
+            "linewidth": 1
+        },
+        {
+            "panel": "all",
+            "type": "v_line",
+            "x_value": 100,
+            "line_style": "k:",
+            "linewidth": 1
+        },
+        {
+            "panel": 0,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.95,
+            "label": "Baroreflex",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "box",
+            "x_coords": [0, 50],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "Off",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "box",
+            "x_coords": [50, 200],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "On",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.45,
+            "label": "P$\\mathregular{_{set}}$",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "box",
+            "x_coords": [50, 100],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "90",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "box",
+            "x_coords": [100, 105],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 0,
+            "type": "box",
+            "x_coords": [105, 200],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "130",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.95,
+            "label": "Baroreflex",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "box",
+            "x_coords": [0, 50],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "Off",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "box",
+            "x_coords": [50, 200],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "On",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.45,
+            "label": "P$\\mathregular{_{set}}$",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "box",
+            "x_coords": [50, 100],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "90",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "box",
+            "x_coords": [100, 105],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 7,
+            "type": "box",
+            "x_coords": [105, 200],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "130",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.95,
+            "label": "Baroreflex",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "box",
+            "x_coords": [0, 50],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "Off",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "box",
+            "x_coords": [50, 200],
+            "y_rel_coords": [1.8, 2.1],
+            "label": "On",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "text",
+            "x_coord": -80,
+            "y_rel_coord": 1.45,
+            "label": "P$\\mathregular{_{set}}$",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "box",
+            "x_coords": [50, 100],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "90",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "box",
+            "x_coords": [100, 105],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "",
+            "label_fontsize": 9
+        },
+        {
+            "panel": 14,
+            "type": "box",
+            "x_coords": [105, 200],
+            "y_rel_coords": [1.3, 1.6],
+            "label": "130",
+            "label_fontsize": 9
+        }
+    ],
+    "panels":
+    [
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Arterial\npressure\n(mm Hg)",
+                "legend_bbox_to_anchor": [1, 0],
+                "legend_location": "lower right",
+                "legend_borderaxespad": 0,
+                "series":
+                [
+                    {
+                        "field": "pressure_arteries",
+                        "field_label": "Pressure",
+                        "style": "envelope"
+                    },
+                    {
+                        "field": "baro_P_set",
+                        "field_label": "Setpoint",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "B$\\mathregular{_{a}}$",
+                "ticks": [0, 1],
+                "series":
+                [
+                    {
+                        "field": "baro_B_a",
+                        "style": "envelope"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "B$\\mathregular{_{b}}$",
+                "ticks": [0, 1],
+                "series":
+                [
+                    {
+                        "field": "baro_B_b",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "B$\\mathregular{_{c,1..7}}$",
+                "ticks": [0, 1],
+                "series":
+                [
+                    {
+                        "field": "baro_B_c_heart_rate_t_quiescent_period",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Total\nblood volume\n(liters)",
+                "series":
+                [
+                    {
+                        "field": "blood_volume",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Ventricular\ncavity volume\n(liters)",
+                "series":
+                [
+                    {
+                        "field": "volume_ventricle",
+                        "style": "envelope"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 1,
+            "y_info":
+            {
+                "label": "Venous\npressure\n(mm Hg)",
+                "series":
+                [
+                    {
+                        "field": "pressure_veins",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "Heart\nrate\n(bpm)",
+                "series":
+                [
+                    {
+                        "field": "heart_rate",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_{1}}$\n(s$\\mathregular{^{-1}}$)",
+                "series":
+                [
+                    {
+                        "field": "k_1",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_{on}}$\n(nM$\\mathregular{^{-1}}$s$\\mathregular{^{-1}}$)",
+                "series":
+                [
+                    {
+                        "field": "k_on",
+                        "scaling_factor": 1e-9,
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_{act}}$\n(M$\\mathregular{^{-1}}$s$\\mathregular{^{-1}}$)",
+                "series":
+                [
+                    {
+                        "field": "k_act",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "k$\\mathregular{_{SERCA}}$\n(M$\\mathregular{^{-1}}$s$\\mathregular{^{-1}}$)",
+                "series":
+                [
+                    {
+                        "field": "k_serca",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "R$\\mathregular{_{arterioles}}$\n(mm Hg L$\\mathregular{^{-1}}$ s)",
+                "series":
+                [
+                    {
+                        "field": "arterioles_resistance",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 2,
+            "y_info":
+            {
+                "label": "C$\\mathregular{_{veins}}$\n([mm Hg]$\\mathregular{^{-1}}$ L)",
+                "series":
+                [
+                    {
+                        "field": "veins_compliance",
+                        "style": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Half-\nsarcomere\nlength\n(nm)",
+                "scaling_type": "close_fit",
+                "series":
+                [
+                    {
+                        "field": "hs_length",
+                        "style": "envelope"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Ca$\\mathregular{_{myo}}$\n($\\mathregular{\\mu}$M)",
+                "series":
+                [
+                    {
+                        "field": "Ca_cytosol",
+                        "style": "envelope",
+                        "scaling_factor": 1e6
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Total\nwall stress\n(kN m$\\mathregular{^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "hs_stress",
+                        "style": "envelope",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Active\nwall stress\n(kN m$\\mathregular{^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "cb_stress",
+                        "style": "envelope",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Passive\nwall stress\n(kN m$\\mathregular{^{-2}}$)",
+                "series":
+                [
+                    {
+                        "field": "int_pas_stress",
+                        "style": "envelope",
+                        "scaling_factor": 1e-3
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Thin\nfilament",
+                "legend_bbox_to_anchor": [1, 1],
+                "legend_location": "upper right",
+                "legend_framealpha": 0.65,
+                "legend_borderaxespad": 0,
+                "series":
+                [
+                    {
+                        "field": "n_off",
+                        "field_label": "OFF",
+                        "style": "envelope"
+                    },
+                    {
+                        "field": "n_on",
+                        "field_label": "ON",
+                        "style": "envelope"
+                    }
+                ]
+            }
+        },
+        {
+            "column": 3,
+            "y_info":
+            {
+                "label": "Thick\nfilament",
+                "legend_bbox_to_anchor": [1, 1],
+                "legend_location": "upper right",
+                "legend_framealpha": 0.65,
+                "legend_borderaxespad": 0,
+                "series":
+                [
+                    {
+                        "field": "M_SRX",
+                        "field_label": "SRX",
+                        "style": "envelope"
+                    },
+                    {
+                        "field": "M_DRX",
+                        "field_label": "DRX",
+                        "style": "envelope"
+                    },
+                    {
+                        "field": "M_FG",
+                        "field_label": "FG",
+                        "style": "envelope"
+                    }
+                ]
+            }
+        }
+    ]
+}

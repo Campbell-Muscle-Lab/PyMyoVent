@@ -34,6 +34,8 @@ def default_formatting():
     formatting['legend_borderaxespad'] = 0.5
     formatting['legend_framealpha'] = 0.8
     formatting['legend_edgecolor'] = 'inherit'
+    formatting['legend_ncol'] = 1
+    formatting['legend_mode'] = []
     formatting['tick_fontsize'] = 11
     formatting['patch_alpha'] = 0.3
     formatting['max_rows_per_legend'] = 4
@@ -51,6 +53,7 @@ def default_layout():
     layout['right_margin'] = 0.1
     layout['grid_wspace'] = 0.1
     layout['grid_hspace'] = 0.1
+    layout['lhs'] = []
 
     return layout
 
@@ -266,6 +269,8 @@ def multi_panel_from_flat_data(
                     col = colors[y_d['field_color']]
                 else:
                     col = colors[line_counter]
+                if ('color_override' in y_d):
+                    col = y_d['color_override']
                 draw_indices = np.arange(x.size)[::spacing]
                 ax[i].plot(x[draw_indices], y[draw_indices],
                            linewidth=formatting['data_linewidth'],
@@ -391,21 +396,29 @@ def multi_panel_from_flat_data(
             legend_props = dict()
             for p in ['legend_location', 'legend_handlelength',
                       'legend_bbox_to_anchor', 'legend_borderaxespad',
-                      'legend_framealpha', 'legend_edgecolor']:
+                      'legend_framealpha', 'legend_edgecolor',
+                      'legend_ncol', 'legend_mode']:
                 if (p in p_data['y_info']):
                     legend_props[p] = p_data['y_info'][p]
                 else:
                     legend_props[p] = formatting[p]
+                    
+            # print(tuple(legend_props['legend_bbox_to_anchor']))
+            
+            # Set ncol
+            if not ('legend_ncol' in p_data['y_info']):
+                legend_props['legend_ncol'] = \
+                        int(np.ceil(len(legend_symbols) / \
+                                formatting['max_rows_per_legend']))
                 
             ax[i].legend(legend_symbols, legend_strings,
                          loc=legend_props['legend_location'],
                          handlelength=legend_props['legend_handlelength'],
-                         bbox_to_anchor=(legend_props['legend_bbox_to_anchor'][0],
-                                         legend_props['legend_bbox_to_anchor'][1]),
+                         bbox_to_anchor=tuple(legend_props['legend_bbox_to_anchor']),
                          prop={'family': formatting['fontname'],
                                'size': formatting['legend_fontsize']},
-                         ncol=int(np.ceil(len(legend_symbols) /
-                                          formatting['max_rows_per_legend'])),
+                         ncol=legend_props['legend_ncol'],
+                         mode=legend_props['legend_mode'],
                          borderaxespad=legend_props['legend_borderaxespad'],
                          framealpha=legend_props['legend_framealpha'],
                          edgecolor=legend_props['legend_edgecolor'])
@@ -422,12 +435,17 @@ def multi_panel_from_flat_data(
     hei = (fig_height - 0*layout['bottom_margin'] -
            layout['top_margin']) / fig_height
     r = [lhs, bot, wid, hei]
-    spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
-                      h_pad = layout['grid_hspace'])
+    # spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
+    #                   h_pad = layout['grid_hspace'])
 
     # Align y labels
     for i in range(len(ax)):
         ax[i].yaxis.set_label_coords(formatting['y_label_offset'], 0.5)
+    
+    # Adjust plot if required
+    if layout['box']:
+        plt.subplots_adjust(left=layout['box'][0], bottom=layout['box'][1],
+                            right=layout['box'][2], top=layout['box'][3])
 
     # Save if required
     if output_image_file:
@@ -448,8 +466,8 @@ def handle_annotations(template_data, ax, panel_index, formatting):
     if not ('annotations' in template_data):
         return
 
-    annotation_data = template_data['annotations']
-    for an in annotation_data['annotation']:
+    annotation_data = template_data['annotation']
+    for an in annotation_data:
         if ((an['panel'] == 'all') or (an['panel'] == panel_index)):
             if (an['type'] == 'v_line'):
                 ax.plot(an['x_value']*np.array([1, 1]),

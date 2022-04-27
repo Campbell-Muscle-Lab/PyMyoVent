@@ -1,0 +1,11 @@
+{
+    "templated_images":
+    [
+        {
+            "relative_to": "this_file",
+            "template_file_string": "../template/template_base_sim.json",
+            "output_image_file": "../sim_output/figure_base_sim",
+            "output_image_formats": ["png", "svg"]
+        }
+    ]
+}

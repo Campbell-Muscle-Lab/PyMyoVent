@@ -25,7 +25,8 @@ class output_handler():
     def __init__(self, output_handler_file_string,
                  sim_data=[],
                  sim_results_file_string=[],
-                 cb_dump_file_string=[]):
+                 cb_dump_file_string=[],
+                 show_figure = False):
 
         print("sim_data")
         print(sim_data)
@@ -74,7 +75,8 @@ class output_handler():
                     sim_data,
                     ud['template_file_string'],
                     ud['output_image_file'],
-                    ud['output_image_formats'])
+                    ud['output_image_formats'],
+                    show_figure = show_figure)
 
         # Animation
         if ('distribution_animation' in self.oh_data):
@@ -92,7 +94,8 @@ class output_handler():
                                    sim_data,
                                    template_file_string,
                                    output_image_file,
-                                   image_formats = ['png']):
+                                   image_formats = ['png'],
+                                   show_figure = False):
 
         if not os.path.isabs(template_file_string):
             template_file_string = os.path.join(os.getcwd(),
@@ -106,7 +109,8 @@ class output_handler():
                         output_image_file = output_image_file,
                         image_formats = image_formats)
 
-        plt.close(fig)
+        if (show_figure == "show"):
+            plt.show()
 
     def animate_cb_distributions(self,
                                  cb_dump_file_string=[],
