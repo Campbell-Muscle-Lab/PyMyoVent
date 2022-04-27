@@ -13,23 +13,25 @@ from .vad import vad as va
 
 from protocol import protocol as prot
 from sim_options import sim_options as sim_opt
-from output_handler import output_handler as oh
-
-from scipy.constants import mmHg as mmHg_in_pascals
-
 
 class single_ventricle_circulation():
     """Class for a single ventricle circulation"""
 
-    from .implement import \
+    # Import functions from additional files
+    from .calculate_properties import \
+        return_wall_thickness, \
+        return_lv_circumference, \
+        return_internal_radius_for_chamber_volume, \
+        return_lv_pressure, \
+        return_stroke_work
+
+    from .write_data import \
         write_complete_data_to_sim_data, \
         write_complete_data_to_envelope_data, \
-        write_envelope_data_to_sim_data
-
-    from .energy import \
-        handle_energetics, \
-        return_myosin_ATPase, \
-        return_stroke_work
+        write_envelope_data_to_sim_data, \
+        write_output_files, \
+        write_sim_results_to_file,\
+        run_output_handler
 
     def __init__(self, model_json_file_string, thread_id=[]):
 
@@ -48,34 +50,6 @@ class single_ventricle_circulation():
         # Load the model as a dict
         with open(model_json_file_string, 'r') as f:
             sc_model = json.load(f)
-        
-        # Check code version against the version in the model file
-        # First get this code version from a matching file
-        version_file_string = os.path.join(Path(__file__).parent, 'version.json')
-        with open(version_file_string, 'r') as f:
-            v = json.load(f)
-        code_v_string = v['PyMyoVent_code']['version'].split('.')
-        code_v = []
-        for i in range(len(code_v_string)):
-            code_v.append(int(code_v_string[i]))
-        
-        # Now get model version
-        model_v_string = sc_model['PyMyoVent']['version'].split('.')
-        model_v = []
-        for i in range(len(model_v_string)):
-            model_v.append(int(model_v_string[i]))
-        
-        # Now compare
-        version_problem = False;
-        if (code_v[0] > model_v[0]):
-            version_problem = True
-        elif (code_v[1] < model_v[1]):
-            version_problem = True
-        if (version_problem):
-            print('PyMyoVent version problem')
-            print('Code version %s' % code_v_string)
-            print('Model version %s' % model_v_string)
-            exit(1)
 
         # Create a model dict for things that do not change during a simulation
         self.model = dict()
@@ -146,7 +120,7 @@ class single_ventricle_circulation():
         self.hr = hr.heart_rate(sc_model['heart_rate'])
 
         # Pull off the half_sarcomere parameters and make a half-sarcomere
-        self.hs = hs.half_sarcomere(sc_model['half_sarcomere'])
+        self.hs = hs.half_sarcomere(sc_model['half_sarcomere'], self)
 
         # Deduce the hsl where force is zero and set the hsl to that length
         self.hs.data['slack_hsl'] = \
@@ -237,13 +211,13 @@ class single_ventricle_circulation():
         else:
             self.gr = []
 
-        # Add in ATPase, stroke work, and efficiency
-        self.data['myosin_ATPase'] = 0
+        # Add functional fields
         self.data['stroke_volume'] = 0
-        self.data['stroke_work']= 0
         self.data['ejection_fraction'] = 0
-        self.data['myosin_efficiency'] = 0
-        self.data['ATPase_to_myo'] = 0
+        self.data['stroke_work'] = 0
+        self.data['stroke_cost'] = 0
+        self.data['efficiency'] = 0
+        self.data['mean_arterial_pressure'] = 0
 
         # Set the last index for heart_beat initiation
         self.last_heart_beat_time = -1
@@ -253,6 +227,10 @@ class single_ventricle_circulation():
             self.va = va.VAD(sc_model['VAD'], self)
         else:
             self.va = []
+        
+        # Save space for some filenames
+        self.sim_results_file_string = []
+        self.output_handerl_file_string = []
 
         # Create a sim_options object
         self.so = []
@@ -274,8 +252,11 @@ class single_ventricle_circulation():
             list(self.hr.data.keys()) + \
             list(self.hs.data.keys()) + \
             list(self.hs.memb.data.keys()) + \
-            list(self.hs.myof.data.keys()) + \
-            ['write_mode']
+            list(self.hs.myof.data.keys())
+        if hasattr(self.hs, 'ener'):
+            data_fields = data_fields + \
+                list(self.hs.ener.data.keys())
+        data_fields = data_fields + ['write_mode']
 
         # Add in fields from optional modules
         if (self.br != []):
@@ -328,42 +309,31 @@ class single_ventricle_circulation():
             self.sim_data = \
                 self.create_data_structure(self.prot.data['no_of_time_steps'])
 
+        # Update the file handles
+        self.sim_results_file_string = sim_results_file_string
+        self.output_handler_file_string = output_handler_file_string
+
         # Step through the simulation
+        time_step = self.prot.data['time_step']
         self.t_counter = 0
         self.write_counter = 0
         self.envelope_counter = 0
         for i in np.arange(self.prot.data['no_of_time_steps']):
-            self.implement_time_step(self.prot.data['time_step'])
+            # Iplmement a step
+            self.implement_time_step(time_step)
+            # Check whether we should dump the output
+            if ('periodic_save_interval_s' in self.so.data):
+                if ((i > 0) and 
+                    (np.mod(self.data['time'],
+                            self.so.data['periodic_save_interval_s'])
+                                 < time_step) and
+                    (i < (self.prot.data['no_of_time_steps']-1))):
+                    # Write sim data to file and run the output handler
+                    self.write_output_files()       
 
-        # Save the simulation results to file
-        if ('sim_results_file_string'):
-            output_file_string = os.path.abspath(sim_results_file_string)
-            ext = output_file_string.split('.')[-1]
-            # Make sure the path exists
-            output_dir = os.path.dirname(output_file_string)
-            print('output_dir %s' % output_dir)
-            if not os.path.isdir(output_dir):
-                print('Making output dir')
-                os.makedirs(output_dir)
-            print('Writing sim_data to %s' % output_file_string)
-            if (ext == 'xlsx'):
-                self.sim_data.to_excel(output_file_string, index=False)
-            else:
-                self.sim_data.to_csv(output_file_string, index=False)
+        # Tidy up by writing sim data to file and running the output handler
+        self.write_output_files()
 
-        # Load the output_handler and process
-        if (output_handler_file_string == []):
-            print("No output_structure_file_string. Exiting")
-            return
-
-        cb_dump_file_string = []
-        if self.so:
-            if ('cb_dump_file_string' in self.so.data):
-                cb_dump_file_string = self.so.data['cb_dump_file_string']
-
-        self.oh = oh.output_handler(output_handler_file_string,
-                                    sim_data=self.sim_data,
-                                    cb_dump_file_string=cb_dump_file_string)
 
     def return_system_values(self, time_interval=3):
         d = dict()
@@ -384,7 +354,7 @@ class single_ventricle_circulation():
                 d['hs_length_max']
             d['cpt_int_pas_stress_mean'] = self.temp_data['cpt_int_pas_stress'].mean()
             d['cpt_cb_stress_mean'] = self.temp_data['cpt_cb_stress'].mean()
-            d['myosin_efficiency'] = self.data['myosin_efficiency']
+            d['efficiency'] = self.data['efficiency']
             d['pressure_artery_max'] = \
                 self.temp_data['pressure_arteries'].max()
             d['pressure_artery_min'] = \
@@ -398,6 +368,10 @@ class single_ventricle_circulation():
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
             d['dm'] = self.data['growth_dm']
+
+            if ('ener_intracell_ATP_conc' in self.temp_data):
+                d['ener_intracell_ATP_conc'] = \
+                    self.temp_data['ener_intracell_ATP_conc'].mean()
 
             if ('baro_B_a' in self.temp_data):
                 d['baro_B_a'] = self.temp_data['baro_B_a'].mean()
@@ -490,9 +464,6 @@ class single_ventricle_circulation():
                      (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
             self.data['n_hs']
 
-        # Handle energetics
-        self.handle_energetics(time_step, new_beat)
-
         # Update model
         self.data['ventricle_circumference'] = new_circumference
         self.data['ventricle_wall_volume'] = \
@@ -512,8 +483,8 @@ class single_ventricle_circulation():
         self.data['p'][-1] = self.return_lv_pressure(self.data['v'][-1])
 
         # Update the objects' data
-        self.update_data(time_step)
-        self.hs.update_data()
+        self.update_data(time_step, new_beat)
+        self.hs.update_data(new_beat)
 
         # Now that ventricular volume is calculated, update the wall thickness
         self.data['ventricle_wall_thickness'] = self.return_wall_thickness(
@@ -586,7 +557,7 @@ class single_ventricle_circulation():
                 c = self.data[('%s_compliance' % v)]
                 self.data['compliance'][i] = c
 
-    def update_data(self, time_step):
+    def update_data(self, time_step, new_beat):
         """ Update data after a time step """
 
         # Update data for the heart-rate
@@ -599,75 +570,52 @@ class single_ventricle_circulation():
         for i, v in enumerate(self.model['compartment_list']):
             self.data['pressure_%s' % v] = self.data['p'][i]
             self.data['volume_%s' % v] = self.data['v'][i]
+        
+        if (hasattr(self.hs, 'ener')):
+            self.data['ener_ATPase_to_myo'] = \
+                self.hs.ener.data['ener_flux_ATP_consumed'] / \
+                    (0.001 * self.data['ventricle_wall_volume'] *
+                     (1.0 - self.hs.myof.data['prop_fibrosis']) * 
+                      self.hs.myof.data['prop_myofilaments'])
 
-    def return_lv_pressure(self, chamber_volume):
-        """ return pressure for a given volume """
+        # If it is new beat, calculate cycle metrics
+        if ((new_beat > 0) and (self.last_heart_beat_time > 0)):
+            # Prune data to last cycle
+            
+            # Deduce the fields that are needed
+            cycle_fields = ['time', 'pressure_ventricle',
+                            'pressure_arteries', 'volume_ventricle']
+            if hasattr(self.hs, 'ener'):
+                cycle_fields = cycle_fields + ['ener_flux_ATP_consumed']
 
-        # Estimate the force produced at the new length
-        new_lv_circumference = self.return_lv_circumference(chamber_volume)
-        new_hs_length = 1e9 * new_lv_circumference / self.data['n_hs']
-        delta_hsl = new_hs_length - self.hs.data['hs_length']
-        f = self.hs.myof.check_myofilament_stresses(delta_hsl)
-        total_stress = f['hs_stress']
+            d_cycle = self.sim_data[cycle_fields]
+            
+            d_cycle = d_cycle[d_cycle['time'].between(
+                self.last_heart_beat_time, self.data['time'])]
+            
+            self.data['stroke_volume'] = d_cycle['volume_ventricle'].max() - \
+                d_cycle['volume_ventricle'].min()
+            
+            self.data['ejection_fraction'] = self.data['stroke_volume'] / \
+                d_cycle['volume_ventricle'].max()
+            
+            self.data['stroke_work'] = self.return_stroke_work(d_cycle)
 
-        internal_r = self.return_internal_radius_for_chamber_volume(
-            chamber_volume)
-
-        wall_thickness = self.return_wall_thickness(chamber_volume)
-
-        # Pressure from Laplaces law
-        # https://www.annalsthoracicsurgery.org/action/showPdf?pii=S0003-4975%2810%2901981-8
-        if (internal_r < 1e-6):
-            P_in_pascals = 0
-        else:
-            # Check options for approximation
-            P_in_pascals = ((total_stress * wall_thickness *
-                             (2.0 + self.thick_wall_multiplier*(wall_thickness / internal_r))) /
-                            internal_r)
-        P_in_mmHg = P_in_pascals / mmHg_in_pascals
-
-        return P_in_mmHg
-
-    def return_wall_thickness(self, chamber_volume):
-        """ returns wall thickness given internal_r """
-        if (chamber_volume < 0):
-            chamber_volume = 0
-
-        # Note that volumes are in liters, dimensions are in m
-        internal_r = self.return_internal_radius_for_chamber_volume(
-                        chamber_volume)
-
-        t  = np.power(0.001 * (chamber_volume +
-                               self.data['ventricle_wall_volume']) /
-                      ((2.0 / 3.0) * np.pi), (1.0 / 3.0)) - \
-                          internal_r
-
-        return t
-
-    def return_lv_circumference(self, chamber_volume):
-        # Based on 2 pi * (internal r + 0.5 * wall thickness)
-        # volume is in liters, circumference is in meters
-
-        if (chamber_volume < 0.0):
-            chamber_volume = 0
-
-        wall_thickness = self.return_wall_thickness(chamber_volume)
-
-        lv_circum = (2.0 * np.pi *
-                     (self.return_internal_radius_for_chamber_volume(
-                         chamber_volume) +
-                      (0.5 * wall_thickness)))
-
-        return lv_circum
-
-    def return_internal_radius_for_chamber_volume(self, chamber_volume):
-        # Returns internal radius in meters for chamber volume in liters
-        if (chamber_volume < 0):
-            chamber_volume = 0
-
-        r = np.power((3.0 * 0.001 * chamber_volume) / (2.0 * np.pi), (1.0/3.0))
-
-        return r
+            self.data['mean_arterial_pressure'] = \
+                d_cycle['pressure_arteries'].mean()
+    
+            if hasattr(self.hs, 'ener'):
+                self.data['stroke_cost'] = \
+                    -d_cycle['ener_flux_ATP_consumed'].sum() * time_step * \
+                        self.hs.myof.implementation['delta_G_ATP']
+            
+                if (self.data['stroke_cost'] > 0):
+                    self.data['efficiency'] = self.data['stroke_work'] / \
+                        self.data['stroke_cost']
+                else:
+                    self.data['efficiency'] = np.nan
+            
+            
 
     def return_flows(self, v, time_step):
         """ return flows between compartments """

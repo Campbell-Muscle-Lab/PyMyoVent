@@ -1,0 +1,16 @@
+{
+  "PyMyoVent_batch":
+  {
+    "job":
+    [
+      {
+          "relative_to": "this_file",
+          "model_file_string": "sim_input/model.json",
+          "protocol_file_string": "sim_input/protocol.json",
+          "sim_options_file_string": "sim_input/options.json",
+          "output_handler_file_string": "sim_input/output_handler.json",
+          "sim_results_file_string" : "sim_output/sim_output.csv"
+      }
+    ]
+  }
+}

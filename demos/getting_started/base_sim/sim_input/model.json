@@ -1,6 +1,4 @@
 {
-    "PyMyoVent":{
-        "version": "1.2.1"},
     "circulation":{
         "blood_volume": 4.5,
         "compartments":
@@ -82,7 +80,7 @@
             "k_1": 3,
             "k_force": 1e-3,
             "k_2": 200,
-            "k_3": 35,
+            "k_3": 32,
             "k_4_0": 30,
             "k_4_1": 1,
             "k_cb": 0.001,
@@ -118,10 +116,10 @@
     },
     "baroreflex":
     {
-        "b_P_set": 90,
-        "b_S": 0.02,
-        "b_k_drive": 10,
-        "b_k_recov": 0.1,
+        "baro_P_set": 90,
+        "baro_S": 0.02,
+        "baro_k_drive": 10,
+        "baro_k_recov": 0.1,
         "controls":
         {
             "control":
@@ -129,7 +127,7 @@
                 {
                     "level": "heart_rate",
                     "variable": "t_quiescent_period",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 1.753497,
                     "symp_factor": 0.386
@@ -137,7 +135,7 @@
                 {
                     "level": "membranes",
                     "variable": "k_act",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 0.5,
                     "symp_factor": 2.0
@@ -145,7 +143,7 @@
                 {
                     "level": "membranes",
                     "variable": "k_serca",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 0.5,
                     "symp_factor": 2
@@ -153,7 +151,7 @@
                 {
                     "level": "myofilaments",
                     "variable": "k_1",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 0.5,
                     "symp_factor": 2
@@ -161,7 +159,7 @@
                 {
                     "level": "myofilaments",
                     "variable": "k_on",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 2,
                     "symp_factor": 0.5
@@ -169,7 +167,7 @@
                 {
                     "level": "circulation",
                     "variable": "arterioles_resistance",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 0.5,
                     "symp_factor": 2
@@ -177,7 +175,7 @@
                 {
                     "level": "circulation",
                     "variable": "veins_compliance",
-                    "k_control": 0.05,
+                    "k_control": 0.025,
                     "k_recov": 0.1,
                     "para_factor": 4,
                     "symp_factor": 0.25

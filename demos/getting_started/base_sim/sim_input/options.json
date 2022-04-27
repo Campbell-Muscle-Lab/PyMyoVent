@@ -1,0 +1,14 @@
+{
+    "xcross_bridge_dump":
+    {
+        "file_string": "../demo_files/3state_with_SRX_base/sim_output/cb_distribution_dump.txt",
+        "t_start_s": 8.5,
+        "t_stop_s": 10
+    },
+    "xburst_output":
+    {
+        "complete_span_s": 1.5,
+        "complete_repeat_s": 20,
+        "envelope_span_s": 2
+    }
+}

@@ -25,7 +25,8 @@ class output_handler():
     def __init__(self, output_handler_file_string,
                  sim_data=[],
                  sim_results_file_string=[],
-                 cb_dump_file_string=[]):
+                 cb_dump_file_string=[],
+                 show_figure = False):
 
         print("sim_data")
         print(sim_data)
@@ -47,31 +48,35 @@ class output_handler():
         # have been passed in
         if (sim_results_file_string != []):
             print('Loading sim data from %s' % sim_results_file_string)
-            sim_data = pd.read_csv(sim_results_file_string)
+            sim_data = pd.read_csv(sim_results_file_string, sep='\t')
 
         if not isinstance(sim_data, pd.DataFrame):
             print('No simulation data available')
             return
+        
+        # Drop write mode == 2 to handle data written in burst mode
+        if ('write_mode' in sim_data.columns):
+            sim_data = sim_data.drop(np.flatnonzero(sim_data['write_mode']==2))
 
         # User defined files
         base_directory = Path(output_handler_file_string).parent.absolute()
-        print(base_directory)
         if ('templated_images' in self.oh_data):
             user_defined = self.oh_data['templated_images']
             print(user_defined)
             for ud in user_defined:
                 # Adjust for relative path
-                if ('relative_path' in ud):
-                    if (ud['relative_path']):
-                        ud['template_file_string'] = os.path.join(
-                            base_directory, ud['template_file_string'])
-                        ud['output_file_string'] = os.path.join(
-                            base_directory, ud['output_file_string'])
+                if (ud['relative_to'] == 'this_file'):
+                    ud['template_file_string'] = os.path.join(
+                        base_directory, ud['template_file_string'])
+                    ud['output_image_file'] = os.path.join(
+                        base_directory, ud['output_image_file'])
 
                 self.create_image_from_template(
                     sim_data,
                     ud['template_file_string'],
-                    ud['output_file_string'])
+                    ud['output_image_file'],
+                    ud['output_image_formats'],
+                    show_figure = show_figure)
 
         # Animation
         if ('distribution_animation' in self.oh_data):
@@ -88,20 +93,24 @@ class output_handler():
     def create_image_from_template(self,
                                    sim_data,
                                    template_file_string,
-                                   output_image_file_string):
+                                   output_image_file,
+                                   image_formats = ['png'],
+                                   show_figure = False):
 
         if not os.path.isabs(template_file_string):
             template_file_string = os.path.join(os.getcwd(),
                                                 template_file_string)
-        if not os.path.isabs(output_image_file_string):
-            output_image_file_string = os.path.join(os.getcwd(),
-                                                    output_image_file_string)
+        if not os.path.isabs(output_image_file):
+            output_image_file = os.path.join(os.getcwd(),
+                                                    output_image_file)
         fig, ax = multi_panel_from_flat_data(
                         pandas_data=sim_data,
-                        template_file_string=template_file_string,
-                        output_image_file_string=output_image_file_string)
+                        template_file_string = template_file_string,
+                        output_image_file = output_image_file,
+                        image_formats = image_formats)
 
-        plt.close(fig)
+        if (show_figure == "show"):
+            plt.show()
 
     def animate_cb_distributions(self,
                                  cb_dump_file_string=[],

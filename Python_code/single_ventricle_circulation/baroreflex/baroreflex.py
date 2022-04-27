@@ -21,14 +21,14 @@ class baroreflex():
 
         # Initialise the model dict
         self.model = dict()
-        self.model['baro_S'] = baro_structure['b_S']
-        self.model['baro_k_drive'] = baro_structure['b_k_drive']
-        self.model['baro_k_recov'] = baro_structure['b_k_recov']
+        self.model['baro_S'] = baro_structure['baro_S']
+        self.model['baro_k_drive'] = baro_structure['baro_k_drive']
+        self.model['baro_k_recov'] = baro_structure['baro_k_recov']
 
         # Initialise the data dict
         self.data = dict()
-        self.data['baro_P_set'] = baro_structure['b_P_set']
-        self.data['baro_B_a'] = self.return_b_a(pressure)
+        self.data['baro_P_set'] = baro_structure['baro_P_set']
+        self.data['baro_B_a'] = self.return_B_a(pressure)
         self.data['baro_B_b'] = 0.5
 
         # Pull off the controls
@@ -48,8 +48,9 @@ class baroreflex():
                             reflex_active=0):
         """ implements time-step """
 
-        # First update baro c
-        self.data['baro_B_a'] = self.return_b_a(pressure)
+        # First update the B_a and B_b signals
+        self.data['baro_B_a'] = self.return_B_a(pressure)
+        
         sol = odeint(self.diff_B_b, self.data['baro_B_b'],
                      [0, time_step],
                      args=((reflex_active,)))
@@ -82,10 +83,10 @@ class baroreflex():
             self.data[k] = bc.data['B_c']
 
 
-    def return_b_a(self, pressure):
-        b_a = 1 / (1 + np.exp(-self.model['baro_S']*
+    def return_B_a(self, pressure):
+        B_a = 1 / (1 + np.exp(-self.model['baro_S']*
                             (pressure - self.data['baro_P_set'])))
-        return b_a
+        return B_a
 
     def diff_B_b(self, B_b, t, reflex_active=False):
         """ returns the rate of change of the balance signal B_b

@@ -101,6 +101,11 @@ class sim_options():
         else:
             print('Full dump mode, writing %i time-points' %
                   self.parent_circulation.prot.data['no_of_time_steps'])
+            
+        # Check for period_save
+        if ('periodic_save' in so):
+            self.data['periodic_save_interval_s'] = \
+                so['periodic_save']['save_interval_s']
 
 
     def return_save_status(self, t):

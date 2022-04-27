@@ -26,11 +26,16 @@ def default_formatting():
     formatting['x_label_pad'] = 0
     formatting['y_label_rotation'] = 0
     formatting['y_label_fontsize'] = 12
-    formatting['y_label_pad'] = 30
+    formatting['y_label_offset'] = -0.5
     formatting['legend_location'] = 'upper left'
     formatting['legend_bbox_to_anchor'] = [1.05, 1]
     formatting['legend_fontsize'] = 9
     formatting['legend_handlelength'] = 1
+    formatting['legend_borderaxespad'] = 0.5
+    formatting['legend_framealpha'] = 0.8
+    formatting['legend_edgecolor'] = 'inherit'
+    formatting['legend_ncol'] = 1
+    formatting['legend_mode'] = []
     formatting['tick_fontsize'] = 11
     formatting['patch_alpha'] = 0.3
     formatting['max_rows_per_legend'] = 4
@@ -48,6 +53,7 @@ def default_layout():
     layout['right_margin'] = 0.1
     layout['grid_wspace'] = 0.1
     layout['grid_hspace'] = 0.1
+    layout['lhs'] = []
 
     return layout
 
@@ -66,7 +72,8 @@ def multi_panel_from_flat_data(
         excel_sheet='Sheet1',
         pandas_data=[],
         template_file_string=[],
-        output_image_file_string=[],
+        output_image_file=[],
+        image_formats=[],
         dpi=300):
 
     # Check for template file, make an empty dict if absent
@@ -120,30 +127,18 @@ def multi_panel_from_flat_data(
         else:
             x_ticks_defined = True
     else:
-        # Set ticks to beginning and end of record
-        x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-                  pandas_data[x_display['global_x_field']].iloc[-1])
+        # Set ticks to min and max of record
+        x_lim = (np.amin(pandas_data[x_display['global_x_field']]),
+                 np.amax(pandas_data[x_display['global_x_field']]))
+        # Check whether x_lim[-1] is also max, if not prune data to max
+        if (not x_lim[-1] ==
+                pandas_data[x_display['global_x_field']].iloc[-1]):
+            diff_x = (pandas_data[x_display['global_x_field']].diff() < 0)
+            diff_ind = np.flatnonzero(diff_x)
+            pandas_data = pandas_data.head(diff_ind[0])
+            
         x_display['ticks'] = \
             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-
-
-    # if (('ticks' not in x_display) or ('ticks_rel_to_end' not in x_display)):
-    #     if ('ticks_rel_to_end' not in x_display):
-    #         # Set ticks to beginning and end of record
-    #         x_lim = (pandas_data[x_display['global_x_field']].iloc[0],
-    #                  pandas_data[x_display['global_x_field']].iloc[-1])
-    #         x_display['ticks'] = \
-    #             np.asarray(deduce_axis_limits(x_lim, 'autoscaling'))
-    #         x_ticks_defined = False
-    #     else:
-    #         # Set ticks relative to end
-    #         x = pandas_data[x_display['global_x_field']].to_numpy()
-    #         x_end = x[-1]
-    #         x_lim = [x[x < (x_end + x_display['ticks_rel_to_end'][0])][-1],
-    #                  x[x < (x_end + x_display['ticks_rel_to_end'][-1])][-1]]
-    #         x_display['ticks'] = x_lim
-    #         print(x_display['ticks'])
-    #         x_ticks_defined = True
 
     if 'label' not in x_display:
         x_display['label'] = x_display['global_x_field']
@@ -274,6 +269,8 @@ def multi_panel_from_flat_data(
                     col = colors[y_d['field_color']]
                 else:
                     col = colors[line_counter]
+                if ('color_override' in y_d):
+                    col = y_d['color_override']
                 draw_indices = np.arange(x.size)[::spacing]
                 ax[i].plot(x[draw_indices], y[draw_indices],
                            linewidth=formatting['data_linewidth'],
@@ -319,6 +316,21 @@ def multi_panel_from_flat_data(
                     legend_strings.append(y_d['field_label'])
 
                 patch_counter = patch_counter+1
+                
+            if ('reference' in y_d):
+                if (y_d['reference'] == "initial"):
+                    y_d['reference'] = y[0]
+                xx = x[draw_indices[[0, -1]]]
+                yy = y_d['reference'] + 0*xx
+                if ('reference_style' in y_d):
+                    line_style = y_d['reference_style']
+                else:
+                    line_style = 'k:'
+                        
+                ax[i].plot(xx, yy,
+                           line_style,
+                           linewidth=formatting['data_linewidth'],
+                           clip_on=True)
 
         # Tidy up axes and legends
 
@@ -373,23 +385,43 @@ def multi_panel_from_flat_data(
         ax[i].set_ylabel(p_data['y_info']['label'],
                          loc='center',
                          verticalalignment='center',
-                         labelpad=formatting['y_label_pad'],
                          fontfamily=formatting['fontname'],
                          fontsize=formatting['y_label_fontsize'],
                          rotation=formatting['y_label_rotation'])
 
         # Add legend if it exists
         if legend_symbols:
+            # Check for overrides of legend properties, otherwise
+            # use general formatting
+            legend_props = dict()
+            for p in ['legend_location', 'legend_handlelength',
+                      'legend_bbox_to_anchor', 'legend_borderaxespad',
+                      'legend_framealpha', 'legend_edgecolor',
+                      'legend_ncol', 'legend_mode']:
+                if (p in p_data['y_info']):
+                    legend_props[p] = p_data['y_info'][p]
+                else:
+                    legend_props[p] = formatting[p]
+                    
+            # print(tuple(legend_props['legend_bbox_to_anchor']))
+            
+            # Set ncol
+            if not ('legend_ncol' in p_data['y_info']):
+                legend_props['legend_ncol'] = \
+                        int(np.ceil(len(legend_symbols) / \
+                                formatting['max_rows_per_legend']))
+                
             ax[i].legend(legend_symbols, legend_strings,
-                         loc=formatting['legend_location'],
-                         handlelength=formatting['legend_handlelength'],
-                         bbox_to_anchor=(
-                             formatting['legend_bbox_to_anchor'][0],
-                             formatting['legend_bbox_to_anchor'][1]),
+                         loc=legend_props['legend_location'],
+                         handlelength=legend_props['legend_handlelength'],
+                         bbox_to_anchor=tuple(legend_props['legend_bbox_to_anchor']),
                          prop={'family': formatting['fontname'],
                                'size': formatting['legend_fontsize']},
-                         ncol=int(np.ceil(len(legend_symbols) /
-                                          formatting['max_rows_per_legend'])))
+                         ncol=legend_props['legend_ncol'],
+                         mode=legend_props['legend_mode'],
+                         borderaxespad=legend_props['legend_borderaxespad'],
+                         framealpha=legend_props['legend_framealpha'],
+                         edgecolor=legend_props['legend_edgecolor'])
 
         # Handle annotations
         handle_annotations(template_data, ax[i], i, formatting)
@@ -403,19 +435,29 @@ def multi_panel_from_flat_data(
     hei = (fig_height - 0*layout['bottom_margin'] -
            layout['top_margin']) / fig_height
     r = [lhs, bot, wid, hei]
-    spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
-                      h_pad = layout['grid_hspace'])
+    # spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
+    #                   h_pad = layout['grid_hspace'])
 
-    fig.align_labels()
+    # Align y labels
+    for i in range(len(ax)):
+        ax[i].yaxis.set_label_coords(formatting['y_label_offset'], 0.5)
+    
+    # Adjust plot if required
+    if layout['box']:
+        plt.subplots_adjust(left=layout['box'][0], bottom=layout['box'][1],
+                            right=layout['box'][2], top=layout['box'][3])
 
     # Save if required
-    if output_image_file_string:
-        print('Saving figure to %s' % output_image_file_string)
-        # Check path exists
-        folder = os.path.dirname(output_image_file_string)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        fig.savefig(output_image_file_string, dpi=dpi)
+    if output_image_file:
+        for f in image_formats:
+            output_image_file_string = '%s.%s' % (output_image_file, f)
+        
+            print('Saving figure to %s' % output_image_file_string)
+            # Check path exists
+            folder = os.path.dirname(output_image_file_string)
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            fig.savefig(output_image_file_string, dpi=dpi)
 
     return (fig, ax)
 
@@ -424,8 +466,8 @@ def handle_annotations(template_data, ax, panel_index, formatting):
     if not ('annotations' in template_data):
         return
 
-    annotation_data = template_data['annotations']
-    for an in annotation_data['annotation']:
+    annotation_data = template_data['annotation']
+    for an in annotation_data:
         if ((an['panel'] == 'all') or (an['panel'] == panel_index)):
             if (an['type'] == 'v_line'):
                 ax.plot(an['x_value']*np.array([1, 1]),

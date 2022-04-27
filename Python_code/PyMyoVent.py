@@ -16,7 +16,6 @@ from pathlib import Path
 
 from single_ventricle_circulation import single_ventricle_circulation as svc
 from output_handler import output_handler as oh
-from display.display import create_summary
 
 
 def PyMyoVent_main():
@@ -31,7 +30,10 @@ def PyMyoVent_main():
             run_batch(sys.argv[2])
 
         if (sys.argv[1] == 'create_figures'):
-            create_figures(sys.argv[2])
+            if (no_of_arguments == 3):
+                create_figures(sys.argv[2])
+            else:
+                create_figures(sys.argv[2], sys.argv[3])
 
 
 def run_batch(batch_json_file_string):
@@ -63,11 +65,12 @@ def run_batch(batch_json_file_string):
                 job['sim_options_file_string'] = []
 
             # Adapt for relative paths
-            if ('relative_path' in job):
-                if (job['relative_path']):
+            if ('relative_to' in job):
+                if (job['relative_to'] == 'this_file'):
                     base_directory = \
                         Path(batch_json_file_string).parent.absolute()
-                    for k in ['model_file_string', 'protocol_file_string',
+                    for k in ['model_file_string',
+                              'protocol_file_string',
                               'output_handler_file_string',
                               'sim_options_file_string',
                               'sim_results_file_string']:
@@ -103,20 +106,56 @@ def run_batch(batch_json_file_string):
     print('Batch run time')
     print(stop-start)
 
-
 def worker(job, thread_id=[]):
     """ Runs a job in a batch """
 
     svc_object = svc.single_ventricle_circulation(
         job['model_file_string'], thread_id)
+
     svc_object.run_simulation(
         protocol_file_string=job['protocol_file_string'],
         output_handler_file_string=job['output_handler_file_string'],
         sim_options_file_string=job['sim_options_file_string'],
         sim_results_file_string=job['sim_results_file_string'])
 
+def check_version(model_file_string):
+    """ Checks version saved in model file against this version of
+        the code, saved in a file in the source directory """
 
-def create_figures(batch_json_file_string):
+    # Get code string
+    version_file_string = os.path.join(Path(__file__).parent, 'version.json')
+    with open(version_file_string, 'r') as f:
+        v = json.load(f)
+    code_v_string = v['PyMyoVent_code']['version'].split('.')
+    code_v = []
+    for i in range(len(code_v_string)):
+        code_v.append(int(code_v_string[i]))
+    
+    # Get model version
+    with open(model_file_string, 'r') as f:
+        model = json.lad(f)
+    
+    # Now get model version
+    model_v_string = model['PyMyoVent']['version'].split('.')
+    model_v = []
+    for i in range(len(model_v_string)):
+        model_v.append(int(model_v_string[i]))
+    
+    # Now compare
+    version_problem = False;
+    if (code_v[0] > model_v[0]):
+        version_problem = True
+    elif (code_v[1] < model_v[1]):
+        version_problem = True
+    if (version_problem):
+        print('PyMyoVent version problem')
+        print('Code version %s' % code_v_string)
+        print('Model version %s' % model_v_string)
+        exit(1)
+
+
+
+def create_figures(batch_json_file_string, show_figures=False):
     """ Create figures from batch file """
 
     if (batch_json_file_string == []):
@@ -131,8 +170,8 @@ def create_figures(batch_json_file_string):
         for job in jobs:
             if ('output_handler_file_string' in job):
                 # Adapt for relative path
-                if ('relative_path' in job):
-                    if (job['relative_path']):
+                if ('relative_to' in job):
+                    if (job['relative_to'] == 'this_file'):
                         base_directory = Path(batch_json_file_string).parent.absolute();
                         output_handler_file_string = \
                             os.path.join(base_directory, job['output_handler_file_string'])
@@ -140,7 +179,11 @@ def create_figures(batch_json_file_string):
                             os.path.join(base_directory, job['sim_results_file_string'])
                             
                 oh.output_handler(output_handler_file_string,
-                    sim_results_file_string = results_file_string)
+                    sim_results_file_string = results_file_string,
+                    show_figure = show_figures)
+
+
 
 if __name__ == "__main__":
     PyMyoVent_main()
+

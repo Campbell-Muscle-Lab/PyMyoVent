@@ -1,5 +1,9 @@
+import os
+
 import pandas as pd
 import numpy as np
+
+from output_handler import output_handler as oh
 
 def write_complete_data_to_sim_data(self, index):
     """ Writes full data to data frame """
@@ -16,8 +20,9 @@ def write_complete_data_to_sim_data(self, index):
             self.sim_data.at[self.write_counter, f] = self.hs.data[f]
         for f in list(self.hs.memb.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.memb.data[f]
-        for f in list(self.hs.ener.data.keys()):
-            self.sim_data.at[self.write_counter, f] = self.hs.ener.data[f]
+        if (hasattr(self.hs, 'ener')):
+            for f in list(self.hs.ener.data.keys()):
+                self.sim_data.at[self.write_counter, f] = self.hs.ener.data[f]
         for f in list(self.hs.myof.data.keys()):
             self.sim_data.at[self.write_counter, f] = self.hs.myof.data[f]
         if (self.br):
@@ -154,3 +159,52 @@ def write_envelope_data_to_sim_data(self, index):
     self.sim_data.at[self.write_counter, 'write_mode'] = 2
     self.sim_data.at[self.write_counter+1, 'write_mode'] = 2
     self.write_counter = self.write_counter + 2
+
+def write_output_files(self):
+    """ Write sim to data file and run output hander """
+    
+    if (not self.sim_results_file_string == []):
+        self.write_sim_results_to_file()
+        
+        if (not self.output_handler_file_string == []):
+            self.run_output_handler()
+
+def write_sim_results_to_file(self):
+    """ Write sim results to specified file """
+
+    # Save the simulation results to file
+    if (not self.sim_results_file_string == []):
+        output_file_string = os.path.abspath(self.sim_results_file_string)
+        ext = output_file_string.split('.')[-1]
+        # Make sure the path exists
+        output_dir = os.path.dirname(output_file_string)
+        print('output_dir %s' % output_dir)
+        if not os.path.isdir(output_dir):
+            print('Making output dir')
+            os.makedirs(output_dir)
+        print('Writing sim_data to %s' % output_file_string)
+        if (ext == 'xlsx'):
+            self.sim_data.to_excel(output_file_string,
+                                   index=False)
+        else:
+            self.sim_data.to_csv(output_file_string,
+                                 float_format='%g',
+                                 sep='\t',
+                                 index=False)
+
+def run_output_handler(self):
+    """ Launches output handler """
+
+    # Check the output file
+    if (self.output_handler_file_string == []):
+        print("No output_structure_file_string. Exiting")
+        return
+
+    cb_dump_file_string = []
+    if self.so:
+        if ('cb_dump_file_string' in self.so.data):
+            cb_dump_file_string = self.so.data['cb_dump_file_string']
+
+    self.oh = oh.output_handler(self.output_handler_file_string,
+                                sim_data=self.sim_data,
+                                cb_dump_file_string=cb_dump_file_string)

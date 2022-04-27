@@ -1,15 +1,20 @@
 import numpy as np
 import pandas as pd
-from .myofilaments import myofilaments as myof
+
 from .membranes import membranes as memb
+from .energetics import energetics as ener
+from .myofilaments import myofilaments as myof
 
 
 class half_sarcomere():
     """Class for a half-sarcomere"""
 
-    def __init__(self, hs_struct):
-        
-        # Create a dict to store data
+    def __init__(self, hs_struct, parent_circulation):
+
+        # Store the parent circulation
+        self.parent_circulation = parent_circulation
+
+        # Create a dict to store half-sarcomere specific data
         self.data = dict()
         self.data['hs_length'] = hs_struct['initial_hs_length']
         self.data['slack_hs_length'] = 0
@@ -30,7 +35,14 @@ class half_sarcomere():
         myofil_struct = hs_struct["myofilaments"]
         self.myof = myof.myofilaments(myofil_struct, self)
 
-    def update_simulation(self, time_step, delta_hsl, activation):
+        # Pull of energetics parameters if appropriate
+        if ('energetics' in hs_struct):
+            energetics_struct = hs_struct["energetics"]
+            self.ener = ener.energetics(energetics_struct, self)
+
+
+    def update_simulation(self, time_step, delta_hsl,
+                          activation):
 
         if (time_step > 0.0):
             # Need to do some kinetics stuff
@@ -38,6 +50,10 @@ class half_sarcomere():
             # Update calcium
             self.memb.implement_time_step(time_step,
                                            activation)
+
+            # Update energetics if appropriate
+            if hasattr(self, 'ener'):
+                self.ener.implement_time_step(time_step)
 
             # Myofilaments
             self.myof.evolve_kinetics(time_step,
@@ -52,12 +68,14 @@ class half_sarcomere():
         self.myof.set_myofilament_stresses()
         self.hs_stress = self.myof.hs_stress
         
-    def update_data(self):
+    def update_data(self, new_beat):
         # First update own object data
         f = self.myof.check_myofilament_stresses(0)
         for key in f.keys():
             self.data[key] = f[key]
         
-        # Now update membrane and myofilaments
+        # Now update other components
         self.memb.update_data()
+        if hasattr(self, 'ener'):
+            self.ener.update_data()
         self.myof.update_data()
