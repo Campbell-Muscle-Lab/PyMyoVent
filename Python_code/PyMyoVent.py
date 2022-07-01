@@ -177,6 +177,11 @@ def create_figures(batch_json_file_string, show_figures=False):
                             os.path.join(base_directory, job['output_handler_file_string'])
                         results_file_string = \
                             os.path.join(base_directory, job['sim_results_file_string'])
+                    else:
+                        output_handler_file_string = \
+                            os.path.join(job['relative_to'], job['output_handler_file_string'])
+                        results_file_string = \
+                            os.path.join(job['relative_to'], job['sim_results_file_string'])
                             
                 oh.output_handler(output_handler_file_string,
                     sim_results_file_string = results_file_string,

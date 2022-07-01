@@ -34,6 +34,8 @@ def default_formatting():
     formatting['legend_borderaxespad'] = 0.5
     formatting['legend_framealpha'] = 0.8
     formatting['legend_edgecolor'] = 'inherit'
+    formatting['legend_box_linewidth'] = []
+    formatting['legend_fancybox'] = True
     formatting['legend_ncol'] = 1
     formatting['legend_mode'] = []
     formatting['tick_fontsize'] = 11
@@ -306,7 +308,10 @@ def multi_panel_from_flat_data(
 
                 polygon = pat.Polygon(xy, True, clip_on=True,
                                       fc=col,
-                                      alpha=formatting['patch_alpha'])
+                                      alpha=formatting['patch_alpha'],
+                                      linestyle='-',
+                                      edgecolor=col,
+                                      linewidth=formatting['data_linewidth'])
                 ax[i].add_patch(polygon)
 
                 if y_d['field_label']:
@@ -397,12 +402,17 @@ def multi_panel_from_flat_data(
             for p in ['legend_location', 'legend_handlelength',
                       'legend_bbox_to_anchor', 'legend_borderaxespad',
                       'legend_framealpha', 'legend_edgecolor',
-                      'legend_ncol', 'legend_mode']:
+                      'legend_ncol', 'legend_mode',
+                      'legend_fancybox', 'legend_box_linewidth']:
                 if (p in p_data['y_info']):
                     legend_props[p] = p_data['y_info'][p]
                 else:
                     legend_props[p] = formatting[p]
                     
+            if ('legend_fancybox' in legend_props):
+                if (legend_props['legend_fancybox'] == 'False'):
+                    legend_props['legend_fancybox'] = False
+            
             # print(tuple(legend_props['legend_bbox_to_anchor']))
             
             # Set ncol
@@ -411,7 +421,7 @@ def multi_panel_from_flat_data(
                         int(np.ceil(len(legend_symbols) / \
                                 formatting['max_rows_per_legend']))
                 
-            ax[i].legend(legend_symbols, legend_strings,
+            leg = ax[i].legend(legend_symbols, legend_strings,
                          loc=legend_props['legend_location'],
                          handlelength=legend_props['legend_handlelength'],
                          bbox_to_anchor=tuple(legend_props['legend_bbox_to_anchor']),
@@ -421,10 +431,16 @@ def multi_panel_from_flat_data(
                          mode=legend_props['legend_mode'],
                          borderaxespad=legend_props['legend_borderaxespad'],
                          framealpha=legend_props['legend_framealpha'],
-                         edgecolor=legend_props['legend_edgecolor'])
+                         edgecolor=legend_props['legend_edgecolor'],
+                         fancybox=legend_props['legend_fancybox'])
 
-        # Handle annotations
-        handle_annotations(template_data, ax[i], i, formatting)
+            if not (legend_props['legend_box_linewidth'] ==[]):
+                leg.get_frame().set_linewidth(
+                    legend_props['legend_box_linewidth'])
+            
+    # Handle annotations
+    if ('annotations' in template_data):
+        handle_annotations(template_data['annotations'], ax, formatting)
 
     # Tidy overall figure
     # Move plots inside margins
@@ -435,17 +451,12 @@ def multi_panel_from_flat_data(
     hei = (fig_height - 0*layout['bottom_margin'] -
            layout['top_margin']) / fig_height
     r = [lhs, bot, wid, hei]
-    # spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
-    #                   h_pad = layout['grid_hspace'])
+    spec.tight_layout(fig, rect=r, w_pad = layout['grid_wspace'],
+                      h_pad = layout['grid_hspace'])
 
     # Align y labels
     for i in range(len(ax)):
         ax[i].yaxis.set_label_coords(formatting['y_label_offset'], 0.5)
-    
-    # Adjust plot if required
-    if layout['box']:
-        plt.subplots_adjust(left=layout['box'][0], bottom=layout['box'][1],
-                            right=layout['box'][2], top=layout['box'][3])
 
     # Save if required
     if output_image_file:
@@ -462,43 +473,53 @@ def multi_panel_from_flat_data(
     return (fig, ax)
 
 
-def handle_annotations(template_data, ax, panel_index, formatting):
-    if not ('annotations' in template_data):
-        return
+def handle_annotations(annotation_data, ax, formatting):
 
-    annotation_data = template_data['annotation']
     for an in annotation_data:
-        if ((an['panel'] == 'all') or (an['panel'] == panel_index)):
+        
+        # Work out which panels to draw on
+        ax_ids = []
+        if (an['panel'] == 'all'):
+            ax_ids = list(range(len(ax)))
+        else:
+            ax_ids = an['panel']
+            
+        # Check for single entry panel
+        if (isinstance(ax_ids, int)):
+            ax_ids = list([ax_ids])
+
+        for i in ax_ids:
+
             if (an['type'] == 'v_line'):
-                ax.plot(an['x_value']*np.array([1, 1]),
-                        ax.get_ylim(),
-                        an['line_style'],
-                        linewidth=an['linewidth'])
+                ax[i].plot(an['x_value']*np.array([1, 1]),
+                           ax[i].get_ylim(),
+                           an['line_style'],
+                           linewidth=an['linewidth'])
 
             if (an['type'] == 'box'):
                 xc = an['x_coords']
                 x = np.array([xc[0], xc[0], xc[1], xc[1], xc[0]])
-                y_lim = ax.get_ylim()
+                y_lim = ax[i].get_ylim()
                 yc = an['y_rel_coords']
                 y = y_lim[0] + (y_lim[1] - y_lim[0]) *\
                     np.array([yc[0], yc[1], yc[1], yc[0], yc[0]])
-                ax.plot(x, y, 'k-', clip_on=False)
-                ax.text(np.mean(x[[0, 2]]), y[0] + 0.45 * (y[1] - y[0]),
-                        an['label'],
-                        fontsize=an['label_fontsize'],
-                        fontfamily=formatting['fontname'],
-                        horizontalalignment='center',
-                        verticalalignment='center')
+                ax[i].plot(x, y, 'k-', clip_on=False)
+                ax[i].text(np.mean(x[[0, 2]]), y[0] + 0.45 * (y[1] - y[0]),
+                           an['label'],
+                           fontsize=an['label_fontsize'],
+                           fontfamily=formatting['fontname'],
+                           horizontalalignment='center',
+                           verticalalignment='center')
 
             if (an['type'] == 'text'):
-                y_lim = ax.get_ylim()
-                ax.text(an['x_coord'],
-                        y_lim[0] + ((y_lim[1]-y_lim[0]) * an['y_rel_coord']),
-                        an['label'],
-                        fontsize=an['label_fontsize'],
-                        fontfamily=formatting['fontname'],
-                        horizontalalignment='center',
-                        verticalalignment='center')
+                y_lim = ax[i].get_ylim()
+                ax[i].text(an['x_coord'],
+                           y_lim[0] + ((y_lim[1]-y_lim[0]) * an['y_rel_coord']),
+                           an['label'],
+                           fontsize=an['label_fontsize'],
+                           fontfamily=formatting['fontname'],
+                           horizontalalignment='center',
+                           verticalalignment='center')
 
 
 def deduce_axis_limits(lim, mode_string=[]):
