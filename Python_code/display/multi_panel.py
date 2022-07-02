@@ -504,8 +504,16 @@ def handle_annotations(annotation_data, ax, formatting):
                 y = y_lim[0] + (y_lim[1] - y_lim[0]) *\
                     np.array([yc[0], yc[1], yc[1], yc[0], yc[0]])
                 ax[i].plot(x, y, 'k-', clip_on=False)
+
+                text_color = 'k'
+                if ('text_color_index' in an):
+                    prop_cycle = plt.rcParams['axes.prop_cycle']
+                    colors = prop_cycle.by_key()['color']
+                    text_color = colors[an['text_color_index']-1]
+
                 ax[i].text(np.mean(x[[0, 2]]), y[0] + 0.45 * (y[1] - y[0]),
                            an['label'],
+                           color=text_color,
                            fontsize=an['label_fontsize'],
                            fontfamily=formatting['fontname'],
                            horizontalalignment='center',
