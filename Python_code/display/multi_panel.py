@@ -302,7 +302,7 @@ def multi_panel_from_flat_data(
                 xy = np.vstack((xp, yp))
                 xy = np.array(np.array(xy).transpose())
                 if 'field_color' in y_d:
-                    col = colors[y_d['field_counter']]
+                    col = colors[y_d['field_color']]
                 else:
                     col = colors[patch_counter]
 
