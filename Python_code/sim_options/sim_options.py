@@ -9,9 +9,11 @@ import json
 import os
 
 import numpy as np
+import pandas as pd
+
+from pathlib import Path
 
 from protocol import protocol as prot
-
 
 class sim_options():
 
@@ -106,6 +108,15 @@ class sim_options():
         if ('periodic_save' in so):
             self.data['periodic_save_interval_s'] = \
                 so['periodic_save']['save_interval_s']
+                
+        # Check for rates_dump
+        if ('rates_dump' in so):
+            self.data['rates_file_string'] = so['rates_dump']['file_string']
+            
+            if (so['rates_dump']['relative_to'] == 'this_file'):
+                base_dir = Path(sim_options_file_string).parent.absolute()
+                self.data['rates_file_string'] = os.path.join(
+                    base_dir, self.data['rates_file_string'])
 
 
     def return_save_status(self, t):
@@ -146,3 +157,24 @@ class sim_options():
             else:
                 self.cb_dump_file.write('\t')
         self.cb_dump_file.close()
+        
+    def dump_rates_file(self):
+        """ Dumps rate file """
+        
+        r = self.parent_circulation.hs.myof.return_rates()
+        
+        # Write rate structure as a pandas dataframe
+        d = pd.DataFrame.from_dict(r)
+        d['x'] = self.parent_circulation.hs.myof.x
+        # Move x to the front
+        cols = list(d)
+        cols.insert(0, cols.pop(cols.index('x')))
+        d = d.loc[:,cols]
+        
+        # Dump to file
+        print('Writing rates to: %s' % self.data['rates_file_string'])
+        d.to_csv(self.data['rates_file_string'], sep='\t',
+                 index=False,
+                 float_format='%g')
+        
+        

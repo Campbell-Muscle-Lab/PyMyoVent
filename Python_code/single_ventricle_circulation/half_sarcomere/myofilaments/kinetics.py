@@ -130,9 +130,84 @@ def update_4_state_with_SRX(self, time_step, Ca_conc):
     self.y[0] = self.y[0] + (1.0 - sum_of_heads)
 
     self.fluxes = return_fluxes(self, self.y, Ca_conc)
+    
+def return_rates(self):
+    """ Returns rates as a dict """
+    
+    r = dict()
+    
+    if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
+        
+        r['r_1'] = np.minimum(self.implementation['max_rate'],
+                        self.data['k_1'] * 
+                        (1.0 + self.data['k_force'] *
+                             np.maximum(0, self.cpt_myofil_stress)))
+
+        r['r_2'] = np.minimum(self.implementation['max_rate'], self.data['k_2'])
+        
+        r['r_3'] = self.data['k_3'] * \
+                np.exp(-self.data['k_cb'] * (self.x**2) /
+                    (2.0 * 1e18 * scipy_constants.Boltzmann * 
+                         self.implementation['temperature']))
+        r['r_3'][r['r_3'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+        r['r_4'] = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
+        r['r_4'][r['r_4'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+            
+    if (self.implementation['kinetic_scheme'] == '4_state_with_SRX'):
+        
+        r['r_1'] = np.minimum(self.implementation['max_rate'],
+                        self.data['k_1'] * 
+                        (1.0 + self.data['k_force'] *
+                             np.maximum(0, self.cpt_myofil_stress)))
+
+        r['r_2'] = np.minimum(self.implementation['max_rate'], self.data['k_2'])
+        
+        r['r_3'] = self.data['k_3'] * \
+                np.exp(-self.data['k_cb'] * (self.x**2) /
+                    (2.0 * 1e18 * scipy_constants.Boltzmann * 
+                         self.implementation['temperature']))
+        r['r_3'][r['r_3'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+            
+        r['r_4'] = self.data['k_4_0'] * \
+                np.exp(-(self.data['k_cb'] * self.x * self.data['k_4_1']) /
+                       (1e18 * scipy_constants.Boltzmann *
+                        self.implementation['temperature']))
+        r['r_4'] = r['r_4'] + \
+                self.implementation['max_rate'] * \
+                    (1.0 / (1 + np.exp(-self.data['k_4_2'] *
+                                        (self.x - self.data['k_4_3']))))
+        r['r_4'][r['r_4'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+        r['r_5'] = self.data['k_5'] * np.ones(self.no_of_x_bins)
+        r['r_5'][r['r_5'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+        r['r_6'] = self.data['k_6'] * np.ones(self.no_of_x_bins)
+        r['r_6'][r['r_6'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+        r['r_7'] = self.data['k_7_0'] + (self.data['k_7_1'] * np.power(self.x, 4))
+        r['r_7'][r['r_7'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+        r['r_8'] = self.data['k_8'] * \
+            np.exp(-self.data['k_cb'] * (self.x**2) /
+                (2.0 * 1e18 * scipy_constants.Boltzmann *
+                 self.implementation['temperature']))
+        r['r_8'][r['r_8'] > self.implementation['max_rate']] = \
+            self.implementation['max_rate']
+
+    return r
 
 def return_fluxes(self, y, Ca_conc):
     # Returns fluxes
+    
+    r = self.return_rates()
     
     if (self.implementation['kinetic_scheme'] == '3_state_with_SRX'):
 
@@ -143,25 +218,11 @@ def return_fluxes(self, y, Ca_conc):
         n_on = y[-1]
         n_bound = np.sum(M_FG)
 
-        r_1 = np.minimum(self.implementation['max_rate'],
-                        self.data['k_1'] * 
-                        (1.0 + self.data['k_force'] *
-                             np.maximum(0, self.cpt_myofil_stress)))
-        J_1 = r_1 * M_SRX
+        J_1 = r['r_1'] * M_SRX
+        J_2 = r['r_2'] * M_DRX
+        J_3 = r['r_3'] * self.implementation['bin_width'] * M_DRX * (n_on - n_bound)
+        J_4 = r['r_4'] * M_FG
 
-        r_2 = np.minimum(self.implementation['max_rate'], self.data['k_2'])
-        J_2 = r_2 * M_DRX
-
-        r_3 = self.data['k_3'] * \
-                np.exp(-self.data['k_cb'] * (self.x**2) /
-                    (2.0 * 1e18 * scipy_constants.Boltzmann * 
-                         self.implementation['temperature']))
-        r_3[r_3 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * (n_on - n_bound)
-
-        r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
-        r_4[r_4 > self.implementation['max_rate']] = self.implementation['max_rate']
-        J_4 = r_4 * M_FG
         if (self.n_overlap > 0.0):
             J_on = (self.data['k_on'] * Ca_conc * (self.n_overlap - n_on) *
                 (1.0 + self.data['k_coop'] * (n_on / self.n_overlap)))
@@ -197,52 +258,15 @@ def return_fluxes(self, y, Ca_conc):
         N_ON = y[-1]
         N_BOUND = np.sum(M_PRE) + np.sum(M_POST)
 
-        r_1 = np.minimum(self.implementation['max_rate'],
-                         self.data['k_1'] *
-                         (1.0 + self.data['k_force'] *
-                              np.maximum(0, self.cpt_myofil_stress)))
-        J_1 = r_1 * M_SRX
-
-        r_2 = np.minimum(self.implementation['max_rate'],
-                         self.data['k_2'])
-        J_2 = r_2 * M_DRX
-
-        r_3 = self.data['k_3'] * \
-                np.exp(-self.data['k_cb'] * (self.x**2) /
-                       (2.0 * 1e18 * scipy_constants.Boltzmann *
-                        self.implementation['temperature']))
-        r_3[r_3 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_3 = r_3 * self.implementation['bin_width'] * M_DRX * \
+        J_1 = r['r_1'] * M_SRX
+        J_2 = r['r_2'] * M_DRX
+        J_3 = r['r_3'] * self.implementation['bin_width'] * M_DRX * \
                 (N_ON - N_BOUND)
-        
-        r_4 = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
-        r_4[r_4 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_4 = r_4 * M_PRE
-
-        r_5 = self.data['k_5'] * np.ones(self.no_of_x_bins)
-        r_5[r_5 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_5 = r_5 * M_PRE
-
-        r_6 = self.data['k_6'] * np.ones(self.no_of_x_bins)
-        r_6[r_6 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_6 = r_6 * M_POST
-
-        r_7 = self.data['k_7_0'] + (self.data['k_7_1'] * np.power(self.x, 4))
-        r_7[r_7 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_7 = r_7 * M_POST
-
-        r_8 = self.data['k_8'] * \
-            np.exp(-self.data['k_cb'] * (self.x**2) /
-                (2.0 * 1e18 * scipy_constants.Boltzmann *
-                 self.implementation['temperature']))
-        r_8[r_8 > self.implementation['max_rate']] = \
-            self.implementation['max_rate']
-        J_8 = r_8 * self.implementation['bin_width'] * M_DRX * \
+        J_4 = r['r_4'] * M_PRE
+        J_5 = r['r_5'] * M_PRE
+        J_6 = r['r_6'] * M_POST
+        J_7 = r['r_7'] * M_POST
+        J_8 = r['r_8'] * self.implementation['bin_width'] * M_DRX * \
                 (N_ON - N_BOUND)
 
         if (self.n_overlap > 0.0):

@@ -542,6 +542,10 @@ class single_ventricle_circulation():
         # Update the last heart beat time if required
         if (new_beat > 0):
             self.last_heart_beat_time = self.data['time']
+            
+        # Check whether we need to dump the rates
+        if (self.t_counter == 0):
+            self.so.dump_rates_file()
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1

@@ -3,7 +3,7 @@ import numpy as np
 class myofilaments():
     """Class for myofilaments"""
 
-    from .kinetics import evolve_kinetics, return_fluxes
+    from .kinetics import evolve_kinetics, return_fluxes, return_rates
     from .move import move_cb_distributions
     from .forces import set_myofilament_stresses, check_myofilament_stresses, \
         return_hs_length_for_stress, return_intracellular_passive_stress, \
