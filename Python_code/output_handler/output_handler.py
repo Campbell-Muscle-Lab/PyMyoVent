@@ -64,12 +64,13 @@ class output_handler():
             user_defined = self.oh_data['templated_images']
             print(user_defined)
             for ud in user_defined:
-                # Adjust for relative path
-                if (ud['relative_to'] == 'this_file'):
-                    ud['template_file_string'] = os.path.join(
-                        base_directory, ud['template_file_string'])
-                    ud['output_image_file'] = os.path.join(
-                        base_directory, ud['output_image_file'])
+                if ('relative_to' in ud):
+                    # Adjust for relative path
+                    if (ud['relative_to'] == 'this_file'):
+                        ud['template_file_string'] = os.path.join(
+                            base_directory, ud['template_file_string'])
+                        ud['output_image_file'] = os.path.join(
+                            base_directory, ud['output_image_file'])
 
                 self.create_image_from_template(
                     sim_data,

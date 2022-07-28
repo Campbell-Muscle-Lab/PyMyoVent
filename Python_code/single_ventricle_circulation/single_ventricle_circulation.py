@@ -204,12 +204,17 @@ class single_ventricle_circulation():
         # Create the growth modules
         self.data['growth_active'] = 0
         self.data['growth_dn'] = 0
+        self.data['shrink_dn'] = 0
         self.data['growth_dm'] = 0
+        self.data['shrink_dm'] = 0
 
         if ('growth' in sc_model):
             self.gr = gr.growth(sc_model['growth'], self)
         else:
             self.gr = []
+            
+        # Add a field for the n_hs perturbation
+        self.data['pert_dn'] = 0
 
         # Add functional fields
         self.data['stroke_volume'] = 0
@@ -239,7 +244,7 @@ class single_ventricle_circulation():
         """ returns a data frame from the data dicts of each component """
 
         sim_data = pd.DataFrame()
-        z = np.zeros(no_of_data_points)
+        z = np.NaN * np.ones(no_of_data_points)
 
         # Prune some fields from the self_data
         sk = []
@@ -328,8 +333,9 @@ class single_ventricle_circulation():
                             self.so.data['periodic_save_interval_s'])
                                  < time_step) and
                     (i < (self.prot.data['no_of_time_steps']-1))):
-                    # Write sim data to file and run the output handler
-                    self.write_output_files()       
+                    # Write sim data to file but do not run the
+                    # output handler
+                    self.write_output_files(output_handler=True)       
 
         # Tidy up by writing sim data to file and running the output handler
         self.write_output_files()
@@ -367,7 +373,9 @@ class single_ventricle_circulation():
             d['n_hs'] = self.data['n_hs']
             d['dn'] = self.data['growth_dn']
             d['ventricle_wall_volume'] = self.data['ventricle_wall_volume']
-            d['dm'] = self.data['growth_dm']
+            d['growth_dm'] = self.data['growth_dm']
+            d['shrink_dm'] = self.data['shrink_dm']
+            d['shrink_dn'] = self.data['shrink_dn']
 
             if ('ener_intracell_ATP_conc' in self.temp_data):
                 d['ener_intracell_ATP_conc'] = \
@@ -408,6 +416,10 @@ class single_ventricle_circulation():
                                         self.data['baro_active'])
 
         # Check and implement perturbations
+        
+        # First reset pert_dn, the special case for n_hs
+        self.data['pert_dn'] = 0        
+        
         for p in self.prot.perturbations:
 
             if((self.t_counter >= p.data['t_start_ind']) and
@@ -419,8 +431,12 @@ class single_ventricle_circulation():
                     self.va.data[p.data['variable']] += \
                         p.data['increment']
                 elif (p.data['level'] == 'circulation'):
-                    self.data[p.data['variable']] += \
-                        p.data['increment']
+                    # Special case for n_hs
+                    if not (p.data['variable'] == 'n_hs'):
+                        self.data[p.data['variable']] += \
+                            p.data['increment']
+                    else:
+                        self.data['pert_dn'] = p.data['increment']
                 elif (p.data['level'] == 'baroreflex'):
                     self.br.data[p.data['variable']] += \
                         p.data['increment']
@@ -460,18 +476,23 @@ class single_ventricle_circulation():
                                 self.data['v'][-1])
         delta_circumference = new_circumference - \
             self.data['ventricle_circumference']
-        delta_hsl = ((1e9*delta_circumference) -
-                     (self.hs.data['hs_length'] * self.data['growth_dn'])) / \
-            self.data['n_hs']
+        delta_hsl = (((1e9 * delta_circumference) -
+                         (self.hs.data['hs_length'] *
+                          (self.data['growth_dn'] + self.data['shrink_dn'] + \
+                               self.data['pert_dn']))) /
+                            self.data['n_hs'])
 
         # Update model
         self.data['ventricle_circumference'] = new_circumference
         self.data['ventricle_wall_volume'] = \
             self.data['ventricle_wall_volume'] + \
             self.data['growth_dm'] + \
+            self.data['shrink_dm'] + \
             (self.data['ventricle_wall_volume'] *
-             self.data['growth_dn'] / self.data['n_hs'])
-        self.data['n_hs'] = self.data['n_hs'] + self.data['growth_dn']
+             (self.data['growth_dn'] + self.data['shrink_dn'] + self.data['pert_dn']) / self.data['n_hs'])
+        self.data['n_hs'] = self.data['n_hs'] + \
+                                self.data['growth_dn'] + self.data['shrink_dn'] + \
+                                self.data['pert_dn']
 
         # Update the half-sarcomere with the new length
         self.hs.update_simulation(0, delta_hsl, 0)
@@ -573,7 +594,7 @@ class single_ventricle_circulation():
         
         if (hasattr(self.hs, 'ener')):
             self.data['ener_ATPase_to_myo'] = \
-                self.hs.ener.data['ener_flux_ATP_consumed'] / \
+                self.hs.ener.data['ener_flux_total_ATP_consumed'] / \
                     (0.001 * self.data['ventricle_wall_volume'] *
                      (1.0 - self.hs.myof.data['prop_fibrosis']) * 
                       self.hs.myof.data['prop_myofilaments'])
@@ -586,7 +607,7 @@ class single_ventricle_circulation():
             cycle_fields = ['time', 'pressure_ventricle',
                             'pressure_arteries', 'volume_ventricle']
             if hasattr(self.hs, 'ener'):
-                cycle_fields = cycle_fields + ['ener_flux_ATP_consumed']
+                cycle_fields = cycle_fields + ['ener_flux_total_ATP_consumed']
 
             d_cycle = self.sim_data[cycle_fields]
             
@@ -606,7 +627,7 @@ class single_ventricle_circulation():
     
             if hasattr(self.hs, 'ener'):
                 self.data['stroke_cost'] = \
-                    -d_cycle['ener_flux_ATP_consumed'].sum() * time_step * \
+                    -d_cycle['ener_flux_total_ATP_consumed'].sum() * time_step * \
                         self.hs.myof.implementation['delta_G_ATP']
             
                 if (self.data['stroke_cost'] > 0):

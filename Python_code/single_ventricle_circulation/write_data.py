@@ -160,14 +160,15 @@ def write_envelope_data_to_sim_data(self, index):
     self.sim_data.at[self.write_counter+1, 'write_mode'] = 2
     self.write_counter = self.write_counter + 2
 
-def write_output_files(self):
+def write_output_files(self, output_handler=True):
     """ Write sim to data file and run output hander """
     
     if (not self.sim_results_file_string == []):
         self.write_sim_results_to_file()
         
-        if (not self.output_handler_file_string == []):
-            self.run_output_handler()
+        if (output_handler):
+            if (not self.output_handler_file_string == []):
+                self.run_output_handler()
 
 def write_sim_results_to_file(self):
     """ Write sim results to specified file """

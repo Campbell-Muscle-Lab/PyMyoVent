@@ -325,13 +325,20 @@ def multi_panel_from_flat_data(
             if ('reference' in y_d):
                 if (y_d['reference'] == "initial"):
                     y_d['reference'] = y[0]
-                xx = x[draw_indices[[0, -1]]]
+                
+                xx = np.asarray([x[draw_indices[0]], x[draw_indices].max()])
                 yy = y_d['reference'] + 0*xx
+                
                 if ('reference_style' in y_d):
                     line_style = y_d['reference_style']
                 else:
                     line_style = 'k:'
                         
+                # Adjust limits
+                max_y = np.amax([yy[0], max_y])
+                min_y = np.amin([yy[0], min_y])
+
+                # Draw reference                    
                 ax[i].plot(xx, yy,
                            line_style,
                            linewidth=formatting['data_linewidth'],
