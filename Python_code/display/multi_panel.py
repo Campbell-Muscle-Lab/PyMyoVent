@@ -216,7 +216,7 @@ def multi_panel_from_flat_data(
         line_counter = 0
         patch_counter = 0
 
-        # Cycle through the y_data
+       # Cycle through the y_data
         for j, y_d in enumerate(p_data['y_info']['series']):
             # Set the plot style to line if it is missing
             if 'style' not in y_d:
@@ -234,6 +234,13 @@ def multi_panel_from_flat_data(
             x = pandas_data[p_data['x_field']].to_numpy()
             vi = np.nonzero((x >= p_data['x_ticks'][0]) &
                             (x <= p_data['x_ticks'][-1]))
+            
+            # Break out if there are no valid x values
+            # (confusingly, np.nonzero is returning a tuple here)
+            if (vi[0].size == 0):
+                break
+            
+            # Otherwise constrain the x data
             x = x[vi]
             y = pandas_data[y_d['field']].to_numpy()[vi]
 
@@ -345,6 +352,10 @@ def multi_panel_from_flat_data(
                            clip_on=True)
 
         # Tidy up axes and legends
+
+        # First check that we have some limits, break out otherwise
+        if (not 'min_x' in locals()):
+            break
 
         # Set x limits
         xlim = (min_x, max_x)

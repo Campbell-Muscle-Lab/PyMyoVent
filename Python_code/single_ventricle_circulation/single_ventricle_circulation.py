@@ -298,6 +298,13 @@ class single_ventricle_circulation():
         else:
             self.so = []
 
+        # Check whether we need to dump stuff set by the sim_options
+        if ('rates_file_string' in self.so.data):
+            self.so.dump_rates_file()
+        
+        if ('pas_stress_file_string' in self.so.data):
+            self.so.dump_pas_stress_file()
+
         # Determine the number of data points in the output file
         # If burst mode has been set in the sim_options, we need to create
         # two data structures - one for the main data, and the other that
@@ -341,7 +348,7 @@ class single_ventricle_circulation():
         self.write_output_files()
 
 
-    def return_system_values(self, time_interval=3):
+    def return_system_values(self, time_interval=2):
         d = dict()
         if (self.data['time'] > time_interval):
             self.temp_data = \
@@ -542,10 +549,6 @@ class single_ventricle_circulation():
         # Update the last heart beat time if required
         if (new_beat > 0):
             self.last_heart_beat_time = self.data['time']
-            
-        # Check whether we need to dump the rates
-        if (self.t_counter == 0):
-            self.so.dump_rates_file()
 
         # Update the t counter for the next step
         self.t_counter = self.t_counter + 1

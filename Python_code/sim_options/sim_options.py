@@ -15,6 +15,9 @@ from pathlib import Path
 
 from protocol import protocol as prot
 
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
 class sim_options():
 
     def __init__(self,
@@ -113,10 +116,35 @@ class sim_options():
         if ('rates_dump' in so):
             self.data['rates_file_string'] = so['rates_dump']['file_string']
             
+            if ('output_image_file' in so['rates_dump']):
+                self.data['rates_image_file'] = \
+                    so['rates_dump']['output_image_file']
+                self.data['rates_image_formats'] = \
+                    so['rates_dump']['output_image_formats']            
+            
             if (so['rates_dump']['relative_to'] == 'this_file'):
                 base_dir = Path(sim_options_file_string).parent.absolute()
                 self.data['rates_file_string'] = os.path.join(
                     base_dir, self.data['rates_file_string'])
+                self.data['rates_image_file'] = os.path.join(
+                    base_dir, self.data['rates_image_file'])
+
+        # Check for pas stress dump
+        if ('pas_stress_dump' in so):
+            self.data['pas_stress_file_string'] = so['pas_stress_dump']['file_string']
+            
+            if ('output_image_file' in so['pas_stress_dump']):
+                self.data['pas_stress_image_file'] = \
+                    so['pas_stress_dump']['output_image_file']
+                self.data['pas_stress_image_formats'] = \
+                    so['pas_stress_dump']['output_image_formats']
+            
+            if (so['pas_stress_dump']['relative_to'] == 'this_file'):
+                base_dir = Path(sim_options_file_string).parent.absolute()
+                self.data['pas_stress_file_string'] = os.path.join(
+                    base_dir, self.data['pas_stress_file_string'])
+                self.data['pas_stress_image_file'] = os.path.join(
+                    base_dir, self.data['pas_stress_image_file'])
 
 
     def return_save_status(self, t):
@@ -177,4 +205,136 @@ class sim_options():
                  index=False,
                  float_format='%g')
         
+        if ('rates_image_file' in self.data):
+            # Make a figure
+            fig = plt.figure(constrained_layout=False)
+            fig.set_size_inches([3.5, 6])
+            ax = []
+            n_rows = round((len(cols)-1) / 2)
+            n_cols = 1
+            spec = gridspec.GridSpec(nrows=n_rows,
+                                     ncols=n_cols,
+                                     figure=fig)
+            
+            c = 0
+            for r in range(n_rows):
+                ax.append(fig.add_subplot(spec[r,c]))
+                
+                for i in range(2):
+                    ind = 2*r + i + 1
+                    lab_string = 'r_%i' % ind
+                    x = d['x'].to_numpy()
+                    y = d[lab_string].to_numpy()
+                    ax[r].plot(x, np.log10(y), '-', label=lab_string)
+
+                ax[r].set_ylim([-1,4])
+                ax[r].set_yticks(np.linspace(-1, 4, 6))                  
+                ax[r].legend(loc='lower left')
+
+            for imf in self.data['rates_image_formats']:
+                image_file_string = self.data['rates_image_file'] + \
+                    '.' + imf
+                print('Saving rates figure as %s' % image_file_string)
+                fig.savefig(image_file_string)
+    
+    def dump_pas_stress_file(self, min_rel_vol=0.5, max_rel_vol=3):
+        
+        base_lv_vol = self.parent_circulation.data['volume_ventricle']
+        base_hsl = self.parent_circulation.hs.data['hs_length']
+        n_hs = self.parent_circulation.data['n_hs']
+        
+        v_values = np.linspace(min_rel_vol*base_lv_vol, max_rel_vol*base_lv_vol)
+        
+        # Set up some arrays
+        hs_length = np.NaN * np.ones(len(v_values))
+        lv_volume = np.NaN * np.ones(len(v_values))
+        lv_pressure = np.NaN * np.ones(len(v_values))
+        cpt_int_pas_stress = np.NaN * np.ones(len(v_values))
+        cpt_ext_pas_stress = np.NaN * np.ones(len(v_values))
+        
+        for i, lv_vol in enumerate(v_values):
+            
+            lv_circum = self.parent_circulation.return_lv_circumference(lv_vol)
+            
+            lv_volume[i] = lv_vol
+            hs_length[i] = lv_circum / n_hs
+            lv_pressure[i] = self.parent_circulation.return_lv_pressure(lv_vol)
+            
+            delta_hsl = (1e9*hs_length[i]) - base_hsl
+            d = self.parent_circulation.hs.myof.check_myofilament_stresses(delta_hsl)
+            cpt_int_pas_stress[i] = d['int_pas_stress']
+            cpt_ext_pas_stress[i] = d['ext_pas_stress']
+            
+        # Save data as a dict and convert to dataframe
+        d = dict()
+        d['hs_length'] = 1e9 * hs_length
+        d['lv_volume'] = lv_volume
+        d['lv_pressure'] = lv_pressure
+        d['int_pas_stress'] = cpt_int_pas_stress
+        d['ext_pas_stress'] = cpt_ext_pas_stress 
+       
+        d = pd.DataFrame.from_dict(d)
+            
+    
+    
+    # def dump_pas_stress_file(self, min_hsl=750, max_hsl=1200):
+    #     """ Dumps passive_stress file """
+        
+    #     base_hsl = self.parent_circulation.hs.data['hs_length']
+        
+    #     n_hs = self.parent_circulation.data['n_hs']
+        
+    #     delta_min_hsl = min_hsl - base_hsl
+    #     delta_max_hsl = max_hsl - base_hsl
+        
+    #     delta_hsl = np.linspace(delta_min_hsl, delta_max_hsl, 25)
+        
+    #     x = np.NaN * np.ones(len(delta_hsl))
+    #     cpt_int_pas_stress = np.NaN * np.ones(len(delta_hsl))
+    #     cpt_ext_pas_stress = np.NaN * np.ones(len(delta_hsl))
+        
+    #     for i, dhsl in enumerate(delta_hsl):
+    #         x[i] = base_hsl + dhsl
+    #         d = self.parent_circulation.hs.myof.check_myofilament_stresses(dhsl)
+    #         cpt_int_pas_stress[i] = d['int_pas_stress']
+    #         cpt_ext_pas_stress[i] = d['ext_pas_stress']
+        
+    #     # Save data as a dict and convert to dataframe
+    #     d = dict()
+    #     d['hs_length'] = x
+    #     d['int_pas_stress'] = cpt_int_pas_stress
+    #     d['ext_pas_stress'] = cpt_ext_pas_stress
+        
+    #     d = pd.DataFrame.from_dict(d)
+        
+        # Dump to file
+        print('Writing pas_stress to: %s' % self.data['pas_stress_file_string'])
+        d.to_csv(self.data['pas_stress_file_string'], sep='\t',
+                 index=False,
+                 float_format='%g')
+    
+        if ('pas_stress_image_file' in self.data):
+            # Make a figure
+            fig, (ax1, ax2) = plt.subplots(2,1)
+            ax1.plot(d['hs_length'], d['int_pas_stress'], 'bo-',
+                    label='Int pas stress')
+            ax1.plot(d['hs_length'], d['ext_pas_stress'], 'rs-',
+                    label='Ext pas stress')
+            
+            ax2.plot(d['hs_length'], d['lv_pressure'], 'gd-',
+                    label='LV pressure')
+            
+            ax1.set_ylabel('Passive\nstress\n(N m^{-2})')
+            
+            ax2.set_xlabel('HS length (nm)')
+            ax2.set_ylim([-20, 20])
+            ax2.set_ylabel('LV pressure (mmHg)')
+            
+            
+            
+            for imf in self.data['pas_stress_image_formats']:
+                image_file_string = self.data['pas_stress_image_file'] + \
+                    '.' + imf
+                print('Saving passive stress figure as %s' % image_file_string)
+                fig.savefig(image_file_string)
         

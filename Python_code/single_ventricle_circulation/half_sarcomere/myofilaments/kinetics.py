@@ -171,15 +171,8 @@ def return_rates(self):
                          self.implementation['temperature']))
         r['r_3'][r['r_3'] > self.implementation['max_rate']] = \
             self.implementation['max_rate']
-            
-        r['r_4'] = self.data['k_4_0'] * \
-                np.exp(-(self.data['k_cb'] * self.x * self.data['k_4_1']) /
-                       (1e18 * scipy_constants.Boltzmann *
-                        self.implementation['temperature']))
-        r['r_4'] = r['r_4'] + \
-                self.implementation['max_rate'] * \
-                    (1.0 / (1 + np.exp(-self.data['k_4_2'] *
-                                        (self.x - self.data['k_4_3']))))
+
+        r['r_4'] = self.data['k_4_0'] + (self.data['k_4_1'] * np.power(self.x, 4))
         r['r_4'][r['r_4'] > self.implementation['max_rate']] = \
             self.implementation['max_rate']
 
@@ -191,7 +184,14 @@ def return_rates(self):
         r['r_6'][r['r_6'] > self.implementation['max_rate']] = \
             self.implementation['max_rate']
 
-        r['r_7'] = self.data['k_7_0'] + (self.data['k_7_1'] * np.power(self.x, 4))
+        r['r_7'] = self.data['k_7_0'] * \
+                np.exp(-(self.data['k_cb'] * self.x * self.data['k_7_1']) /
+                       (1e18 * scipy_constants.Boltzmann *
+                        self.implementation['temperature']))
+        r['r_7'] = r['r_7'] + \
+                self.implementation['max_rate'] * \
+                    (1.0 / (1 + np.exp(-self.data['k_7_2'] *
+                                        (self.x - self.data['k_7_3']))))
         r['r_7'][r['r_7'] > self.implementation['max_rate']] = \
             self.implementation['max_rate']
 
